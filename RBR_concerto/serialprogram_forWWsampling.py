@@ -209,7 +209,7 @@ def main():
     print("[Step 1] Connecting...")
     port = PORT if PORT else find_rbr_port()
     print(f"  Port: {port} @ {BAUD_RATE} baud")
-    ser = open_port(port, BAUD_RATE)
+    ser = open_port(port, BAUD_RATE) #serial.open
 
     try:
         # ------------------------------------------------------------------
