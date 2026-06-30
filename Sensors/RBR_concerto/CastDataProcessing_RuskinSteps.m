@@ -12,9 +12,7 @@ RSKprintchannels(rsk)
 % read the downcast from profiles 
 rsk = RSKreadprofiles(rsk, 'direction', 'down');
 
-%% Derive sea pressure
-rsk = RSKderiveseapressure(rsk);
-
+%% Renaming the temperature channel
 % --------------------
 % Choosing which temperature variable to use
 % --------------------------
@@ -56,6 +54,29 @@ channel_name_list = {'Conductivity', 'Temperature', 'Pressure', 'Temperature2', 
 for i = 1:length(channel_name_list)
     [rsk, holdpts] = RSKcorrecthold(rsk,'channel', channel_name_list(i) ,'action', 'interp');
 end
+
+
+%% De-spiking the data
+
+% removing data outside of 2 standard deviations away from the median of 11 points for all
+% channels. Here is the Ruskin description:
+
+  % 
+  % Identifies and treats spikes using a median filtering algorithm.  A
+  % reference time series is created by filtering the input channel with
+  % a median filter of length 'windowLength'. A residual ("high-pass")
+  % series is formed by subtracting the reference series from the
+  % original signal.  Data in the reference series lying outside of
+  % 'threshold' standard deviations are defined as spikes.  Spikes are
+  % then treated by one of three methods (nan (makes it a nan value), interp (linear interpolation from nearby values),
+  % or replace(replace the value with the corresponding reference value)).
+
+
+for i = 1:length(channel_name_list)
+    [rsk, spike] = RSKdespike(rsk,'channel',channel_name_list{i},'threshold',1,'windowLength',11,'action','nan', 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
+end
+
+
 %% Low-pass filtering
 
 % --------------------------------
@@ -79,13 +100,10 @@ samplingperiod = readsamplingperiod(rsk); %determine logger sampling, in seconds
 % 3 samples ==> minimal smoothing, 5 samples ==> good balance, 7-8 samples ==> stronger smoothing
 
 % smoothing conductivity and temperature
-rsk = RSKsmooth(rsk,'channel',{'temperature','conductivity'},...
+rsk = RSKsmooth(rsk,'channel',{'temperature','conductivity', 'salinity'},...
  'windowLength', 11, 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
 
 
-% smoothing Dissolved O2
-% RSKsmooth(rsk,'channel','Dissolved O2','windowLength',9,...
-%  'visualize', 10);
 
 %% Alignment of conductivity and temperature
 
@@ -104,8 +122,9 @@ rsk = RSKsmooth(rsk,'channel',{'temperature','conductivity'},...
 % minimize salinity spiking and bias.
 % A common approach to determine the optimal lag is to compute and plot salinity for a range of lags, and choose the
 % lag (often by eye) with the smallest salinity spikes at sharp temperature interfaces.
-% As an alternative approach, RSKtools includes a function called RSKcalculateCTlag that estimates the optimal lag between conductivity and temperature by minimizing salinity spiking. We currently suggest using both
-% approaches to check for consistency. See the RSKcalculateCTlag help page for more information.
+% As an alternative approach, RSKtools includes a function called RSKcalculateCTlag that estimates the optimal lag between 
+% conductivity and temperature by minimizing salinity spiking. We currently suggest using both approaches to check for consistency. 
+% See the RSKcalculateCTlag help page for more information.
 % As a rough gui, temperature from a CTD equipped with the red combined CT cell and a fast thermistor typically
 % requires only a very small time advance (perhaps tens of milliseconds). Temperature from a CTD equipped with a
 % cylindrical black conductivity cell (with the thermistor on the sensor endcap) typically requires a temperature lag
@@ -148,9 +167,13 @@ rsk = RSKderivevelocity(rsk);
 
 rsk = RSKderivesalinity(rsk);
 rsk = RSKderivesigma(rsk);
+rsk = RSKderiveseapressure(rsk);
 
 raw = RSKderivesalinity(raw);
 raw = RSKderivesigma(raw);
+raw = RSKderiveseapressure(raw);
+
+
 
 % print a list of channels in the rsk file
 RSKprintchannels(rsk)
@@ -190,22 +213,36 @@ set(ax(2), 'xlim', [15 35])
 set(ax(3), 'xlim', [15 350])
 set(ax, 'ylim', [0 24])
 
+%% Add a channel of DO concentration as mg/L in additional umol/L
+
+% does it make sense to do their deivation or just calculate it by
+% converting the umol/l value
+    % could do both just to see what is different ...
+
+
+% Calculate dissolved oxygen concentration in mg/L
+rsk = RSKderiveO2(rsk, 'toDerive', 'concentration', 'unit', 'mg/l');
+
 
 %% 2D plot visualization
 
 figure(); 
 
-[im_hdl ax_hdl] = RSKimages(rsk, 'channel', {'Temperature', 'Salinity', 'Dissolved O21'}, 'direction', 'down');
-clim('auto');
+[im_hdl ax_hdl] = RSKimages(rsk, 'channel', {'Temperature', 'Salinity', 'Dissolved O23'}, 'direction', 'down');
+clim(ax_hdl(1), [10, 18]);   % Temperature
+clim(ax_hdl(2), [10, 30]);    % Salinity
+clim(ax_hdl(3), [2, 12]);    % Dissolved O2
+
+saveas(gcf, "pcolor_quicklook_SalTempDO.png")
 
 %% saving
 
-save('full_May27TowYoCheck_RSKdata_processed.mat','rsk')
+save('full_May27TowYoCheck_RSKdata_processed_L1.mat','rsk')
 
 data = rsk.data;
 channels = rsk.channels;
 
-save('full_May27TowYoCheckRSK_DataAndChannelsOnly_processed.mat','data', 'channels')
+save('full_May27TowYoCheckRSK_DataAndChannelsOnly_processed_L1.mat','data', 'channels')
 
-save('full_May27TowYoCheckRSKdata_raw.mat', 'raw')
+save('full_May27TowYoCheckRSKdata_raw_L0.mat', 'raw')
 
