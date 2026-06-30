@@ -6,7 +6,7 @@
 
 clc, clear all, close all
 
-files = dir('Robertson_ADCP_27May2026_lap*.mat');
+files = dir('Echo_ADCP_24Jun2026_flood.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
 
 for fi = 1:length(files),
 
@@ -53,7 +53,7 @@ error ( prune ) = NaN;
 
 %% Quality control using max velocity
 
-maxvel = 3;
+maxvel = 1;
 prune  = abs(east) > maxvel | abs(north) > maxvel | abs(up) > maxvel;
 
 east ( prune ) = NaN;
