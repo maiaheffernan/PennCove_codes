@@ -1,0 +1,118 @@
+% read and plot winADCP exports from Sounder, 
+% and save simple/clean files
+% assumes bottom track already applied as reference velocity in winADCP
+%
+% J. Thomson, 1/2018 , adapted by Maia Heffernan, Jun 2026
+
+clc, clear all, close all
+
+files = dir('Robertson_ADCP_27May2026_lap*.mat');
+
+for fi = 1:length(files),
+
+
+%% read in exports and make simple variables
+
+load(files(fi).name)
+
+east = SerEmmpersec./1000;
+north = SerNmmpersec./1000;
+up = SerVmmpersec./1000;
+error = SerErmmpersec./1000;
+
+% depth bins for profile
+z = RDIBin1Mid + (RDIBinSize * SerBins) - (1 * RDIBinSize);
+
+% make matlab datenum (UTC)
+time = datenum( [ (2000+SerYear) SerMon SerDay SerHour SerMin SerSec ]); 
+
+% take average of first and last position from each ensemble to give a single position for each profile
+lat = mean( [ AnFLatDeg AnLLatDeg ]');
+lon = mean( [ AnFLonDeg AnLLonDeg ]');
+
+% basic info
+readme = 'RV Sounder underway ADCP data as East-North-Up current profiles in m/s.  Currents are in the fixed earth reference frame, using bottom tracking as a reference.  Times at matlab datenum in UTC.';
+
+
+%% mean bottom track depth
+
+depth = median ( [ AnBTDepthcmB1 AnBTDepthcmB2 AnBTDepthcmB3 AnBTDepthcmB4 ]' ) ./100; % m
+
+
+%% Quality control using bottom track 
+
+allz = ones(length(time),1) * z ;
+alldepth = depth' * ones(1,length(z)) ;
+
+prune  = allz > (alldepth - 2);
+
+east ( prune ) = NaN;
+north ( prune ) = NaN;
+up ( prune ) = NaN;
+error ( prune ) = NaN;
+
+%% Quality control using max velocity
+
+maxvel = 3;
+prune  = abs(east) > maxvel | abs(north) > maxvel | abs(up) > maxvel;
+
+east ( prune ) = NaN;
+north ( prune ) = NaN;
+up ( prune ) = NaN;
+error ( prune ) = NaN;
+
+%% ENU plot
+
+figure(1), clf
+
+subplot(3,1,1)
+pcolor(time,z,east'), shading flat, colorbar
+caxis([-.5 .5])
+set(gca,'ydir','reverse')
+hold on, plot(time,depth,'k-')
+datetick('x',15,'keeplimits')
+ylabel('z [m]')
+legend('east [m/s]','location','south')
+title( files(fi).name(1:end-4) , 'interpreter', 'none' )
+
+
+subplot(3,1,2)
+pcolor(time,z,north'), shading flat, colorbar
+caxis([-.5 .5])
+set(gca,'ydir','reverse')
+hold on, plot(time,depth,'k-')
+datetick('x',15,'keeplimits')
+ylabel('z [m]')
+legend('north [m/s]','location','south')
+
+subplot(3,1,3)
+pcolor(time,z,up'), shading flat, colorbar
+caxis([-.5 .5])
+set(gca,'ydir','reverse')
+hold on, plot(time,depth,'k-')
+datetick('x',15,'keeplimits')
+ylabel('z [m]')
+legend('up [m/s]','location','south')
+xlabel( datestr(median(time), 1) )
+
+print('-dpng',['./' files(fi).name(1:end-4) '_ENUquicklook.png'])
+
+%% location plot
+
+figure(2), clf
+plot(lon,lat,'.')
+title( files(fi).name(1:end-4) , 'interpreter', 'none' )
+hold on
+%colorbar
+%axis([-120.7182 -120.6318   34.8346   34.9715])
+axis equal
+axis([-120.9 -120.5   34.7   35.2])
+
+print('-dpng',['./' files(fi).name(1:end-4) '_track.png'])
+
+
+%% save cleaned results with simple variable names to a Level2 directory
+
+save(['./' files(fi).name(1:end-4) '_cleaned.mat'],'time','east','north','up','z','depth','lat','lon','error','readme')
+
+end
