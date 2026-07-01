@@ -8,16 +8,65 @@ clear all; close all;
 
 
 % Add rsktools folder to path if you need to: 
-addpath('/Users/heffem3/Documents/MATLAB/rbr-rsktools-7a76410a599a')
+% addpath('/Users/heffem3/Documents/MATLAB/rbr-rsktools-7a76410a599a')
 
 %% load in the data 
 
-SN_endings = {'87', '88', '89', '90', '91', '92'};
-%ending_numbers = {'1446', '1445', '1447', '1449', '1449', '1448'};
+% The data files are organized by recovery month and mooring name in Google
+% Drive, so this makes pulling out the TODO-specific data a little
+% complicated. So, to read all the data into this script you must go to the
+% high-level 'Data' directory where you can see all the mooring name
+% directories. Then run this section which seraches for the files that end
+% with the serial numbers of the TODOs. This should hopefully pull all the
+% data into your workspace in one go.
 
-for i = 1:length(SN_endings)
-    fileName = sprintf('Robertson_TODO2417%s_23May2026.rsk', SN_endings{i});
-    TODO_data{i} = RSKreaddata(RSKopen(fileName));
+
+
+
+% === MAKE SURE YOU ARE IN THE 'DATA' DIRECTORY FOR THE MONTH YOU ARE INTERESTED IN ====
+
+
+
+
+SNs = {'241787', '241789', '241791', '241792'}; % Wire walker serial #s not included here: 241790, 241788
+moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
+months = 'MaytoJun2026'; % edit this based on the data you are downloading
+
+TODO_data = struct(); % create an empty struct that I will read data into
+
+for i = 1:length(SNs)
+
+    % setting the folder path first with the understanding that there is a
+    % depth component to the name that changes, so I will parse that with
+    % the * wild card symbol.
+
+    folderPath = fullfile(sprintf('%s_%s', moorings{i}, months), 'RBR_TODO'); % file path from the high-level data directory
+    filePattern = sprintf('%s_%s_*_sn%s.rsk', moorings{i}, months, SNs{i}); % naming pattern
+
+    fileInfo = dir(fullfile(folderPath, filePattern));  % dir() resolves the wildcard * symbol
+
+% some info in case something went weird with the data load-in
+
+     if isempty(fileInfo)
+        warning('No file found for %s (SN %s) — check path/pattern.', moorings{i}, SNs{i});
+        continue
+    elseif length(fileInfo) > 1
+        warning('Multiple matches for %s (SN %s); using the first one.', moorings{i}, SNs{i});
+    end
+
+    fullFileName = fullfile(fileInfo(1).folder, fileInfo(1).name); % put the file path and name together to get the full directions
+
+
+    fprintf('Opening: %s (%.1f KB)\n', fullFileName, fileInfo(1).bytes/1024);
+    
+    if fileInfo(1).bytes < 10000  % real .rsk files are almost never this small
+        warning('File looks suspiciously small — likely a Google Drive placeholder, not fully synced.');
+    end
+
+
+    fieldName = sprintf('TODO_data_%s_%s', moorings{i}, months);
+    TODO_data.(fieldName) = RSKreaddata(RSKopen(fullFileName));
+
 end
 
 %% pull out the values, cut to the start and end times, and plot
