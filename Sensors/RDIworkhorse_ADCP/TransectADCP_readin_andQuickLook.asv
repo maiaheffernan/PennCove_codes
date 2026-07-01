@@ -6,7 +6,7 @@
 
 clc, clear all, close all
 
-files = dir('Echo_ADCP_24Jun2026_ebb.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
+files = dir('Echo_ADCP_24Jun2026_flood.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
 
 for fi = 1:length(files),
 
@@ -70,40 +70,36 @@ figure(1), clf
 subplot(3,1,1)
 pcolor(time,z,east'), shading flat, colormap(cmap)
 c1 = colorbar;
-c1.Label.String = 'east [m/s]';
-c1.Label.FontSize = 12;
+c1.Label('east [m/s]')
 caxis([-.5 .5])
 set(gca,'ydir','reverse')
 hold on, plot(time,depth,'k-')
 datetick('x',15,'keeplimits')
 ylabel('z [m]')
-%legend('east [m/s]','location','south')
+legend('east [m/s]','location','south')
 title( files(fi).name(1:end-4) , 'interpreter', 'none' )
 
 
 subplot(3,1,2)
 pcolor(time,z,north'), shading flat, colormap(cmap)
 c2 = colorbar;
-c2.Label.String = 'north [m/s]';
-c2.Label.FontSize = 12;
+c2.Label('north [m/s]')
 caxis([-.5 .5])
 set(gca,'ydir','reverse')
 hold on, plot(time,depth,'k-')
 datetick('x',15,'keeplimits')
 ylabel('z [m]')
-%legend('north [m/s]','location','south')
+legend('north [m/s]','location','south')
 
 subplot(3,1,3)
 pcolor(time,z,up'), shading flat, colormap(cmap)
-c3 = colorbar();
-c3.Label.String = 'up [m/s]';
-c3.Label.FontSize = 12;
+c3.Label.String('up [m/s]')
 caxis([-.5 .5])
 set(gca,'ydir','reverse')
 hold on, plot(time,depth,'k-')
 datetick('x',15,'keeplimits')
 ylabel('z [m]')
-%legend('up [m/s]','location','south')
+legend('up [m/s]','location','south')
 xlabel( datestr(median(time), 1) )
 
 print('-dpng',['./' files(fi).name(1:end-4) '_ENUquicklook.png'])
@@ -116,9 +112,8 @@ title( files(fi).name(1:end-4) , 'interpreter', 'none' )
 hold on
 %colorbar
 %axis([-120.7182 -120.6318   34.8346   34.9715])
-%axis([-120.9 -120.5   34.7   35.2])
 axis equal
-axis([-122.76 -122.60 48.21 48.24])
+axis([-120.9 -120.5   34.7   35.2])
 
 print('-dpng',['./' files(fi).name(1:end-4) '_track.png'])
 
