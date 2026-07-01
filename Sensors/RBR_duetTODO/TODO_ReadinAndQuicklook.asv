@@ -93,16 +93,16 @@ end
 
 %% plot the raw data
 
-% this is still broken...
 
 
-for ii = 1:length(SNs)
+
+for i = 1:length(SNs)
 
     fieldName = sprintf('TODO_data_%s_%s', moorings{i}, months);
     % Extract raw values
-    DO_mgl_vals(i) = TODO_data(i).(fieldName(i)).data.values(:,3);
-    temp_vals(i) = TODO_data(i).(fieldName(i)).data.values(:,1);
-    tstamp(i) = TODO_data(i).(fieldName(i)).data.tstamp;
+    DO_mgl_vals(i) = TODO_data(i).(fieldName).data.values(:,3);
+    temp_vals(i) = TODO_data(i).(fieldName).data.values(:,1);
+    tstamp(i) = TODO_data(i).(fieldName).data.tstamp;
 
     % Plot 
 
