@@ -1,7 +1,6 @@
-%%% PME miniDOT readin and quicklook %%%
+%%% PME miniDOT moorings readin and quicklook %%%
 
-%%% Maia, April 2026
-% updated June 2026, Maia
+%%% created on July 1, 2026. Maia H. 
 
 clear all; close all;
 
