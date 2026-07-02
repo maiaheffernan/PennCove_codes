@@ -16,24 +16,20 @@ LJS_16m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.
 LJS_32m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/LoveJoySouth_MaytoJun2026/miniDOT/LoveJoySouth_MaytoJune_32m_sn305219/LoveJoySouth_MaytoJun2026_32m_sn305219_CAT.TXT');
 
 
-% somehow the LJN 26 m concatenation got messed up and it brought in data
-% from only April. But the daily files have data so I just have to
-% concatenate those.
 
 %% plot timeseries 
 
 figure(1); clf;
 
 hold on;
-p1 = plot(LJN_13m.UTC_Date___Time, LJN_13m.DissolvedOxygen, 'b-', 'LineWidth', 1.0);
-p2 = plot(LJN_26m.UTC_Date___Time, LJN_26m.DissolvedOxygen, 'm-', 'LineWidth', 1.0);
-p3 = plot(LJS_16m.UTC_Date___Time, LJS_16m.DissolvedOxygen, 'g-', 'LineWidth', 1.0);
-p4 = plot(LJS_32m.UTC_Date___Time, LJS_32m.DissolvedOxygen, 'r-', 'LineWidth', 1.0);
+p1 = plot(LJN_13m.UTC_Date___Time, LJN_13m.DissolvedOxygen, 'b-', 'LineWidth', 2.0);
+p2 = plot(LJN_26m.UTC_Date___Time, LJN_26m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
+p3 = plot(LJS_16m.UTC_Date___Time, LJS_16m.DissolvedOxygen, 'g-', 'LineWidth', 2.0);
+p4 = plot(LJS_32m.UTC_Date___Time, LJS_32m.DissolvedOxygen, 'r-', 'LineWidth', 2.0);
 
 yline(2, 'k--', 'LineWidth', 1.5)
 
 legend([p1 p2 p3 p4], 'LoveJoyNorth 13m', 'LoveJoyNorth 26m', 'LoveJoySouth 16m', 'LoveJoySouth 32m')
-axis tight
 xlabel('Time')
 ylabel('Dissolved Oxygen (mgL^{-1})')
 title('Dissolved oxygen time series from the shellfish rafts')
@@ -44,20 +40,19 @@ saveas(gcf, 'miniDOT_DO_timeseries_May2026.png');
 figure(2); clf;
 
 hold on;
-p5 = plot(LJN_13m.UTC_Date___Time, LJN_13m.Temperature, 'b-', 'LineWidth', 1.0);
-p6 = plot(LJN_26m.UTC_Date___Time, LJN_26m.Temperature, 'm-', 'LineWidth', 1.0);
-p7 = plot(LJS_16m.UTC_Date___Time, LJS_16m.Temperature, 'g-', 'LineWidth', 1.0);
-p8 = plot(LJS_32m.UTC_Date___Time, LJS_32m.Temperature, 'r-', 'LineWidth', 1.0);
+p5 = plot(LJN_13m.UTC_Date___Time, LJN_13m.Temperature, 'b-', 'LineWidth', 2.0);
+p6 = plot(LJN_26m.UTC_Date___Time, LJN_26m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
+p7 = plot(LJS_16m.UTC_Date___Time, LJS_16m.DissolvedOxygen, 'g-', 'LineWidth', 2.0);
+p8 = plot(LJS_32m.UTC_Date___Time, LJS_32m.DissolvedOxygen, 'r-', 'LineWidth', 2.0);
 
 yline(2, 'k--', 'LineWidth', 1.5)
 
 legend([p5 p6 p7 p8], 'LoveJoyNorth 13m', 'LoveJoyNorth 26m', 'LoveJoySouth 16m', 'LoveJoySouth 32m')
-axis tight
 xlabel('Time')
 ylabel('Temperature (°C)')
 title('Temperature time series from the shellfish rafts')
 
-%saveas(gcf, 'miniDOT_Temp_timeseries_May2026.png');
+saveas(gcf, 'miniDOT_Temp_timeseries_May2026.png');
 
 
 %% Plot histograms
