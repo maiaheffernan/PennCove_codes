@@ -93,39 +93,70 @@ end
 
 %% plot the raw data
 
-% this is still broken...
 
+figure(1); clf;
+
+ax1 = subplot(2,1,1); hold(ax1, 'on');
+ax2 = subplot(2,1,2); hold(ax2, 'on');
 
 for ii = 1:length(SNs)
 
-    fieldName = sprintf('TODO_data_%s_%s', moorings{i}, months);
+    fieldName = sprintf('TODO_data_%s_%s', moorings{ii}, months);
+
     % Extract raw values
-    DO_mgl_vals(i) = TODO_data(i).(fieldName(i)).data.values(:,3);
-    temp_vals(i) = TODO_data(i).(fieldName(i)).data.values(:,1);
-    tstamp(i) = TODO_data(i).(fieldName(i)).data.tstamp;
+    DO_mgl_vals = TODO_data.(fieldName).data.values(:,3);
+    temp_vals = TODO_data.(fieldName).data.values(:,1);
+    tstamp = TODO_data.(fieldName).data.tstamp;
 
-    % Plot 
+    % Plot DO on top subplot
+    plot(ax1, tstamp, DO_mgl_vals, 'DisplayName', moorings{ii});
 
-    figure(1);  
-    plot(tstamp(i), DO_mgl_vals(i), 'DisplayName', moorings{i});
-    datetick;
-    xlabel('Time');
-    ylabel('DO (mg/L)');
-    title('Raw Dissolved Oxygen Data');
-    legend('Location', 'best');
-    grid on;
-
-    figure(2);
-    plot(tstamp(i), temp_vals(i), 'DisplayName', moorings{i});
-    datetick;
-    xlabel('Time');
-    ylabel('Temp (deg C)');
-    title('Raw Temperature Data');
-    legend('Location', 'best');
-    grid on;
+    % Plot temp on bottom subplot
+    plot(ax2, tstamp, temp_vals, 'DisplayName', moorings{ii});
 end
 
 
+% plot formatting
+
+    axes(ax1);
+        yline(2, 'k--', 'HandleVisibility', 'off');
+        datetick('x');
+        ylim([0 10])
+        xlabel('Time'); ylabel('DO (mg/L)');
+        title('Raw bottom dissolved oxygen data');
+        legend('Location', 'best');
+        grid on;
+    
+    
+    axes(ax2);
+        datetick('x');
+        ylim([8 12])
+        xlabel('Time'); ylabel('Temp (\circC)');
+        title('Raw bottom temperature data');
+        legend('Location', 'best');
+        grid on;
+
+  
+
+        
+        
+        
+% Save out the figure to my raw figures on GitHub 
+
+% CHANGE THE MONTH DIRECTORY IN THE FILE PATH BELOW AS NEEDED
+
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/MayJun2026/RawData_plots';
+
+% make sure the directory exists; create it if not
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+
+figName = sprintf('TODO_QuickLook_%s.png', months); 
+outFile = fullfile(outDir, figName);
+
+% Save 
+exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 
 
