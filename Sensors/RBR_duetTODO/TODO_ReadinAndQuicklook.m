@@ -2,6 +2,8 @@
 
 %%% Maia Heffernan, April 2026
 
+% edited July 1, 2026. Maia H.
+
 % You will need the RSKtools toolbox for this script 
 
 clear all; close all;
@@ -141,7 +143,7 @@ end
         
         
         
-% Save out the figure to my raw figures on GitHub 
+%% Save out the figure to my raw data figures on GitHub 
 
 % CHANGE THE MONTH DIRECTORY IN THE FILE PATH BELOW AS NEEDED
 
