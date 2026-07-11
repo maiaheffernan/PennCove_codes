@@ -1,0 +1,30 @@
+%%% Transecting ADCP heading correction %%%
+
+% maia heffernan, july 10 2026
+
+% this coordinate transformation is done on data from a Teledyne RDI
+% Workhorse Sentinel 1200kHz ADCP that we use for transecting through PEnn
+% Cove 
+
+clear all, close all
+
+%% load in the ADCP data from June transecting
+load Echo_ADCP_24Jun2026_ebb_cleaned.mat
+
+load E
+
+
+%% determine course over ground (COG) from the Lat + Lon values
+
+
+%% compare COG to ensemble heading in the exported matlab files 
+
+% the difference is the rotation correction
+
+
+%% compare reciprocal transects for consistency
+
+
+
+
+%% make sure PCA of tidal flow that are mostly east/west that agree with the tidal ellipses from the moorings
