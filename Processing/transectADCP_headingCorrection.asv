@@ -8,19 +8,325 @@
 
 clear all, close all
 
-%% load in the ADCP data from June transecting
+%% Step 1. load in the ADCP data from June transecting
+
 load Echo_ADCP_24Jun2026_ebb_cleaned.mat
 
-load E
+%load Echo_ADCP_24Jun2026_flood_cleaned.mat
+
+%% find the different transects and locations
+
+figure(1); clf;
+h= scatter(lon, lat, 15, time, 'filled'); 
+colormap(jet);  % or parula, turbo, viridis
+cb = colorbar;
+ylabel(cb, 'Time');
+xlabel('Longitude');
+ylabel('Latitude');
+title('Transect Path Colored by Time');
+%axis equal; 
+grid on;
 
 
-%% determine course over ground (COG) from the Lat + Lon values
+% Add extra rows to the BUILT-IN datatip (no custom UpdateFcn needed).
+% This uses the standard cursor you already had, just adds more detail.
+n = numel(time);
+timeStrings = cellstr(datestr(time, 'yyyy-mm-dd HH:MM:SS.FFF'));
+ 
+h.DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('Datenum', time, '%.8f');
+h.DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('Time', timeStrings);
+h.DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('Index', 1:n);
+ 
+datacursormode(gcf, 'on');
+
+%% Pull out the lines
+
+% one row per transect line: [startIdx endIdx]
+lineBounds = [ ...
+    17,   34;
+    47, 125;
+    143, 162;
+    182, 258;
+    281, 301;
+    304, 324;
+    340, 420;
+    422, 497];   
+
+nLines = size(lineBounds, 1);
+transectLines = struct('lat', {}, 'lon', {}, 'time', {}, 'lineNum', {});
+
+for k = 1:nLines
+    idxRange = lineBounds(k,1):lineBounds(k,2);
+    transectLines(k).lat     = lat(idxRange);
+    transectLines(k).lon     = lon(idxRange);
+    transectLines(k).time    = time(idxRange);
+    transectLines(k).lineNum = k;
+end
+
+%% Step 2. determine course over ground (COG) from the Lat + Lon values for each transect line
+%
+% Adapted from the SWIFT drift-velocity method: uses gradient() of lat/lon
+% w.r.t. time within EACH transect line separately (so a turn between lines
+% doesn't get treated as a velocity spike).
+%
+% Assumes transectLines(k).lat, .lon, .time already exist (time = datenum).
+% Adds per-point fields cogSpeed/cogDir, and per-line summary fields
+% cog_mean/speed_mean.
+
+haveMapping = exist('worldmap', 'file') ~= 0;  % deg2km needs Mapping Toolbox
+
+for k = 1:length(transectLines)
+    lat  = transectLines(k).lat;
+    lon  = transectLines(k).lon;
+    time_cog = transectLines(k).time;
+
+    n = length(lat);
+
+    if n > 3 && haveMapping
+        dlondt = gradient(lon, time_cog);   % deg longitude / day
+        dxdt = deg2km(dlondt, 6371*cosd(mean(lat, 'omitnan'))) .* 1000 ./ (24*3600); % m/s east
+
+        dlatdt = gradient(lat, time_cog);   % deg latitude / day
+        dydt = deg2km(dlatdt) .* 1000 ./ (24*3600); % m/s north
+
+        dxdt(isinf(dxdt)) = NaN;
+        dydt(isinf(dydt)) = NaN;
+
+        speed = sqrt(dxdt.^2 + dydt.^2);        % m/s
+        direction = atan2d(dxdt, dydt);          % deg true, 0 = north, clockwise
+        direction(direction < 0) = direction(direction < 0) + 360;
+
+        % discard the two endpoints of the LINE (one-sided gradient, less reliable)
+        speed([1 end]) = NaN;
+        direction([1 end]) = NaN;
+
+        transectLines(k).cogSpeed = speed;       % m/s, one value per point
+        transectLines(k).cogDir   = direction;    % deg true, one value per point
+
+        % single representative COG/speed for the whole line
+        validDir = direction(~isnan(direction));
+        if ~isempty(validDir)
+            transectLines(k).cog_mean = mod( ...
+                atan2d(mean(sind(validDir)), mean(cosd(validDir))), 360); % circular mean
+        else
+            transectLines(k).cog_mean = NaN;
+        end
+        transectLines(k).speed_mean = mean(speed, 'omitnan');
+
+    else
+        transectLines(k).cogSpeed   = NaN(size(lat));
+        transectLines(k).cogDir     = NaN(size(lat));
+        transectLines(k).cog_mean   = NaN;
+        transectLines(k).speed_mean = NaN;
+    end
+end
+    
+
+%% check per-point COG noise within one transect line
+%
+% Usage: set lineNum to the line you want to inspect, then run.
+% Requires transectLines already populated with cogDir/cogSpeed/cog_mean
+% (i.e. run compute_cog_per_line.m first).
+
+% The data should be good if the circular standard deviation is within 1-5°
+
+% If large spikes in circ std correspond to dips in speed, then it's a 
+    %  speed-normalization artifact rather than the boat's course actually changing
+
+clear dir_pts speed_pts cogMean valid R circStd % clear the values made in each iteration for a differen line
+
+lineNum = 8;  % <-- change to inspect a different line
+
+dir_pts   = transectLines(lineNum).cogDir;
+speed_pts = transectLines(lineNum).cogSpeed;
+cogMean   = transectLines(lineNum).cog_mean;
+
+valid = ~isnan(dir_pts);
+
+% circular standard deviation (deg) -- handles 0/360 wraparound correctly
+R = sqrt(mean(cosd(dir_pts(valid)))^2 + mean(sind(dir_pts(valid)))^2);
+circStd = sqrt(-2*log(R)) * (180/pi);
+fprintf('Line %d: circular std of cogDir = %.2f deg (mean COG = %.2f deg)\n', ...
+    lineNum, circStd, cogMean);
+
+figure;
+subplot(2,1,1);
+plot(find(valid), dir_pts(valid), 'o-');
+yline(cogMean, 'r--', 'mean COG');
+ylabel('Direction (deg true)');
+title(sprintf('Line %d: per-point COG (circ. std = %.1f deg)', lineNum, circStd));
+grid on;
+
+subplot(2,1,2);
+plot(find(valid), speed_pts(valid), 'o-');
+ylabel('Speed (m/s)');
+xlabel('Point index within line');
+grid on;
+title('Speed over ground -- compare low-speed points against direction jitter above');
 
 
+% === Book Keeping ===
+
+% Line 1: circular std of cogDir = 4.67 deg (mean COG = 186.96 deg)
+
+% Line 2: circular std of cogDir = 3.29 deg (mean COG = 84.33 deg)
+
+% Line 3: circular std of cogDir = 6.00 deg (mean COG = 172.51 deg)
+
+% Line 4: circular std of cogDir = 1.23 deg (mean COG = 85.39 deg)
+
+% Line 5: circular std of cogDir = 7.14 deg (mean COG = 358.36 deg)
+
+% Line 6: circular std of cogDir = 6.37 deg (mean COG = 173.60 deg)
+
+% Line 7: circular std of cogDir = 3.11 deg (mean COG = 83.47 deg)
+
+% Line 8: circular std of cogDir = 2.76 deg (mean COG = 262.89 deg)
+
+%% Line 5 diagnosis
+
+% Line 5 has a HUGE circular std. When I look at the original plot
+% (figure 1) and zoom in on the north/south line, there are two things that
+% are aparent here. First, the line is really wavy, so it would make sense
+% that the std in COG direction is large here. Whoever was driving mus
+% thave been feeling the 3am wakeup at this point... Alex HD also noted to me
+% that the transect lines were not totally straight all the time so this
+% tracks in my mind. Second, this transect is heading north along the
+% LoveJoy line, so the average COG of 356 deg actually really makes sense
+% here. This code below just does a quick diagnosis, though. I want to make
+% sure I didn't accidentally pull out a turn in the transect, which would
+% hugley throw off the direction.
+
+
+% Pinpoint a turn/kink hiding inside a manually-defined transect line
+lineNum = 5;  % <-- the suspect line
+
+lat_l  = transectLines(lineNum).lat;
+lon_l  = transectLines(lineNum).lon;
+dir_l  = transectLines(lineNum).cogDir;
+idxAll = 1:length(lat_l);
+
+figure;
+
+% left: spatial path colored by point index, so you can see WHERE it kinks
+subplot(1,2,1);
+scatter(lon_l, lat_l, 30, idxAll, 'filled');
+colormap(jet); colorbar;
+xlabel('Longitude'); ylabel('Latitude');
+title(sprintf('Line %d path, colored by point index', lineNum));
+axis equal; grid on;
+
+% right: direction vs index -- UNWRAPPED so a heading near 0/360 doesn't
+% show a fake jump. unwrap() expects radians and assumes points are close
+% together, which is valid within one transect line.
+dir_unwrapped = rad2deg(unwrap(deg2rad(dir_l)));
+
+subplot(1,2,2);
+plot(idxAll, dir_unwrapped, 'o-');
+xlabel('Point index within line');
+ylabel('Direction (deg true, unwrapped)');
+title('Look for the index where direction jumps sharply');
+grid on;
+
+% July 12, 2026 @ 12:26 --> Ah, okay from the plot it looks like I picked out a turn in this line
+% mistakenly. I will go back and fix it in the indices.
+
+% July 12, 2026 @ 12:37 --> Okay this is fixed now. I removed the loop and
+% the diagnostic plot and values show a straight line with about an 18 deg
+% bow in the transect line. This is congruent with the comment Alex made
+% and is expected. Though the circ std is high I still trust this
+% measurement because of the consistently larger circ std from other lines
+% that run North/South. The boat must have been fighting the wind or the
+% tidal current on these lines (which makes sense because this was during
+% the ebb tide which is a primarily east/west movement)! I will accept this
+% an move on. 
 %% compare COG to ensemble heading in the exported matlab files 
+
+load Echo_ADCP_24Jun2026_ebb.mat AnH100thDeg % heading information from the ADCP 
+
 
 % the difference is the rotation correction
 
+
+% Compare ADCP-reported heading to GPS-derived COG, per transect line
+
+
+% Requires:
+%   - transectLines(k).time, .cog_mean already populated (from earlier steps)
+%   - Raw ADCP .mat variables loaded in the workspace:
+%       AnH100thDeg
+
+% === Convert ADCP heading: hundredths of a degree -> degrees ===
+headingDeg = mod(AnH100thDeg / 100, 360);
+
+adcpTime = time;
+
+% === Loop over lines: circular mean ADCP heading within each line's time
+% window ===
+nLines = length(transectLines);
+
+for k = 1:nLines
+    tStart = min(transectLines(k).time);
+    tEnd   = max(transectLines(k).time);
+
+    inLine = adcpTime >= tStart & adcpTime <= tEnd;
+    hdgLine = headingDeg(inLine);
+
+    if ~isempty(hdgLine)
+        adcp_mean = mod(atan2d(mean(sind(hdgLine)), mean(cosd(hdgLine))), 360);
+        R = sqrt(mean(cosd(hdgLine), 'omitnan')^2 + mean(sind(hdgLine), 'omitnan')^2);
+        adcp_std = sqrt(-2*log(R)) * (180/pi);
+    else
+        adcp_mean = NaN;
+        adcp_std  = NaN;
+    end
+
+    transectLines(k).adcp_heading_mean = adcp_mean;
+    transectLines(k).adcp_heading_std  = adcp_std;
+
+    % circular difference (COG - ADCP heading), wrapped to [-180, 180]
+    transectLines(k).heading_bias_mean = ...
+        mod(transectLines(k).cog_mean - adcp_mean + 180, 360) - 180;
+    transectLines(k).heading_bias = transectLines(k).cogDir - hdgLine(k);
+end
+
+%% Summary table
+lineNum  = (1:nLines)';
+cogMean  = [transectLines.cog_mean]';
+adcpMean = [transectLines.adcp_heading_mean]';
+adcpStd  = [transectLines.adcp_heading_std]';
+bias     = [transectLines.heading_bias]';
+
+summaryTable = table(lineNum, cogMean, adcpMean, adcpStd, bias, ...
+    'VariableNames', {'Line','GPS_COG','ADCP_Heading','ADCP_std','Bias_deg'});
+disp(summaryTable);
+
+%% Correct reported ENU velocity components for the rotation biases
+
+rotation = 90 - [transectLines.heading_bias];
+
+eastVel_corrected  = nan(size(eastVel));
+northVel_corrected = nan(size(northVel));
+ 
+nLines = length(transectLines);
+ 
+for k = 1:nLines
+    % same shared indices as heading_bias calculation, since lat/lon/time/
+    % heading/velocity all come from the same ADCP ensemble stream
+    idxRange = find(ismember(time, transectLines(k).time));
+ 
+    theta = transectLines(k).heading_bias_mean;  % deg to add to ADCP heading
+ 
+    e = eastVel(idxRange, :);
+    n = northVel(idxRange, :);
+ 
+    % rotate by +theta in compass sense (see derivation in chat)
+    eastVel_corrected(idxRange, :)  =  e .* cosd(theta) + n .* sind(theta);
+    northVel_corrected(idxRange, :) = -e .* sind(theta) + n .* cosd(theta);
+end
+ 
+% ensembles not falling inside any line's index range stay NaN --
+% e.g. turns/transits between transect lines, which is expected
 
 %% compare reciprocal transects for consistency
 
