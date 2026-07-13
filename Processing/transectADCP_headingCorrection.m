@@ -76,17 +76,17 @@ end
 haveMapping = exist('worldmap', 'file') ~= 0;  % deg2km needs Mapping Toolbox
 
 for k = 1:length(transectLines)
-    lat  = transectLines(k).lat;
-    lon  = transectLines(k).lon;
+    lat_cog  = transectLines(k).lat;
+    lon_cog  = transectLines(k).lon;
     time_cog = transectLines(k).time;
 
-    n = length(lat);
+    n = length(lat_cog);
 
     if n > 3 && haveMapping
-        dlondt = gradient(lon, time_cog);   % deg longitude / day
-        dxdt = deg2km(dlondt, 6371*cosd(mean(lat, 'omitnan'))) .* 1000 ./ (24*3600); % m/s east
+        dlondt = gradient(lon_cog, time_cog);   % deg longitude / day
+        dxdt = deg2km(dlondt, 6371*cosd(mean(lat_cog, 'omitnan'))) .* 1000 ./ (24*3600); % m/s east
 
-        dlatdt = gradient(lat, time_cog);   % deg latitude / day
+        dlatdt = gradient(lat_cog, time_cog);   % deg latitude / day
         dydt = deg2km(dlatdt) .* 1000 ./ (24*3600); % m/s north
 
         dxdt(isinf(dxdt)) = NaN;
@@ -114,8 +114,8 @@ for k = 1:length(transectLines)
         transectLines(k).speed_mean = mean(speed, 'omitnan');
 
     else
-        transectLines(k).cogSpeed   = NaN(size(lat));
-        transectLines(k).cogDir     = NaN(size(lat));
+        transectLines(k).cogSpeed   = NaN(size(lat_cog));
+        transectLines(k).cogDir     = NaN(size(lat_cog));
         transectLines(k).cog_mean   = NaN;
         transectLines(k).speed_mean = NaN;
     end
@@ -287,7 +287,7 @@ for k = 1:nLines
     % circular difference (COG - ADCP heading), wrapped to [-180, 180]
     transectLines(k).heading_bias_mean = ...
         mod(transectLines(k).cog_mean - adcp_mean + 180, 360) - 180;
-    transectLines(k).heading_bias = transectLines(k).cogDir - hdgLine(k);
+    % transectLines(k).heading_bias = transectLines(k).cogDir - hdgLine(k);
 end
 
 %% Summary table
@@ -295,10 +295,10 @@ lineNum  = (1:nLines)';
 cogMean  = [transectLines.cog_mean]';
 adcpMean = [transectLines.adcp_heading_mean]';
 adcpStd  = [transectLines.adcp_heading_std]';
-bias     = [transectLines.heading_bias]';
+meanbias     = [transectLines.heading_bias_mean]';
 
-summaryTable = table(lineNum, cogMean, adcpMean, adcpStd, bias, ...
-    'VariableNames', {'Line','GPS_COG','ADCP_Heading','ADCP_std','Bias_deg'});
+summaryTable = table(lineNum, cogMean, adcpMean, adcpStd, meanbias, ...
+    'VariableNames', {'Line','GPS_COG','ADCP_Heading','ADCP_std','Mean_bias_deg'});
 disp(summaryTable);
 
 %% Correct reported ENU velocity components for the rotation biases
@@ -353,8 +353,8 @@ end
  
 nLines = length(transectLines);
  
-lapData = struct('lap', {}, 'lat', {}, 'lon', {}, 'time', {}, ...
-                  'eastVel', {}, 'northVel', {}, 'alongDist', {}, 'depth', {});
+lapData = struct('lap', {}, 'lat', {}, 'lon', {}, 'time', {}, 'upVel', {}, ...
+                  'eastVel_corrected', {}, 'northVel_corrected', {}, 'alongDist', {}, 'binDepth', {}, 'bottomTrack', {});
  
 for k = 1:nLines
     idxRange = find(ismember(time, transectLines(k).time));
@@ -363,9 +363,11 @@ for k = 1:nLines
     lapData(k).lat       = lat(idxRange);
     lapData(k).lon       = lon(idxRange);
     lapData(k).time      = time(idxRange);
-    lapData(k).eastVel   = eastVel_corrected(idxRange, :) / 1000;   % mm/s -> m/s
-    lapData(k).northVel  = northVel_corrected(idxRange, :) / 1000;  % mm/s -> m/s
-    lapData(k).depth     = binDepth(:)';   % <-- substitute your actual depth vector
+    lapData(k).upVel       = up(idxRange);
+    lapData(k).eastVel_corrected   = east_corrected(idxRange, :);   
+    lapData(k).northVel_corrected  = north_corrected(idxRange, :);  
+    lapData(k).binDepth     = z(:)';   
+    lapData(k).bottomTrack  = depth(:, idxRange)';
  
     % cumulative along-track distance (meters) from this lap's own start point
     d = haversineDistance(lapData(k).lat(1:end-1), lapData(k).lon(1:end-1), ...
@@ -373,16 +375,7 @@ for k = 1:nLines
     lapData(k).alongDist = [0; cumsum(d(:))];
 end
  
-%% HaversineDistance function
-function d = haversineDistance(lat1, lon1, lat2, lon2)
-% Great-circle distance in meters between two lat/lon points (vectorized).
-R = 6371000; % Earth radius, meters
-phi1 = deg2rad(lat1); phi2 = deg2rad(lat2);
-dphi = deg2rad(lat2 - lat1);
-dlambda = deg2rad(lon2 - lon1);
-a = sin(dphi/2).^2 + cos(phi1).*cos(phi2).*sin(dlambda/2).^2;
-d = 2*R*asin(sqrt(a));
-end
+
 
 %% Pcolor plots of corrected east/north velocity, per lap
 %
@@ -396,7 +389,7 @@ nLines = length(lapData);
 % auto-scaling to its own range
 allVel = [];
 for k = 1:nLines
-    allVel = [allVel; lapData(k).eastVel(:); lapData(k).northVel(:)]; %#ok<AGROW>
+    allVel = [allVel; lapData(k).eastVel_corrected(:); lapData(k).northVel_corrected(:)]; 
 end
 climMax = max(abs(allVel), [], 'omitnan');
  
@@ -404,22 +397,26 @@ for k = 1:nLines
     figure('Position', [100 100 900 700]);
  
     subplot(2,1,1);
-    pcolor(lapData(k).alongDist, lapData(k).depth, lapData(k).eastVel');
+    pcolor(lapData(k).alongDist, lapData(k).binDepth, lapData(k).eastVel_corrected');
     shading flat;
     colormap(cmocean('balance'));
     caxis([-climMax climMax]);
     colorbar;
     set(gca, 'YDir', 'reverse');
+    hold on;
+    plot(lapData(k).alongDist, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
     ylabel('Depth (m)');
     title(sprintf('Lap %d: East velocity (m/s)', k));
  
     subplot(2,1,2);
-    pcolor(lapData(k).alongDist, lapData(k).depth, lapData(k).northVel');
+    pcolor(lapData(k).alongDist, lapData(k).binDepth, lapData(k).northVel_corrected');
     shading flat;
     colormap(cmocean('balance'));
     caxis([-climMax climMax]);
     colorbar;
     set(gca, 'YDir', 'reverse');
+    hold on;
+    plot(lapData(k).alongDist, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
     xlabel('Along-track distance (m)');
     ylabel('Depth (m)');
     title(sprintf('Lap %d: North velocity (m/s)', k));
@@ -433,7 +430,7 @@ end
 % Requires transectLines(k).cog_mean already computed.
 %
 % NOTE: this only checks DIRECTION -- always sanity-check that candidate
-% pairs actually overlap spatially (e.g. by eye on your position plot)
+% pairs actually overlap spatially (e.g. by eye on position plot)
 % before treating them as a true reciprocal pair.
 
 nLines = length(transectLines);
@@ -446,7 +443,7 @@ for i = 1:nLines
     for j = i+1:nLines
         diffAngle = abs(mod(cogMeans(i) - cogMeans(j) + 180, 360) - 180); % in [0,180]
         if abs(diffAngle - 180) < tol
-            pairs = [pairs; i, j]; %#ok<AGROW>
+            pairs = [pairs; i, j]; 
         end
     end
 end
@@ -455,6 +452,32 @@ disp('Candidate reciprocal pairs (line i, line j):');
 disp(pairs);
 
 
+
+
+
+
+%% make sure PCA of tidal flow that are mostly east/west that agree with the tidal ellipses from the moorings
+
+
+
+%% save out these new velocities and other.mat components for the ebb and flood separately 
+
+
+
+
+
+%% === Functions === %%
+
+%% HaversineDistance function
+function d = haversineDistance(lat1, lon1, lat2, lon2)
+% Great-circle distance in meters between two lat/lon points (vectorized).
+R = 6371000; % Earth radius, meters
+phi1 = deg2rad(lat1); phi2 = deg2rad(lat2);
+dphi = deg2rad(lat2 - lat1);
+dlambda = deg2rad(lon2 - lon1);
+a = sin(dphi/2).^2 + cos(phi1).*cos(phi2).*sin(dlambda/2).^2;
+d = 2*R*asin(sqrt(a));
+end
 %% Bin average
 
 function [binned, centers] = binAverage(coord, val, edges)
@@ -537,14 +560,21 @@ end
 
 
 
-%% make sure PCA of tidal flow that are mostly east/west that agree with the tidal ellipses from the moorings
-
-
-
-%% save out these new velocities and other.mat components for the ebb and flood separately 
 
 
 %%
 
 % For your report, the useful sentence structure this gives you is something like: "Reciprocal transect pairs (Lap X vs Lap Y) showed [correlation coefficient] agreement in depth-averaged east velocity (RMS difference of [value] m/s), supporting that the heading-bias correction adequately reconciles current estimates across opposing survey directions." The corr/RMS numbers from compareReciprocalLines give you exactly the figures to drop in there, and the plot gives you the visual to go with it.
 % % One thing worth flagging honestly for the write-up: agreement won't be perfect even with a flawless correction, since reciprocal passes aren't simultaneous — real current can genuinely change between the two passes (tidal currents especially, if there's meaningful time between reciprocal laps). If you see a systematic, direction-dependent mismatch (not just scatter), that's more likely instrument bias; if it looks like scatter or a smooth trend consistent with tidal timing, that's more likely real oceanographic variability rather than a calibration problem.
+
+
+% For removing sidelobe interference from the bottom:
+% 
+% guardBand = 0.06 * lapData(k).bottomDepth;  % ~6% of range, adjust if you use a different beam angle
+% cutoff = lapData(k).bottomDepth - guardBand;
+% 
+% depthMat = repmat(lapData(k).depth, length(cutoff), 1);      % [nPings x nBins]
+% cutoffMat = repmat(cutoff(:), 1, length(lapData(k).depth));  % [nPings x nBins]
+% 
+% eastMasked = lapData(k).eastVel;
+% eastMasked(depthMat > cutoffMat) = NaN;
