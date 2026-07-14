@@ -123,7 +123,7 @@ for k = 1:length(transectLines)
         validDir = direction(~isnan(direction));
         if ~isempty(validDir)
             transectLines(k).cog_mean = mod( ...
-                atan2d(mean(sind(validDir)), mean(cosd(validDir))), 360); % circular mean
+                atan2d(mean(sind(validDir)), mean(cosd(validDir))), 360); % circular mean using arctangent
         else
             transectLines(k).cog_mean = NaN;
         end
