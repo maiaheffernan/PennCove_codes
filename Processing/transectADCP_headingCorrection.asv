@@ -10,9 +10,9 @@ clear all, close all
 
 %% Step 1. load in the ADCP data from June transecting
 
-load Echo_ADCP_24Jun2026_ebb_cleaned.mat
+%load Echo_ADCP_24Jun2026_ebb_cleaned.mat
 
-%load Echo_ADCP_24Jun2026_flood_cleaned.mat
+load Echo_ADCP_24Jun2026_flood_cleaned.mat
 
 %% find the different transects and locations
 
@@ -43,10 +43,10 @@ datacursormode(gcf, 'on');
 
 % one row per transect line: [startIdx endIdx]
 lineBounds = [ ...
-    17,   34;
-    47, 125;
-    143, 162;
-    182, 258;
+    1,   80;
+    102, 121;
+    150, 237;
+    262, 282;
     281, 301;
     304, 324;
     340, 420;
@@ -135,7 +135,7 @@ end
 
 clear dir_pts speed_pts cogMean valid R circStd % clear the values made in each iteration for a differen line
 
-lineNum = 8;  % <-- change to inspect a different line
+lineNum = 3;  % <-- change to inspect a different line
 
 dir_pts   = transectLines(lineNum).cogDir;
 speed_pts = transectLines(lineNum).cogSpeed;
@@ -199,7 +199,7 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 
 
 % Pinpoint a turn/kink hiding inside a manually-defined transect line
-lineNum = 5;  % <-- the suspect line
+lineNum = 3;  % <-- the suspect line
 
 lat_l  = transectLines(lineNum).lat;
 lon_l  = transectLines(lineNum).lon;
@@ -384,7 +384,7 @@ end
  
 nLines = length(lapData);
  
-% SAME color limit for east AND north, across ALL laps -- this is what
+% SAME color limit for east AND north, across ALL laps -- this 
 % makes the east-west dominance visually obvious rather than each panel
 % auto-scaling to its own range
 allVel = [];
@@ -397,26 +397,90 @@ for k = 1:nLines
     figure('Position', [100 100 900 700]);
  
     subplot(2,1,1);
-    pcolor(lapData(k).alongDist, lapData(k).binDepth, lapData(k).eastVel_corrected');
+    pcolor(lapData(k).time, lapData(k).binDepth, lapData(k).eastVel_corrected');
     shading flat;
     colormap(cmocean('balance'));
     caxis([-climMax climMax]);
     colorbar;
     set(gca, 'YDir', 'reverse');
+    hold on;
+    plot(lapData(k).time, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
+    datetick;
     ylabel('Depth (m)');
     title(sprintf('Lap %d: East velocity (m/s)', k));
  
     subplot(2,1,2);
-    pcolor(lapData(k).alongDist, lapData(k).binDepth, lapData(k).northVel_corrected');
+    pcolor(lapData(k).time, lapData(k).binDepth, lapData(k).northVel_corrected');
     shading flat;
     colormap(cmocean('balance'));
     caxis([-climMax climMax]);
     colorbar;
     set(gca, 'YDir', 'reverse');
+    hold on;
+    plot(lapData(k).time, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
+    datetick;
     xlabel('Along-track distance (m)');
     ylabel('Depth (m)');
     title(sprintf('Lap %d: North velocity (m/s)', k));
 end
+
+%% Plot entire time series
+
+allTime   = [];
+allEast   = [];
+allNorth  = [];
+allBottom = [];
+
+for k = 1:nLines
+    allTime   = [allTime;   lapData(k).time];
+    allEast   = [allEast;   lapData(k).eastVel_corrected];
+    allNorth  = [allNorth;  lapData(k).northVel_corrected];
+    allBottom = [allBottom; lapData(k).bottomTrack(:)];
+
+    if k < nLines
+        % insert a one-row NaN gap at the midpoint of the turn between laps
+        gapTime = mean([lapData(k).time(end), lapData(k+1).time(1)]);
+        allTime   = [allTime;   gapTime];
+        allEast   = [allEast;   nan(1, size(allEast, 2))];
+        allNorth  = [allNorth;  nan(1, size(allNorth, 2))];
+        allBottom = [allBottom; NaN];
+    end
+end
+
+depth = lapData(1).binDepth;  % assumes same depth bins across all laps
+
+climMax = max(abs([allEast(:); allNorth(:)]), [], 'omitnan');
+
+figure('Position', [100 100 1200 700]);
+
+subplot(2,1,1);
+pcolor(allTime, depth, allEast');
+shading flat;
+colormap(cmocean('balance'));
+caxis([-climMax climMax]);
+colorbar;
+set(gca, 'YDir', 'reverse');
+hold on;
+plot(allTime, allBottom, 'k-', 'LineWidth', 2);
+datetick('x', 'keeplimits');
+ylabel('Depth (m)');
+title('Full survey: East velocity (m/s)');
+
+subplot(2,1,2);
+pcolor(allTime, depth, allNorth');
+shading flat;
+colormap(cmocean('balance'));
+caxis([-climMax climMax]);
+colorbar;
+set(gca, 'YDir', 'reverse');
+hold on;
+plot(allTime, allBottom, 'k-', 'LineWidth', 2);
+datetick('x', 'keeplimits');
+xlabel('Time');
+ylabel('Depth (m)');
+title('Full survey: North velocity (m/s)');
+
+
 
 
 %% Identify candidate reciprocal transect line pairs
@@ -564,4 +628,13 @@ end
 % % One thing worth flagging honestly for the write-up: agreement won't be perfect even with a flawless correction, since reciprocal passes aren't simultaneous — real current can genuinely change between the two passes (tidal currents especially, if there's meaningful time between reciprocal laps). If you see a systematic, direction-dependent mismatch (not just scatter), that's more likely instrument bias; if it looks like scatter or a smooth trend consistent with tidal timing, that's more likely real oceanographic variability rather than a calibration problem.
 
 
-% For removing sidelob
+% For removing sidelobe interference from the bottom:
+% 
+% guardBand = 0.06 * lapData(k).bottomDepth;  % ~6% of range, adjust if you use a different beam angle
+% cutoff = lapData(k).bottomDepth - guardBand;
+% 
+% depthMat = repmat(lapData(k).depth, length(cutoff), 1);      % [nPings x nBins]
+% cutoffMat = repmat(cutoff(:), 1, length(lapData(k).depth));  % [nPings x nBins]
+% 
+% eastMasked = lapData(k).eastVel;
+% eastMasked(depthMat > cutoffMat) = NaN;

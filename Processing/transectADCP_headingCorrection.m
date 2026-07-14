@@ -10,9 +10,9 @@ clear all, close all
 
 %% Step 1. load in the ADCP data from June transecting
 
-load Echo_ADCP_24Jun2026_ebb_cleaned.mat
+%load Echo_ADCP_24Jun2026_ebb_cleaned.mat
 
-%load Echo_ADCP_24Jun2026_flood_cleaned.mat
+load Echo_ADCP_24Jun2026_flood_cleaned.mat
 
 %% find the different transects and locations
 
@@ -42,15 +42,29 @@ datacursormode(gcf, 'on');
 %% Pull out the lines
 
 % one row per transect line: [startIdx endIdx]
+
+% == ebb bounds ==
+% lineBounds = [ ...
+%     17,   34;
+%     47, 125;
+%     143, 162;
+%     182, 258;
+%     281, 301;
+%     304, 324;
+%     340, 420;
+%     422, 497];   
+
+% == flood bounds ==
+
 lineBounds = [ ...
-    17,   34;
-    47, 125;
-    143, 162;
-    182, 258;
-    281, 301;
-    304, 324;
-    340, 420;
-    422, 497];   
+    1, 80;
+    102, 121;
+    150, 237;
+    262, 282;
+    305, 368;
+    402, 417;
+    446, 528;
+    550, 569];
 
 nLines = size(lineBounds, 1);
 transectLines = struct('lat', {}, 'lon', {}, 'time', {}, 'lineNum', {});
@@ -167,6 +181,7 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 
 % === Book Keeping ===
 
+% Ebb tide
 % Line 1: circular std of cogDir = 4.67 deg (mean COG = 186.96 deg)
 
 % Line 2: circular std of cogDir = 3.29 deg (mean COG = 84.33 deg)
@@ -183,9 +198,27 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 
 % Line 8: circular std of cogDir = 2.76 deg (mean COG = 262.89 deg)
 
+
+% Flood tide
+% Line 1: circular std of cogDir = 3.61 deg (mean COG = 263.39 deg)
+
+% Line 2: circular std of cogDir = 10.29 deg (mean COG = 168.39 deg)
+
+% Line 3: circular std of cogDir = 2.81 deg (mean COG = 84.07 deg)
+
+% Line 4: circular std of cogDir = 4.36 deg (mean COG = 353.23 deg)
+
+% Line 5: circular std of cogDir = 9.11 deg (mean COG = 264.52 deg)
+
+% Line 6: circular std of cogDir = 3.23 deg (mean COG = 169.19 deg)
+
+% Line 7: circular std of cogDir = 2.51 deg (mean COG = 83.44 deg)
+
+% Line 8: circular std of cogDir = 3.56 deg (mean COG = 351.40 deg)
+
 %% Line 5 diagnosis
 
-% Line 5 has a HUGE circular std. When I look at the original plot
+% for the ebb tide, line 5 has a HUGE circular std. When I look at the original plot
 % (figure 1) and zoom in on the north/south line, there are two things that
 % are aparent here. First, the line is really wavy, so it would make sense
 % that the std in COG direction is large here. Whoever was driving mus
@@ -197,9 +230,13 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 % sure I didn't accidentally pull out a turn in the transect, which would
 % hugley throw off the direction.
 
+% For the flood tide,. both lines 2 and 5 have huge circular standard
+% deviations. This is obvious for line 5 given how curvy it is which you
+% can seein figure 1, but let's also focus in on line 2 to see its path.
+
 
 % Pinpoint a turn/kink hiding inside a manually-defined transect line
-lineNum = 5;  % <-- the suspect line
+lineNum = 8;  % <-- the suspect line
 
 lat_l  = transectLines(lineNum).lat;
 lon_l  = transectLines(lineNum).lon;
@@ -228,6 +265,7 @@ ylabel('Direction (deg true, unwrapped)');
 title('Look for the index where direction jumps sharply');
 grid on;
 
+% Ebb notes
 % July 12, 2026 @ 12:26 --> Ah, okay from the plot it looks like I picked out a turn in this line
 % mistakenly. I will go back and fix it in the indices.
 
@@ -240,9 +278,16 @@ grid on;
 % tidal current on these lines (which makes sense because this was during
 % the ebb tide which is a primarily east/west movement)! I will accept this
 % an move on. 
+
+
+% Flood notes
+% July 13, 2026 @ 14:25 --> OKay both lines 2 and 5 wander a lot, which
+% describes the large circular standard deviation. This is kind of
+% inescapable here, but at least I did not get a loop in either of these,
+% they just have wobbly transect lines.
 %% compare COG to ensemble heading in the exported matlab files 
 
-load Echo_ADCP_24Jun2026_ebb.mat AnH100thDeg % heading information from the ADCP 
+load Echo_ADCP_24Jun2026_flood.mat AnH100thDeg % heading information from the ADCP 
 
 
 % the difference is the rotation correction
@@ -384,7 +429,7 @@ end
  
 nLines = length(lapData);
  
-% SAME color limit for east AND north, across ALL laps -- this is what
+% SAME color limit for east AND north, across ALL laps -- this 
 % makes the east-west dominance visually obvious rather than each panel
 % auto-scaling to its own range
 allVel = [];
@@ -397,30 +442,90 @@ for k = 1:nLines
     figure('Position', [100 100 900 700]);
  
     subplot(2,1,1);
-    pcolor(lapData(k).alongDist, lapData(k).binDepth, lapData(k).eastVel_corrected');
+    pcolor(lapData(k).time, lapData(k).binDepth, lapData(k).eastVel_corrected');
     shading flat;
     colormap(cmocean('balance'));
     caxis([-climMax climMax]);
     colorbar;
     set(gca, 'YDir', 'reverse');
     hold on;
-    plot(lapData(k).alongDist, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
+    plot(lapData(k).time, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
+    datetick;
     ylabel('Depth (m)');
     title(sprintf('Lap %d: East velocity (m/s)', k));
  
     subplot(2,1,2);
-    pcolor(lapData(k).alongDist, lapData(k).binDepth, lapData(k).northVel_corrected');
+    pcolor(lapData(k).time, lapData(k).binDepth, lapData(k).northVel_corrected');
     shading flat;
     colormap(cmocean('balance'));
     caxis([-climMax climMax]);
     colorbar;
     set(gca, 'YDir', 'reverse');
     hold on;
-    plot(lapData(k).alongDist, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
+    plot(lapData(k).time, lapData(k).bottomTrack, 'k-', 'LineWidth', 2);
+    datetick;
     xlabel('Along-track distance (m)');
     ylabel('Depth (m)');
     title(sprintf('Lap %d: North velocity (m/s)', k));
 end
+
+%% Plot entire time series
+
+allTime   = [];
+allEast   = [];
+allNorth  = [];
+allBottom = [];
+
+for k = 1:nLines
+    allTime   = [allTime;   lapData(k).time];
+    allEast   = [allEast;   lapData(k).eastVel_corrected];
+    allNorth  = [allNorth;  lapData(k).northVel_corrected];
+    allBottom = [allBottom; lapData(k).bottomTrack(:)];
+
+    if k < nLines
+        % insert a one-row NaN gap at the midpoint of the turn between laps
+        gapTime = mean([lapData(k).time(end), lapData(k+1).time(1)]);
+        allTime   = [allTime;   gapTime];
+        allEast   = [allEast;   nan(1, size(allEast, 2))];
+        allNorth  = [allNorth;  nan(1, size(allNorth, 2))];
+        allBottom = [allBottom; NaN];
+    end
+end
+
+depth = lapData(1).binDepth;  % assumes same depth bins across all laps
+
+climMax = max(abs([allEast(:); allNorth(:)]), [], 'omitnan');
+
+figure('Position', [100 100 1200 700]);
+
+subplot(2,1,1);
+pcolor(allTime, depth, allEast');
+shading flat;
+colormap(cmocean('balance'));
+caxis([-climMax climMax]);
+colorbar;
+set(gca, 'YDir', 'reverse');
+hold on;
+plot(allTime, allBottom, 'k-', 'LineWidth', 2);
+datetick('x', 'keeplimits');
+ylabel('Depth (m)');
+title('Full survey: East velocity (m/s)');
+
+subplot(2,1,2);
+pcolor(allTime, depth, allNorth');
+shading flat;
+colormap(cmocean('balance'));
+caxis([-climMax climMax]);
+colorbar;
+set(gca, 'YDir', 'reverse');
+hold on;
+plot(allTime, allBottom, 'k-', 'LineWidth', 2);
+datetick('x', 'keeplimits');
+xlabel('Time');
+ylabel('Depth (m)');
+title('Full survey: North velocity (m/s)');
+
+
 
 
 %% Identify candidate reciprocal transect line pairs
@@ -562,11 +667,7 @@ end
 
 
 
-%%
-
-% For your report, the useful sentence structure this gives you is something like: "Reciprocal transect pairs (Lap X vs Lap Y) showed [correlation coefficient] agreement in depth-averaged east velocity (RMS difference of [value] m/s), supporting that the heading-bias correction adequately reconciles current estimates across opposing survey directions." The corr/RMS numbers from compareReciprocalLines give you exactly the figures to drop in there, and the plot gives you the visual to go with it.
-% % One thing worth flagging honestly for the write-up: agreement won't be perfect even with a flawless correction, since reciprocal passes aren't simultaneous — real current can genuinely change between the two passes (tidal currents especially, if there's meaningful time between reciprocal laps). If you see a systematic, direction-dependent mismatch (not just scatter), that's more likely instrument bias; if it looks like scatter or a smooth trend consistent with tidal timing, that's more likely real oceanographic variability rather than a calibration problem.
-
+%% exta code for later maybe
 
 % For removing sidelobe interference from the bottom:
 % 
