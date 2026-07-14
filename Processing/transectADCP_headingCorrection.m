@@ -28,8 +28,10 @@ title('Transect Path Colored by Time');
 grid on;
 
 
-% Add extra rows to the BUILT-IN datatip (no custom UpdateFcn needed).
-% This uses the standard cursor you already had, just adds more detail.
+% built-in datatip function which shows the timestamp and index value of a 
+% colored dot in the figure
+
+
 n = numel(time);
 timeStrings = cellstr(datestr(time, 'yyyy-mm-dd HH:MM:SS.FFF'));
  
