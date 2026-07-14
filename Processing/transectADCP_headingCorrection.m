@@ -1,6 +1,6 @@
 %%% Transecting ADCP heading correction %%%
 
-% maia heffernan, july 10 2026
+% maia heffernan, updated july 14 2026, with some help from Claude
 
 % this coordinate transformation is done on data from a Teledyne RDI
 % Workhorse Sentinel 1200kHz ADCP that we use for transecting through PEnn
@@ -357,8 +357,8 @@ disp(summaryTable);
 % Assumes:
 %   - transectLines(k).heading_bias_mean already computed
 %   - adcpTime already computed (ADCP ensemble timestamps, as datenum)
-%   - ADCP velocity variables in the workspace. Substitute your actual
-%     variable names below if these don't match your .mat file
+%   - ADCP velocity variables in the workspace. Substitute the actual
+%     variable names below if these don't match the .mat file
 %     (commonly SerEmmpersec / SerNmmpersec in RDI's convention, one row
 %     per ensemble and one column per depth bin, mm/s).
 
@@ -392,11 +392,6 @@ end
 % Requires: transectLines (with .time), eastVel_corrected, northVel_corrected,
 % time, lat, lon already in the workspace (from earlier steps).
 %
-% NOTE: substitute 'binDepth' below with your actual depth-per-bin vector
-% (length = number of columns in eastVel_corrected). RDI exports commonly
-% derive this from bin size + blanking distance + bin number -- if you
-% don't already have a depth vector, let me know your bin-size/blanking
-% variables and I'll build it for you.
  
 nLines = length(transectLines);
  
@@ -414,7 +409,7 @@ for k = 1:nLines
     lapData(k).eastVel_corrected   = east_corrected(idxRange, :);   
     lapData(k).northVel_corrected  = north_corrected(idxRange, :);  
     lapData(k).binDepth     = z(:)';   
-    lapData(k).bottomTrack  = depth(:, idxRange)';
+    lapData(k).bottomTrack  = depth(:, idxRange)'; % this is from teh cleaned .mat file loaded in at the beginning
  
     % cumulative along-track distance (meters) from this lap's own start point
     d = haversineDistance(lapData(k).lat(1:end-1), lapData(k).lon(1:end-1), ...
@@ -426,9 +421,8 @@ end
 
 %% Pcolor plots of corrected east/north velocity, per lap
 %
-% Requires lapData (from build_lap_velocity_struct.m) and the cmocean
-% function on your path (https://www.mathworks.com/matlabcentral/fileexchange/57773-cmocean-perceptually-uniform-colormaps)
- 
+% Requires lapData (from build_lap_velocity_struct.m) and cmocean
+
 nLines = length(lapData);
  
 % SAME color limit for east AND north, across ALL laps -- this 
