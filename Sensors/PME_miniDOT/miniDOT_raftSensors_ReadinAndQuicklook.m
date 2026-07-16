@@ -20,7 +20,7 @@ raft_7m = readtable("RaftSensor_MaytoJune_sn445289/Cat.TXT");
 % the first mooring was recovered.
 
 % Define the time range for trimming the data
-startTime = datetime(2026, 5, 27, 0, 0, 0);
+startTime = datetime(2026, 5, 27, 18, 0, 0);
 endTime = datetime(2026, 6, 23, 20, 0, 0);
 
 % Trim the data for each mooring to the defined time range
@@ -41,6 +41,7 @@ legend([p1 p2], '1m depth', '7m depth')
 xlabel('Time')
 ylabel('Dissolved Oxygen (mgL^{-1})')
 title('Dissolved oxygen time series from the shellfish rafts')
+axis tight
 hold off
 
 saveas(gcf, 'miniDOT_DO_timeseries_May2026_rafts.png');
@@ -55,6 +56,7 @@ legend([p1 p2], '1m depth', '7m depth')
 xlabel('Time')
 ylabel('Temperature (°C)')
 title('Temperature time series from the shellfish rafts')
+axis tight
 
 saveas(gcf, 'miniDOT_Temp_timeseries_May2026_rafts.png');
 
