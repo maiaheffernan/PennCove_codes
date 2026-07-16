@@ -1,0 +1,252 @@
+%%% Loading in the poleCT data from the Echo surveys %%%
+
+% Maia heffernan, July 15, 2026
+
+clear all, close all
+
+%% load in the data
+
+fname1 = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/Echo_MayJun2026/PoleCT/Echo_PoleCT_24Jun2026_ebbsurvey';
+fname2 = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/Echo_MayJun2026/PoleCT/Echo_PoleCT_24Jun2026_floodsurvey';
+
+poleCTdata_ebb = readtable(fname1);
+poleCTdata_flood = readtable(fname2);
+
+
+%% fix any variable names in the table
+
+% === combine the first two columns into a datetime ===
+
+% ebb 
+
+    cleanDate = erase(poleCTdata_ebb.Var1, {'[', ']', ''''});
+    cleanTime = erase(poleCTdata_ebb.Var2, {'[', ']', ''''});
+
+    combinedStr = strcat(cleanDate, {' '}, cleanTime);
+
+    poleCTdata_ebb.DateTime = datetime(combinedStr, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
+
+    % erase the incorrect vars
+    poleCTdata_ebb.Var1 = erase(poleCTdata_ebb.Var1, "'");
+    poleCTdata_ebb.Var2 = erase(poleCTdata_ebb.Var2, "'");
+    
+    
+clear cleanDate cleanTime
+ 
+%flood
+
+    cleanDate = erase(poleCTdata_flood.Var1, {'[', ']', ''''});
+    cleanTime = erase(poleCTdata_flood.Var2, {'[', ']', ''''});
+
+    combinedStr = strcat(cleanDate, {' '}, cleanTime);
+
+    poleCTdata_flood.DateTime = datetime(combinedStr, 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
+
+
+% === get rid of the variable name columns and rename the data columns with the correct label ===
+
+% ebb
+
+    % Loop through variables, looking for "label" columns (cell arrays of char)
+    % paired with a data column right after them
+    varsToRemove = {};
+    i = 1;
+    while i < width(poleCTdata_ebb)
+        thisVar = poleCTdata_ebb.(poleCTdata_ebb.Properties.VariableNames{i});
+        
+        % Check if this column is a cell array of char (i.e., a "label" column)
+        if iscell(thisVar) && ischar(thisVar{1})
+            % Grab the label from the first row
+            rawLabel = thisVar{1};
+            
+            % Clean it up: strip brackets/quotes, replace invalid chars for a
+            % valid MATLAB variable name
+            cleanLabel = erase(rawLabel, {'[', ']', ''''});
+            cleanLabel = matlab.lang.makeValidName(cleanLabel);
+            
+            % Rename the NEXT column (the actual data) to this label
+            nextVarName = poleCTdata_ebb.Properties.VariableNames{i+1};
+            poleCTdata_ebb.Properties.VariableNames{nextVarName} = cleanLabel;
+            
+            % Mark this label column for removal
+            varsToRemove{end+1} = poleCTdata_ebb.Properties.VariableNames{i};
+            
+            i = i + 2;  % skip past the pair
+        else
+            i = i + 1;
+        end
+    end
+    
+    % Remove all the label columns
+    poleCTdata_ebb(:, varsToRemove) = [];
+
+
+% flood 
+
+    % Loop through variables, looking for "label" columns (cell arrays of char)
+        % paired with a data column right after them
+        varsToRemove = {};
+        i = 1;
+        while i < width(poleCTdata_flood)
+            thisVar = poleCTdata_flood.(poleCTdata_flood.Properties.VariableNames{i});
+            
+            % Check if this column is a cell array of char (i.e., a "label" column)
+            if iscell(thisVar) && ischar(thisVar{1})
+                % Grab the label from the first row
+                rawLabel = thisVar{1};
+                
+                % Clean it up: strip brackets/quotes, replace invalid chars for a
+                % valid MATLAB variable name
+                cleanLabel = erase(rawLabel, {'[', ']', ''''});
+                cleanLabel = matlab.lang.makeValidName(cleanLabel);
+                
+                % Rename the NEXT column (the actual data) to this label
+                nextVarName = poleCTdata_flood.Properties.VariableNames{i+1};
+                poleCTdata_flood.Properties.VariableNames{nextVarName} = cleanLabel;
+                
+                % Mark this label column for removal
+                varsToRemove{end+1} = poleCTdata_flood.Properties.VariableNames{i};
+                
+                i = i + 2;  % skip past the pair
+            else
+                i = i + 1;
+            end
+        end
+        
+        % Remove all the label columns
+        poleCTdata_flood(:, varsToRemove) = [];
+
+
+%% plot the data as a time series
+
+figure(1)
+
+s1 = subplot(2,2,1);
+
+p1 = plot(poleCTdata_ebb.DateTime, poleCTdata_ebb.SalinityPSU, 'b.-');
+ylabel('Salinity (PSU)')
+title('Ebb tide')
+subtitle('Surface salinity')
+axis tight
+
+s2 = subplot(2,2,2);
+
+p2 = plot(poleCTdata_flood.DateTime, poleCTdata_flood.SalinityPSU, 'b.-');
+title('Flood tide')
+subtitle('Surface salinity')
+axis tight
+
+s3 = subplot(2,2,3);
+
+p3 = plot(poleCTdata_ebb.DateTime, poleCTdata_ebb.TemperatureDeg_C, 'r.-');
+subtitle('Surface temperature')
+ylabel('Temperature (deg C)')
+xlabel('Time')
+axis tight
+
+
+s4 = subplot(2,2,4);
+
+p4 = plot(poleCTdata_flood.DateTime, poleCTdata_flood.TemperatureDeg_C, 'r.-');
+subtitle('Surface temperature')
+xlabel('Time')
+axis tight
+
+%% Just the individual flood and ebb tides
+
+figure(2)
+
+s5 = subplot(2,1,1);
+
+p5 = plot(poleCTdata_ebb.DateTime, poleCTdata_ebb.SalinityPSU, 'b.-');
+ylabel('Salinity (PSU)')
+title('Ebb tide')
+axis tight
+
+s6 = subplot(2,1,2);
+
+p6 = plot(poleCTdata_ebb.DateTime, poleCTdata_ebb.TemperatureDeg_C, 'r.-');
+ylabel('Temperature (deg C)')
+xlabel('Time')
+axis tight
+
+linkaxes([s5 s6], 'x')
+
+
+figure(3)
+
+s7 = subplot(2,1,1);
+
+p7 = plot(poleCTdata_flood.DateTime, poleCTdata_flood.SalinityPSU, 'b.-');
+ylabel('Salinity (PSU)')
+title('Flood tide')
+axis tight
+
+s8 = subplot(2,1,2);
+
+p8 = plot(poleCTdata_flood.DateTime, poleCTdata_flood.TemperatureDeg_C, 'r.-');
+ylabel('Temperature (deg C)')
+xlabel('Time')
+axis tight
+
+linkaxes([s7 s8], 'x')
+
+%% remove any outliers in the timeseries
+
+% remove salinity values less than 5 PSU because these dips indicate the
+% boat is moving between transect lines and there is likely bubbles in teh salinity measurement
+
+
+% ebb
+
+badRows_ebb = poleCTdata_ebb.SalinityPSU < 5 | poleCTdata_ebb.TemperatureDeg_C > 18;
+fprintf('Removing %d of %d rows from ebb data due to bad salinity or temperature\n', sum(badRows_ebb), height(poleCTdata_ebb));
+poleCTdata_ebb(badRows_ebb, :) = [];
+
+
+% flood
+
+badRows_flood = poleCTdata_flood.SalinityPSU < 5 | poleCTdata_flood.TemperatureDeg_C > 21;
+fprintf('Removing %d of %d rows from flood data due to bad salinity or temperature\n', sum(badRows_flood), height(poleCTdata_flood));
+poleCTdata_flood(badRows_flood, :) = [];
+
+
+%% re-plot these figures 
+
+
+figure(4); clf;
+
+s9 = subplot(2,1,1);
+
+p9 = plot(poleCTdata_ebb.DateTime, poleCTdata_ebb.SalinityPSU, 'b.');
+ylabel('Salinity (PSU)')
+title('Ebb tide')
+axis tight
+
+s10 = subplot(2,1,2);
+
+p10 = plot(poleCTdata_ebb.DateTime, poleCTdata_ebb.TemperatureDeg_C, 'r.');
+ylabel('Temperature (deg C)')
+xlabel('Time')
+axis tight
+
+linkaxes([s9 s10], 'x')
+
+
+figure(5); clf;
+
+s11 = subplot(2,1,1);
+
+p11 = plot(poleCTdata_flood.DateTime, poleCTdata_flood.SalinityPSU, 'b.');
+ylabel('Salinity (PSU)')
+title('Flood tide')
+axis tight
+
+s12 = subplot(2,1,2);
+
+p12 = plot(poleCTdata_flood.DateTime, poleCTdata_flood.TemperatureDeg_C, 'r.');
+ylabel('Temperature (deg C)')
+xlabel('Time')
+axis tight
+
+linkaxes([s11 s12], 'x')
