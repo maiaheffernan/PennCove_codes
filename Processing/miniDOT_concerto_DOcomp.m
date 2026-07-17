@@ -190,7 +190,7 @@ y7 = 7;
 figure(2); clf;
 
 s4 = subplot(1,3,1);
-
+ 
 p4 = plot(ctd_LJN_cast_do, ctd_LJN_cast_depth, '-^', 'LineWidth', 2, 'MarkerSize', 2.5);
 set(gca, 'YDir', 'reverse')
 hold on
