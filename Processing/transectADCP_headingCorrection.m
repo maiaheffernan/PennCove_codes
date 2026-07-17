@@ -564,7 +564,9 @@ disp(pairs);
 %% save out these new velocities and other.mat components for the ebb and flood separately 
 
 
+%save Echo_ADCP_flood_cleaned_corrected.mat lapData
 
+save Echo_ADCP_ebb_cleaned_corrected.mat lapData
 
 
 %% === Functions === %%

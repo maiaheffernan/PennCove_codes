@@ -40,7 +40,7 @@ LJS_32m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.
 
 % Define the time range for trimming the data
 startTime = datetime(2026, 5, 27, 0, 0, 0);
-endTime = datetime(2026, 6, 23, 20, 0, 0);
+endTime = datetime(2026, 6, 23, 20, 40, 0);
 
 % Trim the data for each mooring to the defined time range
 LJN_13m = LJN_13m(LJN_13m.UTC_Date___Time >= startTime & LJN_13m.UTC_Date___Time <= endTime, :);
@@ -69,7 +69,7 @@ ylabel('Dissolved Oxygen (mgL^{-1})')
 title('Dissolved oxygen time series from the moorings')
 hold off
 
-saveas(gcf, 'miniDOT_DO_timeseries_May2026_moorings.png');
+%saveas(gcf, 'miniDOT_DO_timeseries_May2026_moorings.png');
 
 
 
@@ -87,7 +87,7 @@ xlabel('Time')
 ylabel('Temperature (°C)')
 title('Temperature time series from the moorings')
 
-saveas(gcf, 'miniDOT_Temp_timeseries_May2026_moorings.png');
+%saveas(gcf, 'miniDOT_Temp_timeseries_May2026_moorings.png');
 
 
 %% Plot histograms for Dissolved Oxygen 
@@ -121,7 +121,7 @@ title('LoveJoySouth 32m')
 sgtitle('Dissolved Oxygen Distributions from the Moorings')
 
 linkaxes([s1 s2 s3 s4],'x')
-saveas(gcf, 'miniDOT_DO_hist_May2026_moorings.png');
+%saveas(gcf, 'miniDOT_DO_hist_May2026_moorings.png');
 
 %% Plot histograms for Temperature 
 
@@ -156,6 +156,13 @@ sgtitle('Temperature Distributions from the Moorings')
 
 
 linkaxes([s5 s6 s7 s8],'x')
-saveas(gcf, 'miniDOT_Temp_hist_May2026_moorings.png');
+%saveas(gcf, 'miniDOT_Temp_hist_May2026_moorings.png');
+
+
+%% save out the data
+
+
+save miniDOT_MayJun2026_mooringdata_L0 LJN_26m LJN_13m LJS_16m LJS_32m
+
 
 

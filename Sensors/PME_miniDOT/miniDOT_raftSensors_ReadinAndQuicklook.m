@@ -44,7 +44,7 @@ title('Dissolved oxygen time series from the shellfish rafts')
 axis tight
 hold off
 
-saveas(gcf, 'miniDOT_DO_timeseries_May2026_rafts.png');
+% saveas(gcf, 'miniDOT_DO_timeseries_May2026_rafts.png');
 
 figure(2); clf;
 
@@ -58,7 +58,7 @@ ylabel('Temperature (°C)')
 title('Temperature time series from the shellfish rafts')
 axis tight
 
-saveas(gcf, 'miniDOT_Temp_timeseries_May2026_rafts.png');
+% saveas(gcf, 'miniDOT_Temp_timeseries_May2026_rafts.png');
 
 
 %% Plot histograms
@@ -80,7 +80,7 @@ xlabel('Dissolved oxygen concentration (mgL^{-1})')
 ylabel('Frequency')
 title('7m shellfish raft sensor DO distribution')
 
-saveas(gcf, 'miniDOT_7mDO_hist_May2026_rafts.png');
+% saveas(gcf, 'miniDOT_7mDO_hist_May2026_rafts.png');
 
 %% Plot histograms for Temperature
 
@@ -100,6 +100,21 @@ xlabel('Temperature (°C)')
 ylabel('Frequency')
 title('7m shellfish raft sensor Temperature distribution')
 
-saveas(gcf, 'miniDOT_7mTemp_hist_May2026_rafts.png');
+% saveas(gcf, 'miniDOT_7mTemp_hist_May2026_rafts.png');
 
 
+%% Data cleaning
+
+% remove spikes by filtering out jumps greater than one standard deviaiton
+% outside a median of 6 data points (every hour)  
+
+
+% Calculate the median and standard deviation for filtering
+% medianDO_1m = movmedian(raft_1m.DissolvedOxygen, 6);
+% stdDO_1m = movstd(raft_1m.DissolvedOxygen, 6);
+
+
+%% save the data
+
+
+save miniDOT_MayJun2026_raftdata_L0.mat raft_1m raft_7m
