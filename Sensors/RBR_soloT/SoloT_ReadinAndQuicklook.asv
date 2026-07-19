@@ -80,8 +80,8 @@ for i = 1:length(moorings)
         sn = snFields{j};
         thisSensor = soloT_data.(moorName).(sn);
 
-        t = datetime(thisSensor.data.tstamp, 'ConvertFrom', 'datenum');  % convert datenum -> datetime
-        plot(t, thisSensor.data.values, 'DisplayName', sn);
+        t = datetime(thisSensor.datatstamp, 'ConvertFrom', 'datenum');  % convert datenum -> datetime
+        plot(t, thisSensor.data, 'DisplayName', sn);
     end
 
     title(moorName, 'Interpreter', 'none');
