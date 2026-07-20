@@ -1,43 +1,74 @@
 %%%% Averaging the readings from the YSI 600LS bucket test %%%%
 %%% Maia Heffernan, March 2026 %%%
 
-% On Saturday, March 21, I did a bucket test to compare the conductivity
-% readings from the RBR Concerto, Alex's YSI 600LS sensors, and Emily's YSI
-% ExoSonde2 sensors. 
-% I programmed Alex's YSIs to read every second as there was not a convenient way to
-% write down those values in live time during the bucket test. So, this
-% script takes the values from each bucket test round and averages them to
-% get a value for each instrument to compart them. The comparison between
-% all the instruments occures in teh YSI_bucketTest.gsheet document in the
-% M2O2 Drive. Path is Penn Cove
-% 2026/Instrumentation/TestingAndCalibration/BucketTest
-
-
+% updated July 19 2026 for loading in sensor mooring data
 
 close all; clear all;
 
 %% read in the data
 
 
-LS2001_bt = readtable("BucketTest_15M002001_march212026.txt");
-LS2002_bt = readtable("BucketTest_15M002002_march212026.txt");
-LS2004_bt = readtable("BucketTest_15M002004_march212026.txt");
-LS2005_bt = readtable("BucketTest_15M002005_march212026.txt");
-LS2006_bt = readtable("BucketTest_15M002006_march212026.txt");
+LJN_4m = readtable('LoveJoyNorth_MaytoJun2026/YSI600LS/LoveJoyNorth_MaytoJune2026_sn2005.txt', 'Format','{dd.MM.uuuu} {HH:mm}','Delimiter',' ');
+LJN_8m = readtable('LoveJoyNorth_MaytoJun2026/YSI600LS/LoveJoyNorth_MaytoJune2026_sn2006.txt');
 
-% ----------------------------
+LJS_4m = readtable('LoveJoySouth_MaytoJun2026/YSI600LS/LoveJoySouth_MaytoJune_4m_sn15M002001.txt');
+LJS_11m = readtable('LoveJoySouth_MaytoJun2026/YSI600LS/LoveJoySouth_MaytoJune_9m_sn15M002004.txt');
+
+
+%% ----------------------------
 % changing the variable names
 % ----------------------------
 
-% the sensor with the SN that ends in 2005 does not have TDS, so it only
-% has 9 variables
-    Varnames9 = {'Date', 'Time','Temp_C', 'SpCond_mSpercm', 'Cond_uSpercm', 'Sal_ppt', 'Press_psia', 'Depth_m', 'Battery_V'};
+    Varnames = {'Date', 'Time','Temp_C', 'SpCond_mSpercm', 'Cond_uSpercm','Resistance_Ohm*cm','TDS_gperL','Sal_ppt', 'Press_psia', 'Depth_m', 'Battery_V'};
 
-    Varnames10 = {'Date', 'Time','Temp_C', 'SpCond_mSpercm', 'Cond_uSpercm','TDS_gperL','Sal_ppt', 'Press_psia', 'Depth_m', 'Battery_V'};
+LJS_4m.Properties.VariableNames= Varnames;
+LJS_11m.Properties.VariableNames= Varnames;
+LJN_4m.Properties.VariableNames= Varnames;
+LJN_8m.Properties.VariableNames= Varnames;
 
-LS2001_bt.Properties.VariableNames= Varnames10;
-LS2002_bt.Properties.VariableNames= Varnames10;
-LS2004_bt.Properties.VariableNames= Varnames10;
-LS2005_bt.Properties.VariableNames= Varnames9;
-LS2006_bt.Properties.VariableNames= Varnames10;
+%% making the date and time columns one datetime column
+ 
+% make hte date column a datetime and add it to the time column (which is
+% alreay a duration)
 
+dateCol_LJN4m = datetime(LJN_4m.Date, 'InputFormat', 'yyyy/MM/dd'); 
+LJN_4m.DateTime = dateCol_LJN4m + LJN_4m.Time;
+
+dateCol_LJN8m = datetime(LJN_8m.Date, 'InputFormat', 'yyyy/MM/dd'); 
+LJN_8m.DateTime = dateCol_LJN8m + LJN_8m.Time;
+
+dateCol_LJS4m = datetime(LJS_4m.Date, 'InputFormat', 'yyyy/MM/dd'); 
+LJS_4m.DateTime = dateCol_LJS4m + LJS_4m.Time;
+
+dateCol_LJS11m = datetime(LJS_11m.Date, 'InputFormat', 'yyyy/MM/dd'); 
+LJS_11m.DateTime = dateCol_LJS11m + LJS_11m.Time;
+
+%% plot the data
+
+% Plot temperature data from each site
+figure;
+hold on;
+plot(LJN_4m.DateTime, LJN_4m.Temp_C, 'DisplayName', 'LJN 4m');
+plot(LJN_8m.DateTime, LJN_8m.Temp_C, 'DisplayName', 'LJN 8m');
+plot(LJS_4m.DateTime, LJS_4m.Temp_C, 'DisplayName', 'LJS 4m');
+plot(LJS_11m.DateTime, LJS_11m.Temp_C, 'DisplayName', 'LJS 11m');
+hold off;
+xlabel('Date and Time');
+ylabel('Temperature (°C)');
+title('Temperature Readings from YSI 600LS');
+legend show;
+grid on;
+
+% Plot salinity data from each site
+figure;
+hold on;
+plot(LJN_4m.DateTime, LJN_4m.Sal_ppt, 'DisplayName', 'LJN 4m');
+plot(LJN_8m.DateTime, LJN_8m.Sal_ppt, 'DisplayName', 'LJN 8m');
+plot(LJS_4m.DateTime, LJS_4m.Sal_ppt, 'DisplayName', 'LJS 4m');
+plot(LJS_11m.DateTime, LJS_11m.Sal_ppt, 'DisplayName', 'LJS 11m');
+hold off;
+xlabel('Date and Time');
+ylabel('Salinity (ppt)');
+title('Salinity Readings from YSI 600LS');
+legend show;
+grid on;
