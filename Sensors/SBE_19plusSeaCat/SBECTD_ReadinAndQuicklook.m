@@ -11,7 +11,7 @@ clear all, close all
 % === Sea-Bird data first ===
 
 
-fid = fopen('May192026_SBEbucketTest.cnv', 'r');
+fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r'); %'May192026_SBEbucketTest.cnv'
 nHeaders = 0;
 colNames = {};
 while ~feof(fid)
@@ -20,15 +20,17 @@ while ~feof(fid)
     if contains(line, '# name')
         parts = strsplit(line, '=');
         colNames{end+1} = strtrim(parts{2});
+        fprintf('added a column')
     end
     if contains(line, '*END*')
+        fprintf('broke')
         break
     end
 end
 fclose(fid);
 
 % Read the data
-seabirdData = readmatrix('May192026_SBEbucketTest.cnv', 'FileType', 'text', 'NumHeaderLines', nHeaders);
+seabirdData = readmatrix('Robertson_CTD_25May2026_SAR003.hex', 'FileType', 'text', 'NumHeaderLines', nHeaders);
 
 % Check your columns
 for i = 1:length(colNames)
@@ -51,3 +53,17 @@ SBE_juliandays = seabirdData(:, 9);
 
 year = 2026;
 SBE_datetime = datetime(year, 1, 1) - days(1) + days(SBE_juliandays);
+
+%%
+
+% Open the binary file
+fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r');
+
+% Read the raw bytes as unsigned 8-bit integers
+rawBytes = fread(fid, Inf, 'uint8');
+
+% Close the file
+fclose(fid);
+
+% Convert the raw bytes into a readable Hex string matrix
+hexStrings = dec2hex(rawBytes);

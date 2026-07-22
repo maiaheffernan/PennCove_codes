@@ -6,7 +6,7 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'Echo_CTD_23Jun2026_alsoMay2026data.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_21Jul2026.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 

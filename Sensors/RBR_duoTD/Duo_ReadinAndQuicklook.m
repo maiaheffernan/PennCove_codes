@@ -120,7 +120,7 @@ for i = 1:3
 
     % ----- despike temperature  -----
     temp_raw = d.values(:,1);
-    temp_clean = hampel(temp_raw, 7, 2);   % window = 5, threshold = 3 std devs
+    temp_clean = hampel(temp_raw, 7, 2);   % window = 7, threshold = 2 std devs
 
     % ----- despike pressure -----
     pres_raw = d.values(:,2);
