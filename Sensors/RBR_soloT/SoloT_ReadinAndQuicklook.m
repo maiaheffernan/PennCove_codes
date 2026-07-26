@@ -127,7 +127,7 @@ linkaxes(ax, 'xy');
 
 %% save the raw data
 
-save InnerSouth_JunJul2026_soloT_raw.mat soloT_data
+save SoloTdata_JunJul2026_raw.mat soloT_data
 
 %% remove the data points before startTime and after endTime
 
@@ -149,7 +149,7 @@ for i = 1:length(moorings)
 end
 
 
-%% clean the temperature data by de-spiking with 
+%% clean the temperature data by de-spiking with a hampel filter
 
 % Apply a de-spiking algorithm to the temperature data
 for i = 1:length(moorings)
@@ -161,7 +161,41 @@ for i = 1:length(moorings)
         thisSensor = soloT_data.(moorName).(sn);
         
         % De-spike the temperature values
-        thisSensor.data.values = despike(thisSensor.data.values);
+        thisSensor.data.values = hampel(thisSensor.data.values, 5, 2);
         soloT_data.(moorName).(sn) = thisSensor;  % Update the struct with cleaned data
     end
 end
+
+%% plot cleaned data
+
+
+figure;
+ax = gobjects(length(moorings), 1);
+
+for i = 1:length(moorings)
+    moorName = moorings{i};
+    ax(i) = subplot(length(moorings), 1, i);
+    hold on
+
+    snFields = fieldnames(soloT_data.(moorName));
+
+    for j = 1:length(snFields)
+        sn = snFields{j};
+        thisSensor = soloT_data.(moorName).(sn);
+
+        t = datetime(thisSensor.data.tstamp, 'ConvertFrom', 'datenum');  % convert datenum -> datetime
+        plot(t, thisSensor.data.values, 'DisplayName', sn);
+    end
+
+    title(moorName, 'Interpreter', 'none');
+    ylabel('Temp (\circC)');
+    legend('show', 'Location', 'eastoutside');
+    grid on
+end
+
+xlabel('Time');
+linkaxes(ax, 'xy');
+
+%% save cleaned data
+
+save SoloTdata_JunJul2026_L2.mat soloT_data
