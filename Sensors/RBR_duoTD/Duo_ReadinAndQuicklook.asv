@@ -120,23 +120,6 @@ struct_names = {'DuoTD_data_InnerNorth_JunJul2026_240149', ...
 outputFolder = pwd;  
 
 for i = 1:2
-
-    % time limits based on start and end times
-    snFields = fieldnames(DuoTD_data.(struct_names{i}));
-    
-    for j = 1:length(snFields)
-        sn = snFields{j};
-        thisSensor = DuoTD_data.(struct_names{i});
-        
-        % Remove data points outside the specified time range
-        validIndices = thisSensor.data.tstamp >= startTime_dn & thisSensor.data.tstamp <= endTime_dn;
-        thisSensor.data.values = thisSensor.data.values(validIndices, :);
-        thisSensor.data.tstamp = thisSensor.data.tstamp(validIndices);
-        
-        DuoTD_data.(struct_names{i}) = thisSensor;  % Update the struct with filtered data
-    end
-
-
     % pull out the data structure 
     d = DuoTD_data.(struct_names{i}).data;
 
@@ -149,7 +132,7 @@ for i = 1:2
 
     % ----- despike pressure -----
     pres_raw = d.values(:,2);
-    pres_clean = hampel(pres_raw, 7, 2);  
+    pres_clean = hampel(pres_raw, 5, 2);  
 
     % build a cleaned copy of the data structure
     d_clean = d;                       % start with original fields (tstamp, values)
@@ -181,73 +164,29 @@ for i = 1:2
     title(struct_names{i}, 'Interpreter', 'none');
 
     % save out to its own .mat file
-    outFile = fullfile(outputFolder, [struct_names{i} '_cleaned_L2.mat']);
-    save(outFile, 'd_clean');
-
-    fprintf('Saved cleaned data for %s to %s\n', struct_names{i}, outFile);
+    % outFile = fullfile(outputFolder, [struct_names{i} '_cleaned_L2.mat']);
+    % save(outFile, 'd_clean');
+    % 
+    % fprintf('Saved cleaned data for %s to %s\n', struct_names{i}, outFile);
 end
 
 %% cut out unwanted timestamps
-% 
-% for i = 1:length(struct_names)
-%     % moorName = moorings{i};
-%     snFields = fieldnames(DuoTD_data.(struct_names{i}));
-% 
-%     for j = 1:length(snFields)
-%         sn = snFields{j};
-%         thisSensor = DuoTD_data.(struct_names{i});
-% 
-%         % Remove data points outside the specified time range
-%         validIndices = thisSensor.data.tstamp >= startTime_dn & thisSensor.data.tstamp <= endTime_dn;
-%         thisSensor.data.values = thisSensor.data.values(validIndices, :);
-%         thisSensor.data.tstamp = thisSensor.data.tstamp(validIndices);
-% 
-%         DuoTD_data.(struct_names{i}) = thisSensor;  % Update the struct with filtered data
-%     end
-% end
 
-%% plot the cleaned figures 
-
-% ===== first temperature =====
-
-figure; hold on;
-
-for i = 1:2 % 3 for MayJun
-    d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
+for i = 1:length(struct_names)
+    % moorName = moorings{i};
+    snFields = fieldnames(DuoTD_data.(struct_names{i}));
     
-     t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
-
-
-    idx = t >= startTime & t <= endTime;   % logical mask for time bounds
-    plot(t(idx), d.values(idx,1));          % plotting only temp within bounds
-
-    axis tight
+    for j = 1:length(snFields)
+        sn = snFields{j};
+        thisSensor = DuoTD_data.(struct_names{i});
+        
+        % Remove data points outside the specified time range
+        validIndices = thisSensor.data.tstamp >= startTime_dn & thisSensor.data.tstamp <= endTime_dn;
+        thisSensor.data.values = thisSensor.data.values(validIndices, :);
+        thisSensor.data.tstamp = thisSensor.data.tstamp(validIndices);
+        
+        DuoTD_data.(struct_names{i}) = thisSensor;  % Update the struct with filtered data
+    end
 end
 
-hold off;
-legend('Inner North 240149','Inner North, 240150','Inner South, 240151');
-xlabel('Time');
-ylabel('Temperature (°C)');
-title('Time series of temperature from May to June 2026');
-
-
-% ===== then pressure ====
-
-figure(2); hold on;
-
-for i = 1:2 % 3 for MayJun
-    d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
-    
-     t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
-
-    idx = t >= startTime & t <= endTime;   % logical mask for time bounds
-    plot(t(idx), d.values(idx,2));          % plotting only pressure within bounds
-
-    axis tight
-end
-
-hold off;
-legend('SN 240149','SN 240150'); %,'SN 240151'
-xlabel('Time');
-ylabel('dbar');
-title('Time series of pressure from June to July 2026');
+%% plot the figures now

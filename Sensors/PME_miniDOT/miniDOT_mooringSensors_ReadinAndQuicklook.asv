@@ -172,28 +172,22 @@ linkaxes([s5 s6 s7 s8],'x')
 
 save miniDOT_JunJul2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
 
-%% cleaning with a hampel filter and rate of change filter
+%% cleaning with a hampel filter
 
+% Apply Hampel filter to clean the data for Dissolved Oxygen
+% LJN_13m.DissolvedOxygen = hampel(LJN_13m.DissolvedOxygen, 5, 2);
+% LJN_26m.DissolvedOxygen = hampel(LJN_26m.DissolvedOxygen, 5, 2);
+% LJS_16m.DissolvedOxygen = hampel(LJS_16m.DissolvedOxygen, 5, 2);
+% LJS_32m.DissolvedOxygen = hampel(LJS_32m.DissolvedOxygen, 5, 2);
 
-% rates for rate of change filtering
-maxRateDO   = 2;
-maxRateTemp = 3;
-halfWin = 1;
-
-% spike thresholds for more pointed cleaning
-spikeThreshDO   = 2;   % mg/L deviation from local median to call it a spike
-spikeThreshTemp = 2;   % degC deviation from local median to call it a spike
-
-% manually setting a DO floor threshold
-doFloor = 0.5; 
-
+maxRateDO   = 0.3;
+maxRateTemp = 0.3;
 
 sensors = {'LJN_13m', 'LJN_26m', 'LJS_16m', 'LJS_32m'};
 
 for i = 1:length(sensors)
     d = eval(sensors{i});
     
-    % hampel filter
     temp_raw = d.Temperature;
     [~, isOutlier_temp] = hampel(temp_raw, 2, 2);   % get outlier flags, ignore smoothed output
     temp_clean = temp_raw;
@@ -205,41 +199,10 @@ for i = 1:length(sensors)
     do_clean = do_raw;
     do_clean(isOutlier_do) = NaN;
     d.DO_mgl_cleaned = do_clean;
-
-    % rate of change filter
-
-    swingTemp = movmax(temp_clean, [halfWin halfWin], 'omitnan') - ...
-                movmin(temp_clean, [halfWin halfWin], 'omitnan');
-    swingDo  = movmax(do_clean, [halfWin halfWin], 'omitnan') - ...
-                movmin(do_clean, [halfWin halfWin], 'omitnan');
     
-    tempRateExceed = swingTemp > maxRateTemp;
-    doRateExceed  = swingDo  > maxRateDO;
-    
-    temp_clean(tempRateExceed) = NaN;
-    do_clean(doRateExceed)   = NaN;
-
-    % -- isolating independent spikes --
-    
-     doMedian   = movmedian(do_clean, 5, 'omitnan');    
-    tempMedian = movmedian(temp_clean, 5, 'omitnan');
-    
-    doSpike   = abs(do_clean - doMedian) > spikeThreshDO;
-    tempSpike = abs(temp_clean - tempMedian) > spikeThreshTemp;
-    
-    do_clean(doSpike)     = NaN;
-    temp_clean(tempSpike) = NaN;
-    
-    
-    % --- Floor threshold ---
-    do_clean(do_clean < doFloor) = NaN;
-    
-    d.Temp_C_cleaned = temp_clean;
-    d.DO_mgl_cleaned = do_clean;
     assignin('base', sensors{i}, d);
     clear d
 end
-
 
 %% plot cleaned data
 
@@ -250,19 +213,15 @@ p9 = plot(LJN_13m.UTC_Date___Time, LJN_13m.DO_mgl_cleaned, 'b-', 'LineWidth', 1.
 p10 = plot(LJN_26m.UTC_Date___Time, LJN_26m.DO_mgl_cleaned, 'm-', 'LineWidth', 1.0);
 p11 = plot(LJS_16m.UTC_Date___Time, LJS_16m.DO_mgl_cleaned, 'g-', 'LineWidth', 1.0);
 p12 = plot(LJS_32m.UTC_Date___Time, LJS_32m.DO_mgl_cleaned, 'r-', 'LineWidth', 1.0);
-p13 = yline(2);
 
 % Plot cleaned temperature data
 figure(6); clf;
 hold on;
-p14 = plot(LJN_13m.UTC_Date___Time, LJN_13m.Temp_C_cleaned, 'b-', 'LineWidth', 1.0);
-p15 = plot(LJN_26m.UTC_Date___Time, LJN_26m.Temp_C_cleaned, 'm-', 'LineWidth', 1.0);
-p16 = plot(LJS_16m.UTC_Date___Time, LJS_16m.Temp_C_cleaned, 'g-', 'LineWidth', 1.0);
-p17 = plot(LJS_32m.UTC_Date___Time, LJS_32m.Temp_C_cleaned, 'r-', 'LineWidth', 1.0);
+p9 = plot(LJN_13m.UTC_Date___Time, LJN_13m.Temp_C_cleaned, 'b-', 'LineWidth', 1.0);
+p10 = plot(LJN_26m.UTC_Date___Time, LJN_26m.Temp_C_cleaned, 'm-', 'LineWidth', 1.0);
+p11 = plot(LJS_16m.UTC_Date___Time, LJS_16m.Temp_C_cleaned, 'g-', 'LineWidth', 1.0);
+p12 = plot(LJS_32m.UTC_Date___Time, LJS_32m.Temp_C_cleaned, 'r-', 'LineWidth', 1.0);
 
 
 
 
-%% save out the cleaned data
-
-save miniDOT_JunJul2026_mooringdata_L2.mat LJN_26m LJN_13m LJS_16m LJS_32m

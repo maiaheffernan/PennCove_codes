@@ -121,21 +121,18 @@ grid on;
 
 
 sensors = {'LJN_4m', 'LJN_8m', 'LJS_4m', 'LJS_11m'};
+
 for i = 1:length(sensors)
     d = eval(sensors{i});
-    
     temp_raw = d.Temp_C;  % Extract temperature data
-    [~, isOutlier_temp] = hampel(temp_raw, 2, 3);  % window = 2 because the function grabs two data points from either side of the middle point. Since the data is taken every 10 minutes, this compares to 40 minutes of data. Threshold = 3 std devs is standard.
-    temp_clean = temp_raw;
-    temp_clean(isOutlier_temp) = NaN;              % NaN out flagged points
-    d.Temp_C_cleaned = temp_clean;
-    
+    temp_clean = hampel(temp_raw, 3, 3);  % Apply Hampel filter: window = 3 because each data point is taken every 10 minutes, threshold = 3 std devs
+    d.Temp_C_cleaned = temp_clean;  % Store cleaned data back
+
     sal_raw = d.Sal_ppt;
-    [~, isOutlier_sal] = hampel(sal_raw, 2, 3);
-    sal_clean = sal_raw;
-    sal_clean(isOutlier_sal) = NaN;
+    sal_clean = hampel(sal_raw, 3, 3);
     d.Sal_ppt_cleaned = sal_clean;
-    
+
+
     assignin('base', sensors{i}, d);  % Store cleaned data back to the base workspace
     clear d
 end
@@ -169,13 +166,7 @@ ylabel('Salinity (ppt)');
 title('Cleaned salinity Readings from YSI 600LS');
 legend show;
 
-%% save cleaned data
-
-% Save cleaned data to .mat files for each sensor
-for i = 1:length(sensors)
-    cleanedData = eval(sensors{i});
-    save([sensors{i} 'YSI600LS_L2.mat'], 'cleanedData');
-end
+%% save
 
 
 
