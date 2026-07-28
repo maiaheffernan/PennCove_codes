@@ -21,7 +21,7 @@ solo_SNs = { ...
     {'212868', '212869', '212870', '212871', '212872', '212873', '212874'}, ...  % InnerNorth
     {'212875', '212876', '212877', '212878', '212879', '212880', '212881'} ...   % InnerSouth
     };
-months_dir  = 'JunJul2026';  % used for the DIRECTORY name (includes year)
+months_dir  = 'MaytoJun2026';  % used for the DIRECTORY name (includes year)
 
 soloT_data = struct();  % top-level struct; one field per mooring
 
@@ -60,9 +60,12 @@ end
 
 % ===== put in the start and end times =====
 
-startTime = datetime(2026, 6, 25, 19, 0, 0);
-endTime = datetime(2026, 7, 21, 16, 30, 0);
 
+startTime = datetime(2026, 5, 27, 0, 0, 0);
+endTime = datetime(2026, 6, 23, 20, 40, 0);
+    % for JuneJul
+    % startTime = datetime(2026, 6, 25, 19, 0, 0);
+    % endTime = datetime(2026, 7, 21, 16, 30, 0);
 startTime_dn =datenum(startTime);
 endTime_dn =datenum(endTime);
 
@@ -95,7 +98,7 @@ end
 xlabel('Time');
 linkaxes(ax, 'xy');
 
-xlim(ax(1), [startTime endTime]);
+xlim(ax(1), [startTime, endTime]);
 
 %% plot histograms of the data to see the distribution
 
@@ -125,7 +128,7 @@ end
 
 linkaxes(ax, 'xy');
 
-%% save the raw data
+%% save the raw data -- MAKE SURE THE MONTHS ARE CORRECT IN THE NAME
 
 save SoloTdata_JunJul2026_raw.mat soloT_data
 
@@ -161,7 +164,7 @@ for i = 1:length(moorings)
         thisSensor = soloT_data.(moorName).(sn);
         
         % De-spike the temperature values
-        thisSensor.data.values = hampel(thisSensor.data.values, 5, 2);
+        thisSensor.data.values = hampel(thisSensor.data.values, 7, 3);
         soloT_data.(moorName).(sn) = thisSensor;  % Update the struct with cleaned data
     end
 end
@@ -198,4 +201,4 @@ linkaxes(ax, 'xy');
 
 %% save cleaned data
 
-save SoloTdata_JunJul2026_L2.mat soloT_data
+save SoloTdata_MayJun2026_L2.mat soloT_data

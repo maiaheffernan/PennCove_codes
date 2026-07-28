@@ -12,7 +12,7 @@ clear all, close all
 
 SNs = {'066057'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth'}; % these match the order of the serial numbers
-months = 'JunJul2026'; % edit this based on the data you are downloading
+months = 'MaytoJun2026'; % edit this based on the data you are downloading
 
 concerto_data = struct(); % create an empty struct that I will read data into
 
@@ -25,7 +25,7 @@ for i = 1:length(SNs)
     folderPath = fullfile(sprintf('%s_%s', moorings{i}, months), 'RBR_concerto'); % file path from the high-level data directory
     filePattern = sprintf('%s_%s_*_sn%s.rsk', moorings{i}, months, SNs{i}); % naming pattern
 
-    fileInfo = dir(fullfile(folderPath, filePattern));  % dir() resolves the wildcard * symbol
+    fileInfo = dir(fullfile(folderPath, filePattern));  
 
 % some info in case something went weird with the data load-in
 
@@ -56,8 +56,11 @@ end
 %% cut the timestamps to the section we are interested in for each month
 
 % trim the timestamps
-startTime = datetime(2026, 6, 26, 0, 0, 0);
-endTime   = datetime(2026, 7, 21, 16, 30, 0);
+    % for junjul
+    % startTime = datetime(2026, 6, 26, 0, 0, 0);
+    % endTime   = datetime(2026, 7, 21, 16, 30, 0);
+startTime = datetime(2026, 5, 27, 0, 0, 0);
+endTime = datetime(2026, 6, 23, 20, 40, 0);
 startTime_dn = datenum(startTime);
 endTime_dn   = datenum(endTime);
 
@@ -132,7 +135,7 @@ end
 
 raw_values = concerto_data;
 
-save mooredConcertoData_JunJul2026.mat concerto_data
+save mooredConcertoData_MayJun2026.mat concerto_data
 
 %% clean the data 
 
@@ -207,4 +210,4 @@ end
 
  %% save out the cleaned data
 
- save("CleanedData/mooredConcertoData_JunJul2026.mat", "concerto_data")
+ save("CleanedData/mooredConcertoData_MayJun2026.mat", "concerto_data")

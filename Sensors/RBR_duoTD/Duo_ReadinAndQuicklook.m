@@ -10,8 +10,9 @@ close all; clear all;
 
 SNs = {'240149', '240150', '240151'};
 moorings = {'InnerNorth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months_dir = 'JunJul2026'; % edit this based on the data you are downloading -- NOTE there is no InnerSouth data for JunJul because the Duo broke
-%months_file = 'MayJun2026';
+% months_dir = 'JunJul2026'; % edit this based on the data you are downloading -- NOTE there is no InnerSouth data for JunJul because the Duo broke
+months_dir = 'MaytoJun2026';
+months_file = 'MayJun2026';
 
 DuoTD_data = struct(); % create an empty struct that I will read data into
 
@@ -22,7 +23,7 @@ for i = 1:length(SNs)
     % the * wild card symbol.
 
     folderPath = fullfile(sprintf('%s_%s', moorings{i}, months_dir), 'RBR_DuoTD'); % file path from the high-level data directory
-    filePattern = sprintf('%s_%s_*_sn%s.rsk', moorings{i}, months_dir, SNs{i}); % naming pattern
+    filePattern = sprintf('%s_%s_*_sn%s.rsk', moorings{i}, months_file, SNs{i}); % naming pattern
 
     fileInfo = dir(fullfile(folderPath, filePattern));  % dir() resolves the wildcard * symbol
 
@@ -52,26 +53,26 @@ end
 
 %% save raw data
 
-save DuoTDdata_JunJul2026_raw.mat DuoTD_data
+save DuoTDdata_MayJun2026_raw.mat DuoTD_data
 
 %% plot a time series of the data with different colors 
 
-struct_names = {'DuoTD_data_InnerNorth_JunJul2026_240149', 'DuoTD_data_InnerNorth_JunJul2026_240150'}; % 'DuoTD_data_InnerSouth_MayJun2026_240151'
+struct_names = {'DuoTD_data_InnerNorth_MaytoJun2026_240149', 'DuoTD_data_InnerNorth_MaytoJun2026_240150', 'DuoTD_data_InnerSouth_MaytoJun2026_240151'}; % 'DuoTD_data_InnerSouth_MayJun2026_240151'
 
-% startTime = datetime(2026, 5, 27, 0, 0, 0);
-% endTime = datetime(2026, 6, 23, 20, 40, 0);
-
-startTime = datetime(2026, 6, 26, 00, 0, 0);
-endTime = datetime(2026, 7, 21, 16, 30, 0);
+startTime = datetime(2026, 5, 27, 0, 0, 0);
+endTime = datetime(2026, 6, 23, 20, 40, 0);
+    % for JuneJul
+    % startTime = datetime(2026, 6, 26, 00, 0, 0);
+    % endTime = datetime(2026, 7, 21, 16, 30, 0);
 startTime_dn = datenum(startTime);
 endTime_dn   = datenum(endTime);
      
 
 % ===== first temperature =====
 
-figure; hold on;
+figure; clf; hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -92,9 +93,9 @@ title('Time series of temperature from May to June 2026');
 
 % ===== then pressure ====
 
-figure(2); hold on;
+figure(2); clf; hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -109,17 +110,18 @@ hold off;
 legend('SN 240149','SN 240150'); %,'SN 240151'
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from June to July 2026');
+title('Time series of pressure from May to June 2026');
 
 %% clean the data by de-spiking with a hampel loop and trimming the time
 
-struct_names = {'DuoTD_data_InnerNorth_JunJul2026_240149', ...
-                'DuoTD_data_InnerNorth_JunJul2026_240150'}; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
+struct_names = {'DuoTD_data_InnerNorth_MaytoJun2026_240149', ...
+                'DuoTD_data_InnerNorth_MaytoJun2026_240150', ...
+                'DuoTD_data_InnerSouth_MaytoJun2026_240151'}; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
                 
 
 outputFolder = pwd;  
 
-for i = 1:2
+for i = 1:3
 
     % time limits based on start and end times
     snFields = fieldnames(DuoTD_data.(struct_names{i}));
@@ -187,32 +189,13 @@ for i = 1:2
     fprintf('Saved cleaned data for %s to %s\n', struct_names{i}, outFile);
 end
 
-%% cut out unwanted timestamps
-% 
-% for i = 1:length(struct_names)
-%     % moorName = moorings{i};
-%     snFields = fieldnames(DuoTD_data.(struct_names{i}));
-% 
-%     for j = 1:length(snFields)
-%         sn = snFields{j};
-%         thisSensor = DuoTD_data.(struct_names{i});
-% 
-%         % Remove data points outside the specified time range
-%         validIndices = thisSensor.data.tstamp >= startTime_dn & thisSensor.data.tstamp <= endTime_dn;
-%         thisSensor.data.values = thisSensor.data.values(validIndices, :);
-%         thisSensor.data.tstamp = thisSensor.data.tstamp(validIndices);
-% 
-%         DuoTD_data.(struct_names{i}) = thisSensor;  % Update the struct with filtered data
-%     end
-% end
-
 %% plot the cleaned figures 
 
 % ===== first temperature =====
 
 figure; hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -235,7 +218,7 @@ title('Time series of temperature from May to June 2026');
 
 figure(2); hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -247,7 +230,7 @@ for i = 1:2 % 3 for MayJun
 end
 
 hold off;
-legend('SN 240149','SN 240150'); %,'SN 240151'
+legend('SN 240149','SN 240150','SN 240151'); %,'SN 240151' for mayjun
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from June to July 2026');
+title('Time series of pressure from May to June 2026');

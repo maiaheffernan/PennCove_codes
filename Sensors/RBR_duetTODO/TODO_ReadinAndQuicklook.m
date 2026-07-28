@@ -32,7 +32,7 @@ clear all; close all;
 
 SNs = {'241787', '241789', '241791', '241792'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'JunJul2026'; % edit this based on the data you are downloading
+months = 'MaytoJun2026'; % edit this based on the data you are downloading
 
 TODO_data = struct(); % create an empty struct that I will read data into
 
@@ -164,7 +164,7 @@ exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 raw_values = TODO_data; % in case I need to use it in this script
 
-save TODOdata_JunJul2026_raw.mat TODO_data
+save TODOdata_MayJun2026_raw.mat TODO_data
 
 %% clean the data with a hampel filter and rate of change flagging
 
@@ -202,7 +202,7 @@ clear thisSensor
 
 %% Choose how much to filter changes in DO and temp buy looking at the distributions in swings
 
-windowSpan = 5;
+windowSpan = 7;
 halfWin = floor(windowSpan/2);  % centered window
 
 allSwingDO   = [];
@@ -239,15 +239,23 @@ clear thisSensor swingDO_k swingTemp_k
 TODO_data = raw_values;  
 
 % trim the timestamps
-startTime = datetime(2026, 6, 26, 0, 0, 0);
-endTime   = datetime(2026, 7, 21, 16, 30, 0);
+startTime = datetime(2026, 5, 27, 0, 0, 0);
+endTime = datetime(2026, 6, 23, 20, 40, 0);
+
 startTime_dn = datenum(startTime);
 endTime_dn   = datenum(endTime);
 
+
+    % for June
+    % startTime = datetime(2026, 6, 26, 0, 0, 0);
+    % endTime   = datetime(2026, 7, 21, 16, 30, 0);
+    % startTime_dn = datenum(startTime);
+    % endTime_dn   = datenum(endTime);
+
 % rate of change thresholds (per 1-minute sample) -- update these based on
 % the pooled percentiles above
-maxRateDO   = 0.3;
-maxRateTemp = 0.3;
+maxRateDO   = 0.6;
+maxRateTemp = 1;
 
 windowSpan = 5;
 halfWin    = floor(windowSpan/2);   % centered window
@@ -263,9 +271,9 @@ for i = 1:length(moorings)
     thisSensor.data.tstamp = thisSensor.data.tstamp(validIndices);
 
     % Hampel filter on each channel
-    [~, tempOutliers]  = hampel(thisSensor.data.values(:, 1), 5, 3);
-    [~, doOutliers]    = hampel(thisSensor.data.values(:, 2), 5, 3);
-    [~, domglOutliers] = hampel(thisSensor.data.values(:, 3), 5, 3);
+    [~, tempOutliers]  = hampel(thisSensor.data.values(:, 1), 7, 3);
+    [~, doOutliers]    = hampel(thisSensor.data.values(:, 2), 7, 3);
+    [~, domglOutliers] = hampel(thisSensor.data.values(:, 3), 7, 3);
     hampel_bad = tempOutliers | doOutliers | domglOutliers;
 
     % rate of change filter -- centered window
