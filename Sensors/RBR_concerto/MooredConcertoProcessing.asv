@@ -135,7 +135,7 @@ end
 
 raw_values = concerto_data;
 
-save mooredConcertoData_MayJun2026_raw.mat concerto_data
+save mooredConcertoData_JunJul2026.mat concerto_data
 
 %% clean the data 
 
@@ -207,57 +207,7 @@ end
         axis tight;
 
  linkaxes([ax3 ax4], 'x')
-%% interactive cleanup with brushing - cycles through all moorings
 
-channelsToClean = [2 9]; % column 2 = temp, column 9 = salinity PSU
-
-for i = 1:length(moorings)
-    moorName = moorings{i};
-    d = concerto_data.(moorName).data;
-
-    for c = channelsToClean
-
-        if c == 2
-            chanLabel = 'Temp';
-        elseif c == 9
-            chanLabel = 'Salinity';
-        end
-
-        figure(100); clf;
-        h = plot(d.tstamp, d.values(:,c));
-        datetick('x');
-        title(sprintf('%s - %s : brush bad points, then press ENTER in Command Window', moorName, chanLabel));
-        xlabel('Time'); ylabel(chanLabel);
-
-        % turn on brushing mode automatically
-        brush on;
-
-        fprintf('\n=== %s - %s ===\n', moorName, chanLabel);
-        fprintf('Brush the bad points on the figure, then press ENTER here to continue...\n');
-        pause; % waits for you to hit Enter in the command window after brushing
-
-        brush off;
-
-        brushedIdx = find(get(h, 'BrushData'));
-
-        if isempty(brushedIdx)
-            fprintf('No points brushed for %s - %s, skipping.\n', moorName, chanLabel);
-        else
-            d.values(brushedIdx, :) = NaN;   % NaN out entire row across all channels
-
-            if ~isfield(d, 'manual_flag')
-                d.manual_flag = false(length(d.tstamp),1);
-            end
-            d.manual_flag(brushedIdx) = true;
-
-            fprintf('Removed %d brushed points from %s - %s\n', numel(brushedIdx), moorName, chanLabel);
-        end
-    end
-
-    concerto_data.(moorName).data = d;
-end
-
-fprintf('\nDone. Re-plot to check results.\n');
  %% save out the cleaned data
 
- save("CleanedData/mooredConcertoData_MayJun2026_L2.mat", "concerto_data")
+ save("CleanedData/mooredConcertoData_JunJul2026.mat", "concerto_data")

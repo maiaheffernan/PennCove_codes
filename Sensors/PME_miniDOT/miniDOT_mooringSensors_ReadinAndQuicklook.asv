@@ -3,8 +3,7 @@
 %%% created on July 1, 2026. Maia H. 
 
 % July 28, MBH -- edited the low DO threshold to 1.5 mg/L instead of 0.5 to
-% get rid of some obvious spikes in the data without altering any filters
-% that might cut out good data
+% get rid of some obvious spikes in the data without 
 
 
 clear all; close all;

@@ -11,62 +11,62 @@ clear all, close all
 % === Sea-Bird data as .hex files ===
 
 
-% fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r'); %'May192026_SBEbucketTest.cnv'
-% nHeaders = 0;
-% colNames = {};
-% while ~feof(fid)
-%     line = fgetl(fid);
-%     nHeaders = nHeaders + 1;
-%     if contains(line, '# name')
-%         parts = strsplit(line, '=');
-%         colNames{end+1} = strtrim(parts{2});
-%         fprintf('added a column')
-%     end
-%     if contains(line, '*END*')
-%         fprintf('broke')
-%         break
-%     end
-% end
-% fclose(fid);
-% 
-% % Read the data
-% seabirdData = readmatrix('Robertson_CTD_25May2026_SAR003.hex', 'FileType', 'text', 'NumHeaderLines', nHeaders);
-% 
-% % Check your columns
-% for i = 1:length(colNames)
-%     fprintf('Column %d: %s\n', i, colNames{i});
-% end
-% 
-% 
-% % === pulling out the variables ===
-% 
-% SBE_salinity_PSU = seabirdData(:, 1);
-% SBE_temp_degC = seabirdData(:, 5);
-% SBE_pressure_db = seabirdData(:, 2);
-% SBE_seconds = seabirdData(:, 6);
-% SBE_minutes = seabirdData(:, 7);
-% SBE_hours = seabirdData(:, 8);
-% SBE_juliandays = seabirdData(:, 9);
-% 
-% 
-% % === putting the time data into a datetime ===
-% 
-% year = 2026;
-% SBE_datetime = datetime(year, 1, 1) - days(1) + days(SBE_juliandays);
-% 
-% %%
-% 
-% % Open the binary file
-% fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r');
-% 
-% % Read the raw bytes as unsigned 8-bit integers
-% rawBytes = fread(fid, Inf, 'uint8');
-% 
-% % Close the file
-% fclose(fid);
-% 
-% % Convert the raw bytes into a readable Hex string matrix
-% hexStrings = dec2hex(rawBytes);
+fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r'); %'May192026_SBEbucketTest.cnv'
+nHeaders = 0;
+colNames = {};
+while ~feof(fid)
+    line = fgetl(fid);
+    nHeaders = nHeaders + 1;
+    if contains(line, '# name')
+        parts = strsplit(line, '=');
+        colNames{end+1} = strtrim(parts{2});
+        fprintf('added a column')
+    end
+    if contains(line, '*END*')
+        fprintf('broke')
+        break
+    end
+end
+fclose(fid);
+
+% Read the data
+seabirdData = readmatrix('Robertson_CTD_25May2026_SAR003.hex', 'FileType', 'text', 'NumHeaderLines', nHeaders);
+
+% Check your columns
+for i = 1:length(colNames)
+    fprintf('Column %d: %s\n', i, colNames{i});
+end
+
+
+% === pulling out the variables ===
+
+SBE_salinity_PSU = seabirdData(:, 1);
+SBE_temp_degC = seabirdData(:, 5);
+SBE_pressure_db = seabirdData(:, 2);
+SBE_seconds = seabirdData(:, 6);
+SBE_minutes = seabirdData(:, 7);
+SBE_hours = seabirdData(:, 8);
+SBE_juliandays = seabirdData(:, 9);
+
+
+% === putting the time data into a datetime ===
+
+year = 2026;
+SBE_datetime = datetime(year, 1, 1) - days(1) + days(SBE_juliandays);
+
+%%
+
+% Open the binary file
+fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r');
+
+% Read the raw bytes as unsigned 8-bit integers
+rawBytes = fread(fid, Inf, 'uint8');
+
+% Close the file
+fclose(fid);
+
+% Convert the raw bytes into a readable Hex string matrix
+hexStrings = dec2hex(rawBytes);
 
 %% For .cap files
 
@@ -117,19 +117,10 @@ sal = nan(n,1);
 dateStr = strings(n,1);
 timeStr = strings(n,1);
 
-for i = 1:n
+for i = 4:n
     line = capData{i};           % extract the char array from the nested cell
     parts = strsplit(line, ',');   % split on commas
     parts = strtrim(parts);        % remove leading/trailing whitespace
-
-    
-    if numel(parts) < 6
-        % Corrupted/incomplete line - skip it, leave NaN/blank for this row
-        fprintf('Skipping corrupted line %d: "%s"\n', i, line);
-        continue;
-    end
-
-
 
     temp(i)  = str2double(parts{1});
     cond(i)  = str2double(parts{2});
@@ -163,13 +154,8 @@ sum(corruptedLines);
 
 %% applying the time cutoff
 
-
-startTime = datetime(2026, 5, 27, 0, 0, 0);
-endTime = datetime(2026, 6, 23, 20, 40, 0);
-
-    % for Jun Jul
-    % startTime = datetime(2026, 6, 26, 00, 0, 0);
-    % endTime = datetime(2026, 7, 21, 16, 30, 0);
+startTime = datetime(2026, 6, 26, 00, 0, 0);
+endTime = datetime(2026, 7, 21, 16, 30, 0);
 
 % Filter the seacatData based on the time cutoff
 outOfRange = seacatData.DateTime < startTime | seacatData.DateTime > endTime;
@@ -197,7 +183,7 @@ dataVars = seacatData.Properties.VariableNames;
 %% save the raw seabird data to the general data file
 
 % Save the seabird data to a .mat file for future analysis
-save('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/seabirdData_MayJun2026_raw.mat', 'seacatData')
+save('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/July2026/Data/seabirdData_JunJul2026_raw.mat', 'seacatData')
 
 %% plot the raw data
 
