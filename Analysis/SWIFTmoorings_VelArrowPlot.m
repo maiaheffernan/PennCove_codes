@@ -10,7 +10,7 @@ clear all, close all
 
 %% load in the SWIFT sig data from May to Jun
 
-% this is coming from the JunJul 2026 period
+% this is coming from the MayJun 2026 period
 
 SWIFT09_WWS = load('SWIFT09_SDcard_MayJun2026_SIG.mat');
 

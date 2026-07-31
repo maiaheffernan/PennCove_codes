@@ -6,6 +6,14 @@
 
 clear all, close all
 
+
+%% font sizes for plotting later
+
+
+set(0, 'DefaultAxesFontSize', 14);
+set(0, 'DefaultTextFontSize', 14);
+set(0, 'DefaultLegendFontSize', 12);
+
 %% load in the data
 
 

@@ -10,9 +10,9 @@ clear all, close all
 
 %% Step 1. load in the ADCP data from June transecting
 
-%load Echo_ADCP_24Jun2026_ebb_cleaned.mat
+load Echo_ADCP_24Jun2026_ebb_cleaned.mat
 
-load Echo_ADCP_24Jun2026_flood_cleaned.mat
+%load Echo_ADCP_24Jun2026_flood_cleaned.mat
 
 %% find the different transects and locations
 
@@ -46,27 +46,27 @@ datacursormode(gcf, 'on');
 % one row per transect line: [startIdx endIdx]
 
 % == ebb bounds ==
-% lineBounds = [ ...
-%     17,   34;
-%     47, 125;
-%     143, 162;
-%     182, 258;
-%     281, 301;
-%     304, 324;
-%     340, 420;
-%     422, 497];   
+lineBounds = [ ...
+    17,   34;
+    47, 125;
+    143, 162;
+    182, 258;
+    281, 301;
+    304, 324;
+    340, 420;
+    422, 497];   
 
 % == flood bounds ==
 
-lineBounds = [ ...
-    1, 80;
-    102, 121;
-    150, 237;
-    262, 282;
-    305, 368;
-    402, 417;
-    446, 528;
-    550, 569];
+% lineBounds = [ ...
+%     1, 80;
+%     102, 121;
+%     150, 237;
+%     262, 282;
+%     305, 368;
+%     402, 417;
+%     446, 528;
+%     550, 569];
 
 nLines = size(lineBounds, 1);
 transectLines = struct('lat', {}, 'lon', {}, 'time', {}, 'lineNum', {});
@@ -289,7 +289,7 @@ grid on;
 % they just have wobbly transect lines.
 %% compare COG to ensemble heading in the exported matlab files 
 
-load Echo_ADCP_24Jun2026_flood.mat AnH100thDeg % heading information from the ADCP 
+load Echo_ADCP_24Jun2026_ebb.mat AnH100thDeg % heading information from the ADCP 
 
 
 % the difference is the rotation correction
