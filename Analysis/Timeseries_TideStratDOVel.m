@@ -7,12 +7,16 @@
 clear all, close all
 
 
+
+
 %% font sizes for plotting later
 
 
 set(0, 'DefaultAxesFontSize', 14);
 set(0, 'DefaultTextFontSize', 14);
 set(0, 'DefaultLegendFontSize', 12);
+
+set(0, 'DefaultFigureColor', [1 1 1]) % figure background white
 
 %% load in the data
 
@@ -277,6 +281,8 @@ bottomCTD_MayJul.LoveJoyNorth.Datetime = datetime(bottomCTD_MayJul.LoveJoyNorth.
 
 bottomDO_MayJul.LoveJoyNorth.Datetime = datetime(bottomDO_MayJul.LoveJoyNorth.time, 'ConvertFrom', 'datenum');
 bottomDO_MayJul.LoveJoySouth.Datetime = datetime(bottomDO_MayJul.LoveJoySouth.time, 'ConvertFrom', 'datenum');
+bottomDO_MayJul.InnerNorth.Datetime = datetime(bottomDO_MayJul.InnerNorth.time, 'ConvertFrom', 'datenum');
+bottomDO_MayJul.InnerSouth.Datetime = datetime(bottomDO_MayJul.InnerSouth.time, 'ConvertFrom', 'datenum');
 
 
 tide_MayJul.Datetime = datetime(tide_MayJul.time, 'ConvertFrom', 'datenum');
@@ -341,13 +347,20 @@ s2 = nexttile;
 
 % --- Tile 3: bottom DO timeseries ---
 s3 = nexttile;
+
+    p5andhalf = plot(bottomDO_MayJul.InnerNorth.Datetime, bottomDO_MayJul.InnerNorth.DO, 'g-', 'LineWidth', 2);
+    hold on
+    p5andthree = plot(bottomDO_MayJul.InnerSouth.Datetime, bottomDO_MayJul.InnerSouth.DO, 'm-', 'LineWidth', 2);
+    hold on
     p4 = plot(bottomDO_MayJul.LoveJoyNorth.Datetime, bottomDO_MayJul.LoveJoyNorth.DO, 'c-', 'LineWidth', 2);
     hold on
     p5 = plot(bottomDO_MayJul.LoveJoySouth.Datetime, bottomDO_MayJul.LoveJoySouth.DO, 'b-', 'LineWidth', 2);
+    
+    
     ylabel('Dissolved oxygen concentration (mg/L)');
     yline(2, 'k--', 'LineWidth', 1.5)
     hold off
-    legend([p4 p5], 'LoveJoy north', 'LoveJoy south', 'Location', 'Southwest');
+    legend([p4 p5 p5andhalf p5andthree], 'LoveJoy north', 'LoveJoy south', 'Inner North', 'Inner South', 'Location', 'Southwest');
 
 % --- Tile 4: pcolor of velocity at LJN ---
 
@@ -454,6 +467,8 @@ JunJul_bottomSal.concerto_data.LoveJoyNorth.data.Datetime = datetime(JunJul_bott
 % bottom DO
 JunJul_bottomDO.TODO_data.LoveJoyNorth.data.Datetime = datetime(JunJul_bottomDO.TODO_data.LoveJoyNorth.data.tstamp, 'ConvertFrom', 'datenum');
 JunJul_bottomDO.TODO_data.LoveJoySouth.data.Datetime = datetime(JunJul_bottomDO.TODO_data.LoveJoySouth.data.tstamp, 'ConvertFrom', 'datenum');
+JunJul_bottomDO.TODO_data.InnerNorth.data.Datetime = datetime(JunJul_bottomDO.TODO_data.InnerNorth.data.tstamp, 'ConvertFrom', 'datenum');
+JunJul_bottomDO.TODO_data.InnerSouth.data.Datetime = datetime(JunJul_bottomDO.TODO_data.InnerSouth.data.tstamp, 'ConvertFrom', 'datenum');
 
 % tide
 JunJul_tide.d_clean.Datetime = datetime(JunJul_tide.d_clean.tstamp, 'ConvertFrom', 'datenum');
@@ -540,15 +555,25 @@ s6 = nexttile;
 
 % --- Tile 3: bottom DO timeseries ---
 s7 = nexttile;
+
+    p10andhalf = plot(JunJul_bottomDO.TODO_data.InnerNorth.data.Datetime, ...
+               JunJul_bottomDO.TODO_data.InnerNorth.data.values(:,3), 'g-', 'LineWidth', 2);
+    hold on
+    p10andthree = plot(JunJul_bottomDO.TODO_data.InnerSouth.data.Datetime, ...
+               JunJul_bottomDO.TODO_data.InnerSouth.data.values(:,3), 'm-', 'LineWidth', 2);
+    hold on
+
     p9 = plot(JunJul_bottomDO.TODO_data.LoveJoyNorth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.LoveJoyNorth.data.values(:,3), 'c-', 'LineWidth', 2);
     hold on
     p10 = plot(JunJul_bottomDO.TODO_data.LoveJoySouth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.LoveJoySouth.data.values(:,3), 'b-', 'LineWidth', 2);
+
+    
     ylabel('Dissolved oxygen concentration (mg/L)');
     yline(2, 'k--', 'LineWidth', 1.5)
     hold off
-    legend([p9 p10], 'LoveJoy north', 'LoveJoy south', 'Location', 'Southwest')
+    legend([p9 p10 p10andhalf p10andthree], 'LoveJoy north', 'LoveJoy south', 'Inner north','Inner south','Location', 'Southwest')
 
 
 
@@ -629,19 +654,34 @@ s6 = nexttile;
 
 % --- Tile 3: bottom DO timeseries ---
 s7 = nexttile;
+
+    p10andfour = plot(JunJul_bottomDO.TODO_data.InnerNorth.data.Datetime, ...
+               JunJul_bottomDO.TODO_data.InnerNorth.data.values(:,3), 'g-', 'LineWidth', 2);
+    xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
+    hold on
+
+    p10andfive = plot(JunJul_bottomDO.TODO_data.InnerSouth.data.Datetime, ...
+               JunJul_bottomDO.TODO_data.InnerSouth.data.values(:,3), 'm-', 'LineWidth', 2);
+    xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
+    
+    hold on
+
     p9 = plot(JunJul_bottomDO.TODO_data.LoveJoyNorth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.LoveJoyNorth.data.values(:,3), 'c-', 'LineWidth', 2);
     % Zoom in on the specified time range
     xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
+
     hold on
+
     p10 = plot(JunJul_bottomDO.TODO_data.LoveJoySouth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.LoveJoySouth.data.values(:,3), 'b-', 'LineWidth', 2);
-    % Zoom in on the specified time range
-    xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
+     xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
+
+   
     ylabel('Dissolved oxygen concentration (mg/L)');
     yline(2, 'k--', 'LineWidth', 1.5)
     hold off
-    legend([p9 p10], 'LoveJoy north', 'LoveJoy south', 'Location', 'Northwest')
+    legend([p9 p10 p10andfour p10andfive], 'LoveJoy north', 'LoveJoy south', 'Inner North', 'Inner South', 'Location', 'Northwest')
 
 
 
@@ -690,7 +730,7 @@ s8plus1 = nexttile;
 linkaxes([s5 s6 s7 s8 s8plus1], 'x')
 
 
-xticks_common = datetime(2026,6,27):hours(6):datetime(2026,6,29);
+xticks_common = datetime(2026,6,27):hours(6):datetime(2026,6,29, 18, 00, 00);
 set([s5 s6 s7 s8 s8plus1], 'XTick', xticks_common)
 
 

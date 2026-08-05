@@ -51,27 +51,28 @@ SWIFT29_InS = load('SWIFT29_SDcard_MayJun2026_SIG.mat');
 %  4) Plot M2 ellipses for each mooring, both depths
 %  ========================================================================
 
-lat = 48.23;
-
+lat = 48.23; % for PEnn Cove
+ 
 % Same two depth bins for every mooring
-depthBins    = [2.3, 19.3];   % actual depth (m), for labeling
-depthIndices = [4, 38];       % index into profile(k).u / profile(k).v
+depthBins    = [2, 15];   % actual depth (m), for labeling
+depthIndices = [4, 30];       % index into profile(k).u / profile(k).v
 nDepths      = numel(depthIndices);
-
-names   = {'SWIFT09_WWS','SWIFT18_WWN','SWIFT26_InN','SWIFT27_LJS', ...
-           'SWIFT28_LJN','SWIFT29_InS'};
-structs = {SWIFT09_WWS, SWIFT18_WWN, SWIFT26_InN, SWIFT27_LJS, ...
-           SWIFT28_LJN, SWIFT29_InS};
-
-results = struct(); % where we'll store coef, ellipse params, etc. per mooring
-
+ 
+names   = {'InnerN', 'LJN', 'WWN', ...
+           'InnerS','LJS', 'WWS'};
+structs = {SWIFT26_InN, SWIFT28_LJN,  SWIFT18_WWN, ...
+           SWIFT29_InS, SWIFT27_LJS, ...
+           SWIFT09_WWS};
+ 
+results = struct(); % store coef, ellipse params, etc. per mooring
+ 
 for i = 1:length(structs)
-
+ 
     ThisStruct = structs{i};
     N          = numel(ThisStruct.SIG);           % SIG is the 1xN struct array over time
-    t_raw      = [ThisStruct.SIG.time];            % concatenate N scalar times -> 1xN
+    t_raw      = [ThisStruct.SIG.time];            % concatenate N scalar times
     t_raw      = reshape(t_raw, 1, []);             % guarantee row orientation
-
+ 
     % ---- Pull out only the two depth bins we care about, for all timesteps ----
     u_mat = NaN(nDepths, N);
     v_mat = NaN(nDepths, N);
@@ -87,30 +88,71 @@ for i = 1:length(structs)
         end
     end
 
-    fprintf('%s: %d time steps, depths = [%.1f, %.1f] m\n', ...
+    % ---- Despike: remove obvious outliers before tidal fitting ----
+velThresh = 2;  % m/s — anything beyond this is not a real tidal current in Penn Cove
+for d = 1:nDepths
+    badPts = abs(u_mat(d,:)) > velThresh | abs(v_mat(d,:)) > velThresh;
+    if any(badPts)
+        fprintf('%s: removing %d outlier point(s) at %.1f m (|vel| > %.1f m/s)\n', ...
+            names{i}, sum(badPts), depthBins(d), velThresh);
+        u_mat(d, badPts) = NaN;
+        v_mat(d, badPts) = NaN;
+    end
+end
+ 
+    % ---- Enforce strictly monotonic time by removing bad points, not inventing times ----
+    % A forward scan: keep a point only if it's strictly greater than the
+    % last KEPT point. This guarantees a strictly increasing result in one
+    % pass, with no risk of a fix at index k creating a new violation
+    % between k and k+1
+    keepIdx  = true(1, N);
+    lastGood = t_raw(1);
+    nBad     = 0;
+    for k = 2:N
+        if t_raw(k) <= lastGood
+            keepIdx(k) = false;
+            nBad = nBad + 1;
+        else
+            lastGood = t_raw(k);
+        end
+    end
+ 
+    if nBad > 0
+        fprintf('%s: removed %d non-monotonic/duplicate time point(s) out of %d\n', ...
+            names{i}, nBad, N);
+    end
+ 
+    % Apply the same mask to time and both velocity matrices so everything
+    % stays aligned, then update N to the cleaned length.
+    t_raw = t_raw(keepIdx);
+    u_mat = u_mat(:, keepIdx);
+    v_mat = v_mat(:, keepIdx);
+    N     = numel(t_raw);
+ 
+    fprintf('%s: %d time steps (after cleaning), depths = [%.1f, %.1f] m\n', ...
         names{i}, N, depthBins(1), depthBins(2));
-
+ 
     % ---- Run UTide once per depth bin (2 calls per mooring) ----
     coef_cell   = cell(nDepths, 1);
     u_tide_mat  = NaN(nDepths, N);
     v_tide_mat  = NaN(nDepths, N);
-
+ 
     for d = 1:nDepths
         u_d = u_mat(d, :);
         v_d = v_mat(d, :);
-
+ 
         if all(isnan(u_d)) || all(isnan(v_d))
             warning('%s: depth %.1f m is all NaN, skipping', names{i}, depthBins(d));
             continue
         end
-
-        coef_cell{d} = ut_solv(t_raw, u_d, v_d, lat, 'auto');
-
+ 
+        coef_cell{d} = ut_solv(t_raw, u_d, v_d, lat, 'auto', 'OLS');
+ 
         % reconstr only needed if you want the fitted time series itself
         % (not required just to get the ellipse parameters)
         [u_tide_mat(d, :), v_tide_mat(d, :)] = ut_reconstr(t_raw, coef_cell{d});
     end
-
+ 
     % ---- Store everything back ----
     results.(names{i}).t          = t_raw;
     results.(names{i}).depthBins  = depthBins;
@@ -119,14 +161,14 @@ for i = 1:length(structs)
     results.(names{i}).u_tide     = u_tide_mat;
     results.(names{i}).v_tide     = v_tide_mat;
     results.(names{i}).coef       = coef_cell;
-
+ 
     % ---- Pull out M2 ellipse parameters for each of the two depths ----
     % coef.Lsmaj, coef.Lsmin, coef.theta, coef.g come straight out of ut_solv
     Lsmaj_M2  = NaN(nDepths, 1);
     Lsmin_M2  = NaN(nDepths, 1);
     theta_M2  = NaN(nDepths, 1);
     g_M2      = NaN(nDepths, 1);
-
+ 
     for d = 1:nDepths
         if isempty(coef_cell{d})
             continue
@@ -140,12 +182,13 @@ for i = 1:length(structs)
         theta_M2(d) = coef_cell{d}.theta(idx);
         g_M2(d)     = coef_cell{d}.g(idx);
     end
-
+ 
     results.(names{i}).M2.Lsmaj = Lsmaj_M2;
     results.(names{i}).M2.Lsmin = Lsmin_M2;
     results.(names{i}).M2.theta = theta_M2;
     results.(names{i}).M2.g     = g_M2;
 end
+ 
 
 %% ========================================================================
 %  Plot M2 tidal ellipses for each mooring
@@ -171,7 +214,9 @@ for i = 1:length(names)
         end
         [ex, ey] = tidal_ellipse_xy(Lsmaj(d), Lsmin(d), theta(d));
         plot(ex, ey, '-', 'Color', depthColors(d, :), 'LineWidth', 1.8);
-        legendEntries{end+1} = sprintf('%.1f m', depthBins(d)); %#ok<SAGROW>
+        xlim([-0.065 0.065])
+        ylim([-0.06 0.06])
+        legendEntries{end+1} = sprintf('%.1f m', depthBins(d)); 
     end
 
     title(strrep(names{i}, '_', '\_'));
@@ -180,7 +225,7 @@ for i = 1:length(names)
         legend(legendEntries, 'Location', 'best');
     end
 end
-sgtitle('M2 Tidal Current Ellipses by Mooring (shallow vs. deep bin)');
+sgtitle('M2 Tidal Current Ellipses by Mooring');
 
 %% ========================================================================
 %  Helper function: generate ellipse x,y points from UTide ellipse params

@@ -11,7 +11,7 @@ clear all, close all
 %% load in the SWIFT sig data from May to Jun
 
 % this is coming from the MayJun 2026 period
-
+% 
 SWIFT09_WWS = load('SWIFT09_SDcard_MayJun2026_SIG.mat');
 
 SWIFT18_WWN = load('SWIFT18_SDcard_MayJun2026_SIG.mat');
@@ -24,6 +24,19 @@ SWIFT28_LJN = load('SWIFT28_SDcard_MayJun2026_SIG.mat');
 
 SWIFT29_InS = load('SWIFT29_SDcard_MayJun2026_SIG.mat');
 
+
+
+% SWIFT09_WWS = load('SWIFT09_SDcard_MayJun2026_L2.mat');
+% 
+% SWIFT18_WWN = load('SWIFT18_SDcard_MayJun2026_L2.mat');
+% 
+% SWIFT26_InN = load('SWIFT26_SDcard_MayJun2026_L2.mat');
+% 
+% SWIFT27_LJS = load('SWIFT27_SDcard_MayJun2026_L2.mat');
+% 
+% SWIFT28_LJN = load('SWIFT28_SDcard_MayJun2026_L2.mat');
+% 
+% SWIFT29_InS = load('SWIFT29_SDcard_MayJun2026_L2.mat');
 
 % load in the tides data from May to June
 MayJun_tide = load('DuoTD_data_InnerNorth_MaytoJun2026_240150_cleaned_L2.mat');
@@ -217,12 +230,12 @@ end
 
 %% get the bins for those timestamps
 
-% I want the bins at 2.3 and 19.3 m depths. These are in the z matrix at 4
-% and 38
+% I want the bins at 2.3 and 15.3 m depths. These are in the z matrix at 4
+% and 30
 
 % Define the depth bins for the specified depths
-depthBins = [2.3, 19.3]; 
-depthIndices = [4, 38];  % Indices corresponding to the depth bins in the z matrix
+depthBins = [2, 15]; 
+depthIndices = [4, 30];  % Indices corresponding to the depth bins in the z matrix
 
 
 
@@ -250,7 +263,7 @@ sig2mooring = containers.Map(...
     {'WWS','WWN','InnerN','LovejoyS','LoveJoyN','InnerS'});
 
 % --- Depth bins for top/bottom ---
-depthIndices = [4, 38];     % [top, bottom] bin indices into profile.z
+depthIndices = [4, 30];     % [top, bottom] bin indices into profile.z
 % depthBins = [2.3, 19.3];  % corresponding depths (m), for reference/labeling
 
 % --- Extract top/bottom u,v at startTime and endTime for each SWIFT ---
@@ -277,10 +290,10 @@ end
 
 % --- Quiver scale factor ---
 scale = 0.05;
-top_color    = [0.18, 0.49, 0.80];
-bottom_color = [0.85, 0.33, 0.10];
+bottom_color    = [0.18, 0.49, 0.80];
+top_color = [0.85, 0.33, 0.10];
 top_style    = '-';
-bottom_style = '--';
+bottom_style = '-';
 linewidth    = 1.8;
 
 % Per-mooring label offsets [dlat, dlon] in degrees 
@@ -326,25 +339,25 @@ for i = 1:length(times)
 
         offset = label_offsets.(mname);
         text(ax, lat_m + offset(1), lon_m + offset(2), mname, ...
-            'FontSize', 8, 'Color', 'white', 'FontWeight', 'bold');
+            'FontSize', 8, 'Color', 'black', 'FontWeight', 'bold');
     end
 
     % --- Reference arrow ---
     ref_speed = 0.5;
-    ref_lat = lat_lim(1) + 0.003;
+    ref_lat = lat_lim(2) - 0.003;
     ref_lon = lon_lim(1) + 0.003;
     geo_quiver(ref_lat, ref_lon, 0, ref_speed * scale / cosd(ref_lat), ...
-        'white', '-', 2);
-    text(ax, ref_lat, ref_lon + ref_speed * scale / cosd(ref_lat) * 1.3, ...
+        'black', '-', 2);
+    text(ax, ref_lat, ref_lon + ref_speed * scale / cosd(ref_lat) * 1.05, ...
         sprintf('%.1f m/s', ref_speed), ...
-        'Color', 'white', 'FontSize', 8, 'FontWeight', 'bold');
+        'Color', 'black', 'FontSize', 10, 'FontWeight', 'bold');
 
     % --- Legend ---
     h_top_leg = geoplot(ax, NaN, NaN, 'Color', top_color, ...
         'LineStyle', top_style, 'LineWidth', linewidth);
     h_bot_leg = geoplot(ax, NaN, NaN, 'Color', bottom_color, ...
         'LineStyle', bottom_style, 'LineWidth', linewidth);
-    legend([h_top_leg, h_bot_leg], {'2m depth', '19m depth'}, ...
+    legend([h_top_leg, h_bot_leg], {'2m depth', '15m depth'}, ...
         'Location', 'northeast', 'TextColor', 'white', 'Color', [0.2 0.2 0.2]);
 
     title(ax, sprintf('Water Velocity — %s', timeLabels{i}), ...
@@ -365,20 +378,20 @@ disp(class(ax))
 
 % convert mooring coordinates from lat/lon to UTM
 
-utmstruct = defaultm('utm');
-utmstruct.zone = '10N';
-utmstruct.geoid = wgs84Ellipsoid;
-utmstruct = defaultm(utmstruct);
-
-[mooring_easting, mooring_northing] = projfwd(utmstruct, moorings(:,1), moorings(:,2));
+% utmstruct = defaultm('utm');
+% utmstruct.zone = '10N';
+% utmstruct.geoid = wgs84Ellipsoid;
+% utmstruct = defaultm(utmstruct);
+% 
+% [mooring_easting, mooring_northing] = projfwd(utmstruct, moorings(:,1), moorings(:,2));
 
 % --- Quiver scale factor: tune ---
 scale = 2000;
-top_color    = '#72e1e1';
-bottom_color = '#dd4124';
+bottom_color    = '#72e1e1';
+top_color = '#dd4124';
 top_style    = '-';
 bottom_style = '-';
-linewidth    = 2.5;
+linewidth    = 2;
 
 % Per-mooring label offsets [dEasting, dNorthing] in METERS — tune by eye
 label_offsets = struct();
@@ -390,9 +403,13 @@ label_offsets.InnerN   = [100, 100];
 label_offsets.InnerS   = [100, 100];
 
 for i = 1:length(times)
-    fig = openfig('PennCove_UTM_Map.fig');   
-    set(fig, 'Name', timeLabels{i}, 'NumberTitle', 'off');
-    ax = gca;
+    % fig = openfig('PennCove_UTM_Map.fig');   
+    % set(fig, 'Name', timeLabels{i}, 'NumberTitle', 'off');
+    % ax = gca;
+    % hold(ax, 'on');
+    ax = geoaxes;
+    geobasemap(ax, 'satellite');
+    geolimits(ax, lat_lim, lon_lim);
     hold(ax, 'on');
 
     for m = 1:length(mooring_names)
