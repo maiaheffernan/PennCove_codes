@@ -6,7 +6,7 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'Echo_CTD_21Jul2026.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_22Jul2026_flood.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 
@@ -73,7 +73,7 @@ end
 
 
 for i = 1:length(channel_name_list)
-    [rsk, spike] = RSKdespike(rsk,'channel',channel_name_list{i},'threshold',1,'windowLength',11,'action','nan', 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
+    [rsk, spike] = RSKdespike(rsk,'channel',channel_name_list{i},'threshold',2,'windowLength',11,'action','nan', 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
 end
 
 
@@ -237,12 +237,12 @@ saveas(gcf, "pcolor_quicklook_SalTempDO.png")
 
 %% saving
 
-save('Echo_CTD_MayAnd23Jun2026_TowYo_RSKdata_processed_L1.mat','rsk')
+save('Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat','rsk')
 
 data = rsk.data;
 channels = rsk.channels;
 
-save('Echo_CTD_MayAnd23Jun2026_TowYo_DataAndChannelsOnly_processed_L1.mat','data', 'channels')
+save('Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat','data', 'channels')
 
-save('Echo_CTD_MayAnd23Jun2026_TowYo_RSKdata_raw_L0.mat', 'raw')
+save('Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat', 'raw')
 

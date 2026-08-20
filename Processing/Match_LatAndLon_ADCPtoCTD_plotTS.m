@@ -7,16 +7,23 @@ clear all, close all
 
 %% load in the ADCP and casting data
 
-% from June detail
+% ---- from June detail ----
 
-ADCP_flood = load('Echo_ADCP_flood_cleaned_corrected.mat'); % flood
-ADCP_ebb = load('Echo_ADCP_ebb_cleaned_corrected.mat'); % ebb
+    % ADCP_flood = load('Echo_ADCP_flood_cleaned_corrected.mat'); % flood
+    % ADCP_ebb = load('Echo_ADCP_ebb_cleaned_corrected.mat'); % ebb
+    % 
+    % 
+    % CTD_flood = load('Echo_CTD_24Jun2026_FloodTowYo_DataAndChannelsOnly_processed_L1.mat');
+    % CTD_ebb = load('Echo_CTD_24Jun2026_EbbTowYo_DataAndChannelsOnly_processed_L1.mat');
 
 
-CTD_flood = load('Echo_CTD_24Jun2026_FloodTowYo_DataAndChannelsOnly_processed_L1.mat');
-CTD_ebb = load('Echo_CTD_24Jun2026_EbbTowYo_DataAndChannelsOnly_processed_L1.mat');
+% ---- from July detail ----
 
-
+% ADCP_flood = 
+% ADCP_ebb = 
+% 
+% CTD_flood = 
+% CTD_ebb = 
 %% find the ADCP timestamp that is closest to each ctd cast FLOOD
 
 % --- flood ---

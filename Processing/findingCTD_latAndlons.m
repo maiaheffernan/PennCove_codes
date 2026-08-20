@@ -9,8 +9,8 @@ clear all, close all
 
 % from June detail
 
-ADCP_flood = load('Echo_ADCP_flood_cleaned_corrected.mat'); % flood
-ADCP_ebb = load('Echo_ADCP_ebb_cleaned_corrected.mat'); % ebb
+ADCP_flood = load('Echo_ADCP_24June2026_flood_cleaned_corrected.mat'); % flood
+ADCP_ebb = load("/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/Echo_MayJun2026/ADCP/Echo_ADCP_24Jun2026_flood/Echo_ADCP_24June2026_ebb_cleaned_corrected.mat"); % ebb
 
 
 CTD_flood = load('Echo_CTD_24Jun2026_FloodTowYo_DataAndChannelsOnly_processed_L1.mat');
@@ -61,6 +61,7 @@ for i = 1:nCasts
     validIdx = find(~isnat(ts_dt), 1, 'first');
 
     if isempty(validIdx)
+        sprintf('whole cast is NaT, skip idx %d', validIdx)
         continue  % whole cast is NaT, skip (stays NaN/NaT)
     end
 
@@ -88,7 +89,7 @@ clear nLaps adcp_time adcp_lat adcp_lon adcp_datetime nCasts CTD_lat CTD_lon CTD
 
 % -- ebb --
 
-% 1. Concatenate ADCP time/lat/lon across all 8 laps
+% Concatenate ADCP time/lat/lon across all 8 laps
 nLaps = numel(ADCP_ebb.lapData);
 
 adcp_time = [];
@@ -128,6 +129,7 @@ for i = 1:nCasts
     validIdx = find(~isnat(ts_dt), 1, 'first');
 
     if isempty(validIdx)
+        sprintf('whole cast is NaT, skip idx %d', validIdx)
         continue  % whole cast is NaT, skip (stays NaN/NaT)
     end
 
@@ -142,7 +144,69 @@ for i = 1:nCasts
 
     CTD_ebb.data(i).lat = CTD_lat(i);
     CTD_ebb.data(i).lon = CTD_lon(i);
+
 end
+
+
+
+%% plot the tracks
+
+
+figure(1); clf; 
+
+s1 = subplot(2,1,1);
+hold on
+
+for ii = 1:numel(CTD_ebb.data)
+    ce(ii) = [CTD_ebb.data(ii).tstamp(10,:)];
+    scatter([CTD_ebb.data(ii).lon], [CTD_ebb.data(ii).lat], 10, ce(ii), 'filled');
+end
+
+    colormap('parula');
+    cb = colorbar;
+    cb.TickLabels = datestr(cb.Ticks, 'mm/dd HH:MM'); 
+    ylabel(cb, 'Time (UTC)');
+    ylabel('Latitude')
+    xlabel('Longitude')
+    title('June 24, 2026 CTD tracks')
+    subtitle('Ebb')
+
+
+
+s2 = subplot(2,1,2);
+hold on
+
+for iii = 1:numel(CTD_flood.data)
+    cf(iii) = [CTD_flood.data(iii).tstamp(10,:)];
+    scatter([CTD_flood.data(iii).lon], [CTD_flood.data(iii).lat], 10, cf(iii), 'filled');
+end
+    colormap('parula');
+    cb = colorbar;
+    cb.TickLabels = datestr(cb.Ticks, 'mm/dd HH:MM'); 
+    ylabel(cb, 'Time (UTC)');
+    ylabel('Latitude')
+    subtitle('Flood')
+
+
+% save figure
+
+targetFolder = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/TransectSurveys'; 
+fileName = 'Echo_surveyTracks_24June2026.png';
+fullPath = fullfile(targetFolder, fileName);
+
+saveas(gcf, fullPath);
+
+
+%% Save out those CTD lat and lon variables 
+
+% -- Flood lat and lon ---
+
+save Echo_CTD_24Jun2026_flood_L2_withlatlon CTD_flood
+
+
+% -- Ebb lat and lon ---
+
+save Echo_CTD_24Jun2026_ebb_L2_withlatlon CTD_ebb
 
 
 
@@ -190,6 +254,16 @@ for m = 1:nMoorings
         mooring_names{m}, nearest_cast_idx_flood(m), nearest_cast_dist_km_flood(m), ...
         CTD_lat_all_flood(nearest_cast_idx_flood(m)), CTD_lon_all_flood(nearest_cast_idx_flood(m)));
 end
+
+
+
+
+
+
+
+
+
+
 
 %% plot distances for flood 
 
@@ -298,80 +372,7 @@ grid on;
 
 
 
-%% make a TS diagram colored by DO at every mooring location for both the flood and the tide
 
-saveDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/PECS2026';
-
-
-
-
-% pull out salinity and temperature
-
-% salinity is channel 8, temp channel 2, DO mg/L is channel 14
-
-% Column indices into data.values
-col_temp = 2;
-col_sal  = 8;
-col_DO   = 14;
-col_seapress = 6;
-
-% Common color axis for DO across all plots
-allDO = [];
-for m = 1:nMoorings
-    allDO = [allDO; CTD_flood.data(nearest_cast_idx_flood(m)).values(:,col_DO)];
-    allDO = [allDO; CTD_ebb.data(nearest_cast_idx_ebb(m)).values(:,col_DO)];
-end
-DO_clim = [min(allDO, [], 'omitnan'), max(allDO, [], 'omitnan')];
-
-% Common T/S axis limits too, so all panels are directly comparable
-allT = []; allS = [];
-for m = 1:nMoorings
-    allT = [allT; CTD_flood.data(nearest_cast_idx_flood(m)).values(:,col_temp)];
-    allT = [allT; CTD_ebb.data(nearest_cast_idx_ebb(m)).values(:,col_temp)];
-    allS = [allS; CTD_flood.data(nearest_cast_idx_flood(m)).values(:,col_sal)];
-    allS = [allS; CTD_ebb.data(nearest_cast_idx_ebb(m)).values(:,col_sal)];
-end
-T_lim = [min(allT,[],'omitnan')-0.5, max(allT,[],'omitnan')+0.5];
-S_lim = [min(allS,[],'omitnan')-0.5, max(allS,[],'omitnan')+0.5];
-
-
-
-
-% === Individual TS diagrams, one figure per mooring per tide ===
-
-for m = 1:nMoorings
-
-    % ---- flood ----
-    castIdx = nearest_cast_idx_flood(m);
-    T  = CTD_flood.data(castIdx).values(:,col_temp);
-    SP = CTD_flood.data(castIdx).values(:,col_sal);
-    p  = CTD_flood.data(castIdx).values(:,col_seapress);
-    DO = CTD_flood.data(castIdx).values(:,col_DO);
-    castLat = CTD_flood.data(castIdx).lat;
-    castLon = CTD_flood.data(castIdx).lon;
-
-    fig = figure('Position',[100 100 600 500]);
-    plot_TS_panel(SP, T, p, castLon, castLat, DO, DO_clim, ...
-        sprintf('%s -- Flood', mooring_names{m}));
-    saveas(fig, fullfile(saveDir, sprintf('TS_%s_flood.png', mooring_names{m})));
-saveas(fig, fullfile(saveDir, sprintf('TS_%s_flood.fig', mooring_names{m})));
-
-    % ---- ebb ----
-    castIdx = nearest_cast_idx_ebb(m);
-    T  = CTD_ebb.data(castIdx).values(:,col_temp);
-    SP = CTD_ebb.data(castIdx).values(:,col_sal);
-    p  = CTD_ebb.data(castIdx).values(:,col_seapress);
-    DO = CTD_ebb.data(castIdx).values(:,col_DO);
-    castLat = CTD_ebb.data(castIdx).lat;
-    castLon = CTD_ebb.data(castIdx).lon;
-
-    fig = figure('Position',[100 100 600 500]);
-    plot_TS_panel(SP, T, p, castLon, castLat, DO, DO_clim, ...
-        sprintf('%s -- Ebb', mooring_names{m}));
-    saveas(fig, fullfile(saveDir, sprintf('TS_%s_ebb.png', mooring_names{m})));
-saveas(fig, fullfile(saveDir, sprintf('TS_%s_ebb.fig', mooring_names{m})));
-
-end
 
 
 %% haversine distance function

@@ -6,7 +6,7 @@
 
 clc, clear all, close all
 
-files = dir('Echo_ADCP_24Jun2026_ebb.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
+files = dir('Echo_ADCP_22Jul2026_flood.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
 
 for fi = 1:length(files),
 
@@ -44,7 +44,7 @@ depth = median ( [ AnBTDepthcmB1 AnBTDepthcmB2 AnBTDepthcmB3 AnBTDepthcmB4 ]' ) 
 allz = ones(length(time),1) * z ;
 alldepth = depth' * ones(1,length(z)) ;
 
-prune  = allz > (alldepth - 2);
+prune  = allz > (alldepth - 5); % alldepth-2 but let's see if a more strict cutoff helps
 
 east ( prune ) = NaN;
 north ( prune ) = NaN;

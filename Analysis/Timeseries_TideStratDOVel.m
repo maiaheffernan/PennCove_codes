@@ -556,9 +556,6 @@ s6 = nexttile;
 % --- Tile 3: bottom DO timeseries ---
 s7 = nexttile;
 
-    p10andhalf = plot(JunJul_bottomDO.TODO_data.InnerNorth.data.Datetime, ...
-               JunJul_bottomDO.TODO_data.InnerNorth.data.values(:,3), 'g-', 'LineWidth', 2);
-    hold on
     p10andthree = plot(JunJul_bottomDO.TODO_data.InnerSouth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.InnerSouth.data.values(:,3), 'm-', 'LineWidth', 2);
     hold on
@@ -566,8 +563,12 @@ s7 = nexttile;
     p9 = plot(JunJul_bottomDO.TODO_data.LoveJoyNorth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.LoveJoyNorth.data.values(:,3), 'c-', 'LineWidth', 2);
     hold on
+    p10andhalf = plot(JunJul_bottomDO.TODO_data.InnerNorth.data.Datetime, ...
+               JunJul_bottomDO.TODO_data.InnerNorth.data.values(:,3), 'LineStyle','-', 'Color','#009E00', 'LineWidth', 2);
+    
+    hold on
     p10 = plot(JunJul_bottomDO.TODO_data.LoveJoySouth.data.Datetime, ...
-               JunJul_bottomDO.TODO_data.LoveJoySouth.data.values(:,3), 'b-', 'LineWidth', 2);
+               JunJul_bottomDO.TODO_data.LoveJoySouth.data.values(:,3), 'LineStyle','-', 'Color','#FFBF00', 'LineWidth', 2);
 
     
     ylabel('Dissolved oxygen concentration (mg/L)');
@@ -655,6 +656,7 @@ s6 = nexttile;
 % --- Tile 3: bottom DO timeseries ---
 s7 = nexttile;
 
+
     p10andfour = plot(JunJul_bottomDO.TODO_data.InnerNorth.data.Datetime, ...
                JunJul_bottomDO.TODO_data.InnerNorth.data.values(:,3), 'g-', 'LineWidth', 2);
     xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
@@ -674,8 +676,14 @@ s7 = nexttile;
     hold on
 
     p10 = plot(JunJul_bottomDO.TODO_data.LoveJoySouth.data.Datetime, ...
-               JunJul_bottomDO.TODO_data.LoveJoySouth.data.values(:,3), 'b-', 'LineWidth', 2);
+               JunJul_bottomDO.TODO_data.LoveJoySouth.data.values(:,3), 'Color','#FFBF00', 'LineWidth', 2);
      xlim([datetime('2026-06-27 16:50'), datetime('2026-06-29 17:45')]);
+
+
+
+    xregion([datetime(2026, 06, 27, 21,00,00), datetime(2026, 06, 28, 05,00,00)]);
+    xregion([datetime(2026, 06, 28, 21,00,00), datetime(2026, 06, 29, 05,00,00)]);
+    xregion([datetime(2026, 06, 29, 21,00,00), datetime(2026, 06, 30, 05,00,00)]);
 
    
     ylabel('Dissolved oxygen concentration (mg/L)');

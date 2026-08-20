@@ -10,11 +10,12 @@ clear all, close all
 
 %% Step 1. load in the ADCP data from June transecting
 
-load Echo_ADCP_24Jun2026_ebb_cleaned.mat
+load Echo_ADCP_22Jul2026_flood_cleaned.mat
 
 %load Echo_ADCP_24Jun2026_flood_cleaned.mat
 
-%% find the different transects and locations
+%% find the diffe
+% trent transects and locations
 
 figure(1); clf;
 h= scatter(lon, lat, 15, time, 'filled'); 
@@ -45,18 +46,43 @@ datacursormode(gcf, 'on');
 
 % one row per transect line: [startIdx endIdx]
 
-% == ebb bounds ==
-lineBounds = [ ...
-    17,   34;
-    47, 125;
-    143, 162;
-    182, 258;
-    281, 301;
-    304, 324;
-    340, 420;
-    422, 497];   
+% == July 2026 ebb bounds ==
+% lineBounds = [ ...
+%     28,   120;
+%     144, 161;
+%     183, 255;
+%     274, 292;
+%     ];   
 
-% == flood bounds ==
+% == July 2026 flood bounds ==
+
+lineBounds = [ ...
+    53, 117;
+    156, 174;
+    205, 269;
+    304, 323;
+    351, 418;
+    464, 482;
+    508, 580;
+    631, 649;
+    674, 748;
+    770, 786;
+    814, 890];
+
+
+
+% == June 2026 ebb bounds ==
+% lineBounds = [ ...
+%     17,   34;
+%     47, 125;
+%     143, 162;
+%     182, 258;
+%     281, 301;
+%     304, 324;
+%     340, 420;
+%     422, 497];   
+
+% == June 2026 flood bounds ==
 
 % lineBounds = [ ...
 %     1, 80;
@@ -151,7 +177,7 @@ end
 
 clear dir_pts speed_pts cogMean valid R circStd % clear the values made in each iteration for a differen line
 
-lineNum = 8;  % <-- change to inspect a different line
+lineNum = 11;  % <-- change to inspect a different line
 
 dir_pts   = transectLines(lineNum).cogDir;
 speed_pts = transectLines(lineNum).cogSpeed;
@@ -183,7 +209,51 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 
 % === Book Keeping ===
 
-% Ebb tide
+% JULY ebb tide
+% Line 1: circular std of cogDir = 1.70 deg (mean COG = 263.40 deg)
+
+% Line 2: circular std of cogDir = 1.94 deg (mean COG = 174.63 deg)
+
+% Line 3: circular std of cogDir = 1.79 deg (mean COG = 83.60 deg)
+
+% Line 4: circular std of cogDir = 2.46 deg (mean COG = 354.39 deg)
+
+
+
+% JULY flood tide
+% Line 1: circular std of cogDir = 2.03 deg (mean COG = 263.21 deg)
+
+% Line 2: circular std of cogDir = 2.00 deg (mean COG = 173.81 deg)
+
+% Line 3: circular std of cogDir = 2.17 deg (mean COG = 83.42 deg)
+
+% Line 4: circular std of cogDir = 2.02 deg (mean COG = 354.06 deg)
+
+% Line 5: circular std of cogDir = 2.56 deg (mean COG = 83.36 deg)
+
+% Line 6: circular std of cogDir = 2.02 deg (mean COG = 173.23 deg)
+
+% Line 7: circular std of cogDir = 1.75 deg (mean COG = 263.37 deg)
+
+% Line 8: circular std of cogDir = 4.52 deg (mean COG = 354.49 deg)
+
+% Line 9: circular std of cogDir = 1.23 deg (mean COG = 83.55 deg)
+
+% Line 10: circular std of cogDir = 2.01 deg (mean COG = 173.74 deg)
+
+% Line 11: circular std of cogDir = 1.61 deg (mean COG = 83.60 deg)
+
+
+
+
+
+
+
+
+
+
+
+% JUNE ebb tide
 % Line 1: circular std of cogDir = 4.67 deg (mean COG = 186.96 deg)
 
 % Line 2: circular std of cogDir = 3.29 deg (mean COG = 84.33 deg)
@@ -201,7 +271,7 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 % Line 8: circular std of cogDir = 2.76 deg (mean COG = 262.89 deg)
 
 
-% Flood tide
+% JUNE flood tide
 % Line 1: circular std of cogDir = 3.61 deg (mean COG = 263.39 deg)
 
 % Line 2: circular std of cogDir = 10.29 deg (mean COG = 168.39 deg)
@@ -289,7 +359,7 @@ grid on;
 % they just have wobbly transect lines.
 %% compare COG to ensemble heading in the exported matlab files 
 
-load Echo_ADCP_24Jun2026_ebb.mat AnH100thDeg % heading information from the ADCP 
+load Echo_ADCP_22Jul2026_flood.mat AnH100thDeg % heading information from the ADCP 
 
 
 % the difference is the rotation correction
@@ -421,6 +491,7 @@ end
 
 %% Pcolor plots of corrected east/north velocity, per lap
 %
+
 % Requires lapData (from build_lap_velocity_struct.m) and cmocean
 
 nLines = length(lapData);
@@ -479,12 +550,30 @@ for k = 1:nLines
     allBottom = [allBottom; lapData(k).bottomTrack(:)];
 
     if k < nLines
-        % insert a one-row NaN gap at the midpoint of the turn between laps
-        gapTime = mean([lapData(k).time(end), lapData(k+1).time(1)]);
-        allTime   = [allTime;   gapTime];
-        allEast   = [allEast;   nan(1, size(allEast, 2))];
-        allNorth  = [allNorth;  nan(1, size(allNorth, 2))];
-        allBottom = [allBottom; NaN];
+        % insert NaN values adjacent to the real data on both sides of a
+        % leg so there is a gap between lines
+
+        tEnd   = lapData(k).time(end);
+        tStart = lapData(k+1).time(1);
+        eps_t  = 1/86400;   % 1 second expressed as a fraction of a day
+
+        gapTime1 = tEnd   + eps_t;    % just after lap k ends
+        gapTime2 = tStart - eps_t;    % just before lap k+1 starts
+
+        allTime   = [allTime;   gapTime1; gapTime2];
+        allEast   = [allEast;   nan(2, size(allEast, 2))];
+        allNorth  = [allNorth;  nan(2, size(allNorth, 2))];
+        allBottom = [allBottom; NaN; NaN];
+
+
+
+
+
+        % gapTime = mean([lapData(k).time(end), lapData(k+1).time(1)]);
+        % allTime   = [allTime;   gapTime];
+        % allEast   = [allEast;   nan(1, size(allEast, 2))];
+        % allNorth  = [allNorth;  nan(1, size(allNorth, 2))];
+        % allBottom = [allBottom; NaN];
     end
 end
 
@@ -566,7 +655,7 @@ disp(pairs);
 
 %save Echo_ADCP_flood_cleaned_corrected.mat lapData
 
-save Echo_ADCP_ebb_cleaned_corrected.mat lapData
+save Echo_ADCP_22Jul2023_ebb_cleaned_corrected.mat lapData
 
 
 %% === Functions === %%

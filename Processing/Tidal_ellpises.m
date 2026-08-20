@@ -196,7 +196,7 @@ end
 %  ========================================================================
 
 depthColors = [0.85 0.33 0.10;    % shallow bin -> orange
-               0.00 0.45 0.74];   % deep bin    -> blue
+               0.00 1 1];   % deep bin    -> blue  0.00 0.45 0.74]; 
 
 figure('Color', 'w', 'Position', [100 100 1200 700]);
 
@@ -207,23 +207,27 @@ for i = 1:length(names)
     Lsmin = results.(names{i}).M2.Lsmin;
     theta = results.(names{i}).M2.theta;
 
-    legendEntries = {};
+    %legendEntries = {};
     for d = 1:nDepths
         if isnan(Lsmaj(d))
             continue
         end
         [ex, ey] = tidal_ellipse_xy(Lsmaj(d), Lsmin(d), theta(d));
-        plot(ex, ey, '-', 'Color', depthColors(d, :), 'LineWidth', 1.8);
+        plot(ex, ey, '-', 'Color', depthColors(d, :), 'LineWidth', 3);
+        grid off;
+        axis off;
         xlim([-0.065 0.065])
         ylim([-0.06 0.06])
-        legendEntries{end+1} = sprintf('%.1f m', depthBins(d)); 
+        xticks([])
+        yticks([])
+        %legendEntries{end+1} = sprintf('%.1f m', depthBins(d)); 
     end
 
-    title(strrep(names{i}, '_', '\_'));
-    xlabel('East vel (cm/s)'); ylabel('North vel (cm/s)');
-    if ~isempty(legendEntries)
-        legend(legendEntries, 'Location', 'best');
-    end
+    %title(strrep(names{i}, '_', '\_'));
+    %xlabel('East vel (cm/s)'); ylabel('North vel (cm/s)');
+    % if ~isempty(legendEntries)
+    %     legend(legendEntries, 'Location', 'best');
+    % end
 end
 sgtitle('M2 Tidal Current Ellipses by Mooring');
 
