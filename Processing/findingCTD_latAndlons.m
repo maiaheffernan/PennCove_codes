@@ -9,12 +9,12 @@ clear all, close all
 
 % from June detail
 
-ADCP_flood = load('Echo_ADCP_24June2026_flood_cleaned_corrected.mat'); % flood
-ADCP_ebb = load("/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/Echo_MayJun2026/ADCP/Echo_ADCP_24Jun2026_flood/Echo_ADCP_24June2026_ebb_cleaned_corrected.mat"); % ebb
+ADCP_flood = load('Echo_ADCP_22Jul2026_flood_cleaned_corrected.mat'); % flood
+ADCP_ebb = load('Echo_ADCP_22Jul2026_ebb_cleaned_corrected.mat'); %ebb    % for June: ("/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/June2026/Data/Echo_MayJun2026/ADCP/Echo_ADCP_24Jun2026_flood/Echo_ADCP_24June2026_ebb_cleaned_corrected.mat"); % ebb
 
 
-CTD_flood = load('Echo_CTD_24Jun2026_FloodTowYo_DataAndChannelsOnly_processed_L1.mat');
-CTD_ebb = load('Echo_CTD_24Jun2026_EbbTowYo_DataAndChannelsOnly_processed_L1.mat');
+CTD_ebb = load('Echo_CTD_21Jul2026_and_22Jul2026ebb_TowYo_DataAndChannelsOnly_processed_L1.mat');
+CTD_flood = load('Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat');
 
 
 %% find the ADCP timestamp that is closest to each ctd cast FLOOD
@@ -201,12 +201,12 @@ saveas(gcf, fullPath);
 
 % -- Flood lat and lon ---
 
-save Echo_CTD_24Jun2026_flood_L2_withlatlon CTD_flood
+save Echo_CTD_22Jul2026_flood_L2_withlatlon CTD_flood
 
 
 % -- Ebb lat and lon ---
 
-save Echo_CTD_24Jun2026_ebb_L2_withlatlon CTD_ebb
+save Echo_CTD_22Jul2026_ebb_L2_withlatlon CTD_ebb
 
 
 
@@ -214,163 +214,163 @@ save Echo_CTD_24Jun2026_ebb_L2_withlatlon CTD_ebb
 
 
 % define moorings
-moorings_locs = [
-    48.229776, -122.641600; % WWS
-    48.241762, -122.625453; % WWN
-    48.235081, -122.670354; % LoveJoyN
-    48.227576, -122.669771; % LovejoyS
-    48.232424, -122.703108; % InnerN
-    48.224669, -122.702241; % InnerS
-    ];
-
-% Mooring names
-mooring_names = {'WWS', 'WWN', 'LoveJoyN', 'LovejoyS', 'InnerN', 'InnerS'};
-
-nMoorings = size(moorings_locs, 1);
-
-% Pull CTD lat/lon into simple vectors for easy indexing
-CTD_lat_all_flood = [CTD_flood.data.lat]';
-CTD_lon_all_flood = [CTD_flood.data.lon]';
-
-nearest_cast_idx_flood = nan(nMoorings, 1);
-nearest_cast_dist_km_flood = nan(nMoorings, 1);
-
-for m = 1:nMoorings
-    m_lat = moorings_locs(m, 1);
-    m_lon = moorings_locs(m, 2);
-
-    % Distance from this mooring to every CTD cast (haversine, in km)
-    dist_km = haversine_km(m_lat, m_lon, CTD_lat_all_flood, CTD_lon_all_flood);
-
-    [minDist, idx] = min(dist_km);
-
-    nearest_cast_idx_flood(m) = idx;
-    nearest_cast_dist_km_flood(m) = minDist;
-end
-
-% Display results
-for m = 1:nMoorings
-    fprintf('%s: nearest cast #%d, %.3f km away (lat=%.5f, lon=%.5f)\n', ...
-        mooring_names{m}, nearest_cast_idx_flood(m), nearest_cast_dist_km_flood(m), ...
-        CTD_lat_all_flood(nearest_cast_idx_flood(m)), CTD_lon_all_flood(nearest_cast_idx_flood(m)));
-end
-
-
-
-
-
-
-
-
-
-
-
-%% plot distances for flood 
-
-figure; hold on; box on;
-
-% Plot all CTD casts (light gray, for context)
-plot(CTD_lon_all_flood, CTD_lat_all_flood, '.', 'Color', [0.7 0.7 0.7], ...
-    'MarkerSize', 8, 'DisplayName', 'All CTD casts');
-
-% Plot moorings
-plot(moorings_locs(:,2), moorings_locs(:,1), '^', ...
-    'MarkerSize', 10, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k', ...
-    'DisplayName', 'Moorings');
-
-% Plot nearest cast to each mooring
-plot(CTD_lon_all_flood(nearest_cast_idx_flood), CTD_lat_all_flood(nearest_cast_idx_flood), 'o', ...
-    'MarkerSize', 10, 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k', ...
-    'DisplayName', 'Nearest cast');
-
-% Draw a line connecting each mooring to its nearest cast
-for m = 1:nMoorings
-    plot([moorings_locs(m,2), CTD_lon_all_flood(nearest_cast_idx_flood(m))], ...
-         [moorings_locs(m,1), CTD_lat_all_flood(nearest_cast_idx_flood(m))], ...
-         'k--', 'HandleVisibility', 'off');
-end
-
-% Label mooring names
-for m = 1:nMoorings
-    text(moorings_locs(m,2), moorings_locs(m,1), ['  ' mooring_names{m}], ...
-        'FontSize', 9, 'FontWeight', 'bold');
-end
-
-xlabel('Longitude');
-ylabel('Latitude');
-title('Mooring Locations and Nearest CTD Casts from the flood on June 24');
-legend('Location', 'best');
-axis equal;
-grid on;
-
-
-%% Do the same for the ebb
-% Pull CTD lat/lon into simple vectors for easy indexing
-CTD_lat_all_ebb = [CTD_ebb.data.lat]';
-CTD_lon_all_ebb = [CTD_ebb.data.lon]';
-
-nearest_cast_idx_ebb = nan(nMoorings, 1);
-nearest_cast_dist_km_ebb = nan(nMoorings, 1);
-
-for m = 1:nMoorings
-    m_lat = moorings_locs(m, 1);
-    m_lon = moorings_locs(m, 2);
-
-    % Distance from this mooring to every CTD cast (haversine, in km)
-    dist_km = haversine_km(m_lat, m_lon, CTD_lat_all_ebb, CTD_lon_all_ebb);
-
-    [minDist, idx] = min(dist_km);
-
-    nearest_cast_idx_ebb(m) = idx;
-    nearest_cast_dist_km_ebb(m) = minDist;
-end
-
-% Display results
-for m = 1:nMoorings
-    fprintf('%s: nearest cast #%d, %.3f km away (lat=%.5f, lon=%.5f)\n', ...
-        mooring_names{m}, nearest_cast_idx_ebb(m), nearest_cast_dist_km_ebb(m), ...
-        CTD_lat_all_ebb(nearest_cast_idx_ebb(m)), CTD_lon_all_ebb(nearest_cast_idx_ebb(m)));
-end
-
-%% plot distances for flood 
-
-figure; hold on; box on;
-
-% Plot all CTD casts (light gray, for context)
-plot(CTD_lon_all_ebb, CTD_lat_all_ebb, '.', 'Color', [0.7 0.7 0.7], ...
-    'MarkerSize', 8, 'DisplayName', 'All CTD casts');
-
-% Plot moorings
-plot(moorings_locs(:,2), moorings_locs(:,1), '^', ...
-    'MarkerSize', 10, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k', ...
-    'DisplayName', 'Moorings');
-
-% Plot nearest cast to each mooring
-plot(CTD_lon_all_ebb(nearest_cast_idx_ebb), CTD_lat_all_ebb(nearest_cast_idx_ebb), 'o', ...
-    'MarkerSize', 10, 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k', ...
-    'DisplayName', 'Nearest cast');
-
-% Draw a line connecting each mooring to its nearest cast
-for m = 1:nMoorings
-    plot([moorings_locs(m,2), CTD_lon_all_ebb(nearest_cast_idx_ebb(m))], ...
-         [moorings_locs(m,1), CTD_lat_all_ebb(nearest_cast_idx_ebb(m))], ...
-         'k--', 'HandleVisibility', 'off');
-end
-
-% Label mooring names
-for m = 1:nMoorings
-    text(moorings_locs(m,2), moorings_locs(m,1), ['  ' mooring_names{m}], ...
-        'FontSize', 9, 'FontWeight', 'bold');
-end
-
-xlabel('Longitude');
-ylabel('Latitude');
-title('Mooring Locations and Nearest CTD Casts from the flood on June 24');
-legend('Location', 'best');
-axis equal;
-grid on;
-
-
+% moorings_locs = [
+%     48.229776, -122.641600; % WWS
+%     48.241762, -122.625453; % WWN
+%     48.235081, -122.670354; % LoveJoyN
+%     48.227576, -122.669771; % LovejoyS
+%     48.232424, -122.703108; % InnerN
+%     48.224669, -122.702241; % InnerS
+%     ];
+% 
+% % Mooring names
+% mooring_names = {'WWS', 'WWN', 'LoveJoyN', 'LovejoyS', 'InnerN', 'InnerS'};
+% 
+% nMoorings = size(moorings_locs, 1);
+% 
+% % Pull CTD lat/lon into simple vectors for easy indexing
+% CTD_lat_all_flood = [CTD_flood.data.lat]';
+% CTD_lon_all_flood = [CTD_flood.data.lon]';
+% 
+% nearest_cast_idx_flood = nan(nMoorings, 1);
+% nearest_cast_dist_km_flood = nan(nMoorings, 1);
+% 
+% for m = 1:nMoorings
+%     m_lat = moorings_locs(m, 1);
+%     m_lon = moorings_locs(m, 2);
+% 
+%     % Distance from this mooring to every CTD cast (haversine, in km)
+%     dist_km = haversine_km(m_lat, m_lon, CTD_lat_all_flood, CTD_lon_all_flood);
+% 
+%     [minDist, idx] = min(dist_km);
+% 
+%     nearest_cast_idx_flood(m) = idx;
+%     nearest_cast_dist_km_flood(m) = minDist;
+% end
+% 
+% % Display results
+% for m = 1:nMoorings
+%     fprintf('%s: nearest cast #%d, %.3f km away (lat=%.5f, lon=%.5f)\n', ...
+%         mooring_names{m}, nearest_cast_idx_flood(m), nearest_cast_dist_km_flood(m), ...
+%         CTD_lat_all_flood(nearest_cast_idx_flood(m)), CTD_lon_all_flood(nearest_cast_idx_flood(m)));
+% end
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% 
+% %% plot distances for flood 
+% 
+% figure; hold on; box on;
+% 
+% % Plot all CTD casts (light gray, for context)
+% plot(CTD_lon_all_flood, CTD_lat_all_flood, '.', 'Color', [0.7 0.7 0.7], ...
+%     'MarkerSize', 8, 'DisplayName', 'All CTD casts');
+% 
+% % Plot moorings
+% plot(moorings_locs(:,2), moorings_locs(:,1), '^', ...
+%     'MarkerSize', 10, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k', ...
+%     'DisplayName', 'Moorings');
+% 
+% % Plot nearest cast to each mooring
+% plot(CTD_lon_all_flood(nearest_cast_idx_flood), CTD_lat_all_flood(nearest_cast_idx_flood), 'o', ...
+%     'MarkerSize', 10, 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k', ...
+%     'DisplayName', 'Nearest cast');
+% 
+% % Draw a line connecting each mooring to its nearest cast
+% for m = 1:nMoorings
+%     plot([moorings_locs(m,2), CTD_lon_all_flood(nearest_cast_idx_flood(m))], ...
+%          [moorings_locs(m,1), CTD_lat_all_flood(nearest_cast_idx_flood(m))], ...
+%          'k--', 'HandleVisibility', 'off');
+% end
+% 
+% % Label mooring names
+% for m = 1:nMoorings
+%     text(moorings_locs(m,2), moorings_locs(m,1), ['  ' mooring_names{m}], ...
+%         'FontSize', 9, 'FontWeight', 'bold');
+% end
+% 
+% xlabel('Longitude');
+% ylabel('Latitude');
+% title('Mooring Locations and Nearest CTD Casts from the flood on June 24');
+% legend('Location', 'best');
+% axis equal;
+% grid on;
+% 
+% 
+% %% Do the same for the ebb
+% % Pull CTD lat/lon into simple vectors for easy indexing
+% CTD_lat_all_ebb = [CTD_ebb.data.lat]';
+% CTD_lon_all_ebb = [CTD_ebb.data.lon]';
+% 
+% nearest_cast_idx_ebb = nan(nMoorings, 1);
+% nearest_cast_dist_km_ebb = nan(nMoorings, 1);
+% 
+% for m = 1:nMoorings
+%     m_lat = moorings_locs(m, 1);
+%     m_lon = moorings_locs(m, 2);
+% 
+%     % Distance from this mooring to every CTD cast (haversine, in km)
+%     dist_km = haversine_km(m_lat, m_lon, CTD_lat_all_ebb, CTD_lon_all_ebb);
+% 
+%     [minDist, idx] = min(dist_km);
+% 
+%     nearest_cast_idx_ebb(m) = idx;
+%     nearest_cast_dist_km_ebb(m) = minDist;
+% end
+% 
+% % Display results
+% for m = 1:nMoorings
+%     fprintf('%s: nearest cast #%d, %.3f km away (lat=%.5f, lon=%.5f)\n', ...
+%         mooring_names{m}, nearest_cast_idx_ebb(m), nearest_cast_dist_km_ebb(m), ...
+%         CTD_lat_all_ebb(nearest_cast_idx_ebb(m)), CTD_lon_all_ebb(nearest_cast_idx_ebb(m)));
+% end
+% 
+% %% plot distances for flood 
+% 
+% figure; hold on; box on;
+% 
+% % Plot all CTD casts (light gray, for context)
+% plot(CTD_lon_all_ebb, CTD_lat_all_ebb, '.', 'Color', [0.7 0.7 0.7], ...
+%     'MarkerSize', 8, 'DisplayName', 'All CTD casts');
+% 
+% % Plot moorings
+% plot(moorings_locs(:,2), moorings_locs(:,1), '^', ...
+%     'MarkerSize', 10, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k', ...
+%     'DisplayName', 'Moorings');
+% 
+% % Plot nearest cast to each mooring
+% plot(CTD_lon_all_ebb(nearest_cast_idx_ebb), CTD_lat_all_ebb(nearest_cast_idx_ebb), 'o', ...
+%     'MarkerSize', 10, 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'k', ...
+%     'DisplayName', 'Nearest cast');
+% 
+% % Draw a line connecting each mooring to its nearest cast
+% for m = 1:nMoorings
+%     plot([moorings_locs(m,2), CTD_lon_all_ebb(nearest_cast_idx_ebb(m))], ...
+%          [moorings_locs(m,1), CTD_lat_all_ebb(nearest_cast_idx_ebb(m))], ...
+%          'k--', 'HandleVisibility', 'off');
+% end
+% 
+% % Label mooring names
+% for m = 1:nMoorings
+%     text(moorings_locs(m,2), moorings_locs(m,1), ['  ' mooring_names{m}], ...
+%         'FontSize', 9, 'FontWeight', 'bold');
+% end
+% 
+% xlabel('Longitude');
+% ylabel('Latitude');
+% title('Mooring Locations and Nearest CTD Casts from the flood on June 24');
+% legend('Location', 'best');
+% axis equal;
+% grid on;
+% 
+% 
 
 
 

@@ -10,12 +10,11 @@ clear all, close all
 
 %% Step 1. load in the ADCP data from June transecting
 
-load Echo_ADCP_22Jul2026_flood_cleaned.mat
+load Echo_ADCP_22Jul2026_ebb_cleaned.mat
 
 %load Echo_ADCP_24Jun2026_flood_cleaned.mat
 
-%% find the diffe
-% trent transects and locations
+%% find the diffetrent transects and locations
 
 figure(1); clf;
 h= scatter(lon, lat, 15, time, 'filled'); 
@@ -47,27 +46,27 @@ datacursormode(gcf, 'on');
 % one row per transect line: [startIdx endIdx]
 
 % == July 2026 ebb bounds ==
-% lineBounds = [ ...
-%     28,   120;
-%     144, 161;
-%     183, 255;
-%     274, 292;
-%     ];   
+lineBounds = [ ...
+    28,   120;
+    144, 161;
+    183, 255;
+    274, 292;
+    ];   
 
 % == July 2026 flood bounds ==
 
-lineBounds = [ ...
-    53, 117;
-    156, 174;
-    205, 269;
-    304, 323;
-    351, 418;
-    464, 482;
-    508, 580;
-    631, 649;
-    674, 748;
-    770, 786;
-    814, 890];
+% lineBounds = [ ...
+%     53, 117;
+%     156, 174;
+%     205, 269;
+%     304, 323;
+%     351, 418;
+%     464, 482;
+%     508, 580;
+%     631, 649;
+%     674, 748;
+%     770, 786;
+%     814, 890];
 
 
 
@@ -177,7 +176,7 @@ end
 
 clear dir_pts speed_pts cogMean valid R circStd % clear the values made in each iteration for a differen line
 
-lineNum = 11;  % <-- change to inspect a different line
+lineNum = 3;  % <-- change to inspect a different line
 
 dir_pts   = transectLines(lineNum).cogDir;
 speed_pts = transectLines(lineNum).cogSpeed;
@@ -308,7 +307,7 @@ title('Speed over ground -- compare low-speed points against direction jitter ab
 
 
 % Pinpoint a turn/kink hiding inside a manually-defined transect line
-lineNum = 8;  % <-- the suspect line
+lineNum = 3;  % <-- the suspect line
 
 lat_l  = transectLines(lineNum).lat;
 lon_l  = transectLines(lineNum).lon;
@@ -359,7 +358,7 @@ grid on;
 % they just have wobbly transect lines.
 %% compare COG to ensemble heading in the exported matlab files 
 
-load Echo_ADCP_22Jul2026_flood.mat AnH100thDeg % heading information from the ADCP 
+load Echo_ADCP_22Jul2026_ebb.mat AnH100thDeg % heading information from the ADCP 
 
 
 % the difference is the rotation correction
