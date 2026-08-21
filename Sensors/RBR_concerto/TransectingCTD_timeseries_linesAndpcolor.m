@@ -42,80 +42,58 @@ ADCP_data_flood = load('Echo_ADCP_22Jul2026_flood_cleaned_corrected.mat'); % hea
 
 
 
-tol = 30; % tolerance window in seconds for finding the closest CTD cast with ADCP reading
+tol = seconds(120); % tolerance window
 
-matchedCTD_ebb = struct('line', {}, 'casts', {}, 'nCasts', {});
+matchedCTD_ebb = struct('line', {}, 'casts', {}, 'castTimes', {}, 'nCasts', {});
 
 % ---- Ebb ----
-
-% pull out the line timestamps from the ADCP
-
 for i = 1:length(ADCP_data_ebb.lapData)
-    timestamps_ebb = ADCP_data_ebb.lapData(i).time; % Extract timestamps for the current transect line
-    matches_ebb = []; % matched CTD casts for this line
-    matchTimes_ebb = [];   % first valid timestamp for each matched CTD cast
-
-    % -- find first timestep in each CTD cast -- %
-
+    timestamps_ebb = datetime(ADCP_data_ebb.lapData(i).time, 'ConvertFrom', 'datenum'); % adjust if not datenum
+    matches_ebb = [];
+    matchTimes_ebb = datetime.empty(0,1); % empty datetime array,
     for j = 1:length(CTD_data_ebb.CTD_ebb.data)
-        tstamps = CTD_data_ebb.CTD_ebb.data(j).tstamp;
+        tstamps_ebb = CTD_data_ebb.CTD_ebb.data(j).tstamp;
 
-        % find the first non-NaN timestamp in this CTD cast
-        firstValidValue = NaN;
-        for k = 1:length(tstamps)
-            if ~isnan(tstamps(k))
-                firstValidValue = tstamps(k);
+        firstValidValue_ebb = NaN;
+        for k = 1:length(tstamps_ebb)
+            if ~isnan(tstamps_ebb(k))
+                firstValidValue_ebb = tstamps_ebb(k);
                 break;
             end
         end
-
-        if isnan(firstValidValue)
-            continue % skip casts with no valid timestamp at all
+        if isnan(firstValidValue_ebb)
+            continue
         end
 
+        firstValidValue_dt = datetime(firstValidValue_ebb, 'ConvertFrom', 'datenum'); % adjust if not datenum
 
-      % -- find how close this cast's timestamp is to any ADCP time on this
-      % line --
-
-
-        minDiff = min(abs(timestamps_ebb - firstValidValue));
-
+        minDiff = min(abs(timestamps_ebb - firstValidValue_dt)); % this is now a duration
         if minDiff <= tol
-            matches_ebb = [matches_ebb, CTD_data_ebb.CTD_ebb.data(j)]; 
-            matchTimes_ebb = [matchTimes_ebb, firstValidValue];
+            matches_ebb = [matches_ebb, CTD_data_ebb.CTD_ebb.data(j)];
+            matchTimes_ebb = [matchTimes_ebb, firstValidValue_dt];
         end
     end
 
-    % -- store everything for this line as one struct entry --
-    matchedCTD_ebb(i).line   = i;
-    matchedCTD_ebb(i).casts  = matches_ebb;
+    matchedCTD_ebb(i).line      = i;
+    matchedCTD_ebb(i).casts     = matches_ebb;
     matchedCTD_ebb(i).castTimes = matchTimes_ebb;
-    matchedCTD_ebb(i).nCasts = length(matches_ebb);
+    matchedCTD_ebb(i).nCasts    = length(matches_ebb);
 end
 
-% --- clear the i, j, k tickers for the flood --- 
-clear i j k
+%% --- clear the i, j, k tickers for the flood --- 
+clear i j k minDiff
 % ---------------------
 
 % --- Flood ---
 
-
-matchedCTD_flood = struct('line', {}, 'casts', {}, 'nCasts', {});
-
-
-% pull out the line timestamps from the ADCP
-
+matchedCTD_flood = struct('line', {}, 'casts', {}, 'castTimes', {}, 'nCasts', {});
+% ---- Flood ----
 for i = 1:length(ADCP_data_flood.lapData)
-    timestamps_flood = ADCP_data_flood.lapData(i).time; % Extract timestamps for the current transect line
-    matches_flood = []; % matched CTD casts for this line
-    matchTimes_flood = [];   % first valid timestamp for each matched CTD cast
-
-    % -- find first timestep in each CTD cast -- %
-
+    timestamps_flood = datetime(ADCP_data_flood.lapData(i).time, 'ConvertFrom', 'datenum'); % adjust if not datenum
+    matches_flood = [];
+    matchTimes_flood = datetime.empty(0,1); % empty datetime array,
     for j = 1:length(CTD_data_flood.CTD_flood.data)
         tstamps_flood = CTD_data_flood.CTD_flood.data(j).tstamp;
-
-        % find the first non-NaN timestamp in this CTD cast
         firstValidValue_flood = NaN;
         for k = 1:length(tstamps_flood)
             if ~isnan(tstamps_flood(k))
@@ -123,38 +101,28 @@ for i = 1:length(ADCP_data_flood.lapData)
                 break;
             end
         end
-
         if isnan(firstValidValue_flood)
-            continue % skip casts with no valid timestamp at all
+            continue
         end
-
-
-      % -- find how close this cast's timestamp is to any ADCP time on this
-      % line --
-
-
-        minDiff = min(abs(timestamps_flood - firstValidValue_flood));
-
+        firstValidValue_dt = datetime(firstValidValue_flood, 'ConvertFrom', 'datenum'); % adjust if not datenum
+        minDiff = min(abs(timestamps_flood - firstValidValue_dt)); % this is now a duration
         if minDiff <= tol
-            matches_flood = [matches_flood, CTD_data_flood.CTD_flood.data(j)]; 
-            matchTimes_flood = [matchTimes_flood, firstValidValue_flood];
+            matches_flood = [matches_flood, CTD_data_flood.CTD_flood.data(j)];
+            matchTimes_flood = [matchTimes_flood, firstValidValue_dt];
         end
     end
-
-    % -- store everything for this line as one struct entry --
-    matchedCTD_flood(i).line   = i;
-    matchedCTD_flood(i).casts  = matches_flood;
+    matchedCTD_flood(i).line      = i;
+    matchedCTD_flood(i).casts     = matches_flood;
     matchedCTD_flood(i).castTimes = matchTimes_flood;
-    matchedCTD_flood(i).nCasts = length(matches_flood);
+    matchedCTD_flood(i).nCasts    = length(matches_flood);
 end
-
 
 %% Plot the ebb transect timeseries with the transect line colored by time
 
 
-cmap_sal = cmocean('haline');
+cmap_sal = cmocean('-haline');
 cmap_temp = cmocean('thermal');
-cmap_do = cmocean('oxy');
+cmap_do = cmocean('-matter');
 
 
 % column indices within the "values" matrix
@@ -167,19 +135,14 @@ col_do    = 14;
 % the ebb data has data from the previous two trips, so this is the first
 % index number that has ONLY the casts from the 22 of July 2026 which is
 % the day I want
-startIdx = 36;
+dayStart = datetime(2026, 7, 22); 
 
+for ii = 1:3   %length(matchedCTD_ebb)
+    keepIdx = matchedCTD_ebb(ii).castTimes >= dayStart;
 
-% plotting
-
-for ii = 1:length(matchedCTD_ebb)
-    casts     = matchedCTD_ebb(ii).casts(startIdx:end);
-    castTimes = matchedCTD_ebb(ii).castTimes(startIdx:end);
+    casts     = matchedCTD_ebb(ii).casts(keepIdx);
+    castTimes = matchedCTD_ebb(ii).castTimes(keepIdx);
     nCasts    = length(casts);
-
-    if nCasts == 0
-        continue % nothing to plot for this line
-    end
 
     % --- preallocate matrices for easy calling in the plot ---
     nRows   = size(casts(1).values, 1); % 560
@@ -206,12 +169,13 @@ for ii = 1:length(matchedCTD_ebb)
     pcolor(castTimes, depthVec, tempMat); shading flat
     set(s1, 'YDir', 'reverse')
     colormap(s1, cmap_temp); colorbar
-    ylabel('Depth (m)'); title(sprintf('Line %d: Temperature', ii))
+    ylabel('Depth (m)'); title(sprintf('July 22, 2024 ebb line %d: Temperature', ii))
 
     s2 = subplot(4,1,2);
     pcolor(castTimes, depthVec, salMat); shading flat
     set(s2, 'YDir', 'reverse')
     colormap(s2, cmap_sal); colorbar
+    clim([6 25])
     ylabel('Depth (m)'); title('Salinity')
 
     s3 = subplot(4,1,3);
@@ -221,10 +185,300 @@ for ii = 1:length(matchedCTD_ebb)
     ylabel('Depth (m)'); title('Dissolved Oxygen')
 
     s4 = subplot(4,1,4);
-    scatter(lonVals, latVals, 60, castTimes, 'filled')
-    colormap(s4, parula); colorbar
+    colorVals = minutes(castTimes - castTimes(1)); % elapsed seconds since first cast in this line
+    scatter(lonVals, latVals, 60, colorVals, 'filled')
+    colormap(s4, parula)
+    cb = colorbar;
+    cb.Label.String = 'Time elapsed since start of lap (s)';
+    xlim([-122.7 -122.63])
+    ylim([48.22 48.24])
     xlabel('Longitude'); ylabel('Latitude'); title('Cast track (colored by time)')
 
 end
 %% plot the flood transect timeseries with the transect line colore by time
 
+cmap_sal  = cmocean('-haline');
+cmap_temp = cmocean('thermal');
+cmap_do   = cmocean('-matter');
+
+% column indices within the "values" matrix
+col_temp  = 2;
+col_depth = 7;
+col_sal   = 8;
+col_do    = 14;
+
+dayStart = datetime(2026, 7, 22); % the day you want
+
+for ii = 1:7        %length(matchedCTD_flood)
+    keepIdx = matchedCTD_flood(ii).castTimes >= dayStart;
+    casts     = matchedCTD_flood(ii).casts(keepIdx);
+    castTimes = matchedCTD_flood(ii).castTimes(keepIdx);
+    nCasts    = length(casts);
+
+    if nCasts == 0
+        continue % nothing to plot for this line
+    end
+
+    % --- preallocate matrices for easy calling in the plot ---
+    nRows   = size(casts(1).values, 1); % 560
+    salMat  = NaN(nRows, nCasts);
+    tempMat = NaN(nRows, nCasts);
+    doMat   = NaN(nRows, nCasts);
+    lonVals = NaN(1, nCasts);
+    latVals = NaN(1, nCasts);
+
+    for m = 1:nCasts
+        tempMat(:, m) = casts(m).values(:, col_temp);
+        salMat(:, m)  = casts(m).values(:, col_sal);
+        doMat(:, m)   = casts(m).values(:, col_do);
+        lonVals(m)    = casts(m).lon;
+        latVals(m)    = casts(m).lat;
+    end
+    depthVec = casts(1).values(:, col_depth);
+
+    % --- plot ---
+    figure(ii + 10) % offset so flood figures don't overwrite ebb figures (1-3)
+    s1 = subplot(4,1,1);
+    pcolor(castTimes, depthVec, tempMat); shading flat
+    set(s1, 'YDir', 'reverse')
+    colormap(s1, cmap_temp); colorbar
+    ylabel('Depth (m)'); title(sprintf('July 22, 2024 flood line %d: Temperature', ii))
+
+    s2 = subplot(4,1,2);
+    pcolor(castTimes, depthVec, salMat); shading flat
+    set(s2, 'YDir', 'reverse')
+    colormap(s2, cmap_sal); colorbar
+    clim([6 25])
+    ylabel('Depth (m)'); title('Salinity')
+
+    s3 = subplot(4,1,3);
+    pcolor(castTimes, depthVec, doMat); shading flat
+    set(s3, 'YDir', 'reverse')
+    colormap(s3, cmap_do); colorbar
+    ylabel('Depth (m)'); title('Dissolved Oxygen')
+
+    s4 = subplot(4,1,4);
+    colorVals = minutes(castTimes - castTimes(1)); % elapsed minutes since start of lap
+    scatter(lonVals, latVals, 60, colorVals, 'filled')
+    colormap(s4, parula)
+    cb = colorbar;
+    cb.Label.String = 'Time elapsed since start of lap (min)';
+    xlim([-122.7 -122.63])
+    ylim([48.22 48.24])
+    xlabel('Longitude'); ylabel('Latitude'); title('Cast track (colored by time)')
+end
+
+
+%% ebb vertical profiles colored by time elapsed in the lap timeseries
+
+% column indices within the "values" matrix
+col_temp  = 2;
+col_depth = 7;
+col_sal   = 8;
+col_do    = 14;
+
+% wiggle scale factors — tune separately per variable
+scaleT  = 1;
+scaleS  = 1;
+scaleDO = 1;
+
+dayStart = datetime(2026, 7, 22); % the day you want
+
+for ii = 1:length(matchedCTD_ebb)
+    keepIdx = matchedCTD_ebb(ii).castTimes >= dayStart;
+    casts     = matchedCTD_ebb(ii).casts(keepIdx);
+    castTimes = matchedCTD_ebb(ii).castTimes(keepIdx);
+    nCasts    = length(casts);
+
+    if nCasts == 0
+        continue % nothing to plot for this line
+    end
+
+    % --- preallocate matrices ---
+    nRows   = size(casts(1).values, 1);
+    salMat  = NaN(nRows, nCasts);
+    tempMat = NaN(nRows, nCasts);
+    doMat   = NaN(nRows, nCasts);
+    lonVals = NaN(1, nCasts);
+    latVals = NaN(1, nCasts);
+
+    for m = 1:nCasts
+        tempMat(:, m) = casts(m).values(:, col_temp);
+        salMat(:, m)  = casts(m).values(:, col_sal);
+        doMat(:, m)   = casts(m).values(:, col_do);
+        lonVals(m)    = casts(m).lon;
+        latVals(m)    = casts(m).lat;
+    end
+    depthVec = casts(1).values(:, col_depth);
+
+    % --- elapsed time + per-cast colors ---
+    timeNum = minutes(castTimes - castTimes(1)); % elapsed minutes since first cast in this line
+
+    cmap = parula(256);
+    tNorm = (timeNum - min(timeNum)) / (max(timeNum) - min(timeNum));
+    tNorm(isnan(tNorm)) = 0; % guard against single-cast lines
+    colorIdx = round(tNorm * 255) + 1;
+    lineColors = cmap(colorIdx, :); % nCasts x 3 RGB matrix
+
+    % --- plot ---
+    figure(ii)
+
+    % ===================== TEMPERATURE =====================
+    ax1 = subplot(4,1,1);
+    hold on
+    for m = 1:nCasts
+        x_center = timeNum(m);
+        T_centered = tempMat(:, m) - mean(tempMat(:, m), 'omitnan');
+        xvals = x_center + scaleT * T_centered;
+        plot(xvals, depthVec, 'Color', lineColors(m, :))
+    end
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)')
+    title(sprintf('July 22, 2026 ebb line %d: Temperature', ii))
+
+    % ===================== SALINITY =====================
+    ax2 = subplot(4,1,2);
+    hold on
+    for m = 1:nCasts
+        x_center = timeNum(m);
+        S_centered = salMat(:, m) - mean(salMat(:, m), 'omitnan');
+        xvals = x_center + scaleS * S_centered;
+        plot(xvals, depthVec, 'Color', lineColors(m, :))
+    end
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)')
+    title('Salinity')
+
+    % ===================== DISSOLVED OXYGEN =====================
+    ax3 = subplot(4,1,3);
+    hold on
+    for m = 1:nCasts
+        x_center = timeNum(m);
+        DO_centered = doMat(:, m) - mean(doMat(:, m), 'omitnan');
+        xvals = x_center + scaleDO * DO_centered;
+        plot(xvals, depthVec, 'Color', lineColors(m, :))
+    end
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)')
+    title('Dissolved Oxygen')
+    xlabel('Time elapsed (min)')
+
+    % ===================== TRANSECT TRACK =====================
+    ax4 = subplot(4,1,4);
+    scatter(lonVals, latVals, 60, timeNum, 'filled')
+    colormap(ax4, parula)
+    cb = colorbar;
+    cb.Label.String = 'Time elapsed since start of lap (min)';
+    xlim([-122.7 -122.63])
+    ylim([48.22 48.24])
+    xlabel('Longitude'); ylabel('Latitude'); title('Cast track (colored by time)')
+
+    linkaxes([ax1, ax2, ax3], 'x')
+end
+
+%% flood vertical profiles colored by elapsed time in transect line
+
+% column indices within the "values" matrix
+col_temp  = 2;
+col_depth = 7;
+col_sal   = 8;
+col_do    = 14;
+
+% wiggle scale factors — tune separately per variable
+scaleT  = 1;
+scaleS  = 1;
+scaleDO = 0.75;
+
+dayStart = datetime(2026, 7, 22); % the day you want
+
+for ii = 1:length(matchedCTD_flood)
+    keepIdx = matchedCTD_flood(ii).castTimes >= dayStart;
+    casts     = matchedCTD_flood(ii).casts(keepIdx);
+    castTimes = matchedCTD_flood(ii).castTimes(keepIdx);
+    nCasts    = length(casts);
+
+    if nCasts == 0
+        continue % nothing to plot for this line
+    end
+
+    % --- preallocate matrices ---
+    nRows   = size(casts(1).values, 1);
+    salMat  = NaN(nRows, nCasts);
+    tempMat = NaN(nRows, nCasts);
+    doMat   = NaN(nRows, nCasts);
+    lonVals = NaN(1, nCasts);
+    latVals = NaN(1, nCasts);
+
+    for m = 1:nCasts
+        tempMat(:, m) = casts(m).values(:, col_temp);
+        salMat(:, m)  = casts(m).values(:, col_sal);
+        doMat(:, m)   = casts(m).values(:, col_do);
+        lonVals(m)    = casts(m).lon;
+        latVals(m)    = casts(m).lat;
+    end
+    depthVec = casts(1).values(:, col_depth);
+
+    % --- elapsed time + per-cast colors ---
+    timeNum = minutes(castTimes - castTimes(1)); % elapsed minutes since first cast in this line
+
+    cmap = parula(256);
+    tNorm = (timeNum - min(timeNum)) / (max(timeNum) - min(timeNum));
+    tNorm(isnan(tNorm)) = 0; % guard against single-cast lines
+    colorIdx = round(tNorm * 255) + 1;
+    lineColors = cmap(colorIdx, :); % nCasts x 3 RGB matrix
+
+    % --- plot ---
+    figure(ii)
+
+    % ===================== TEMPERATURE =====================
+    ax1 = subplot(4,1,1);
+    hold on
+    for m = 1:nCasts
+        x_center = timeNum(m);
+        T_centered = tempMat(:, m) - mean(tempMat(:, m), 'omitnan');
+        xvals = x_center + scaleT * T_centered;
+        plot(xvals, depthVec, 'Color', lineColors(m, :))
+    end
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)')
+    title(sprintf('July 22, 2026 flood line %d: Temperature', ii))
+
+    % ===================== SALINITY =====================
+    ax2 = subplot(4,1,2);
+    hold on
+    for m = 1:nCasts
+        x_center = timeNum(m);
+        S_centered = salMat(:, m) - mean(salMat(:, m), 'omitnan');
+        xvals = x_center + scaleS * S_centered;
+        plot(xvals, depthVec, 'Color', lineColors(m, :))
+    end
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)')
+    title('Salinity')
+
+    % ===================== DISSOLVED OXYGEN =====================
+    ax3 = subplot(4,1,3);
+    hold on
+    for m = 1:nCasts
+        x_center = timeNum(m);
+        DO_centered = doMat(:, m) - mean(doMat(:, m), 'omitnan');
+        xvals = x_center + scaleDO * DO_centered;
+        plot(xvals, depthVec, 'Color', lineColors(m, :))
+    end
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)')
+    title('Dissolved Oxygen')
+    xlabel('Time elapsed (min)')
+
+    % ===================== TRANSECT TRACK =====================
+    ax4 = subplot(4,1,4);
+    scatter(lonVals, latVals, 60, timeNum, 'filled')
+    colormap(ax4, parula)
+    cb = colorbar;
+    cb.Label.String = 'Time elapsed since start of lap (min)';
+    xlim([-122.7 -122.63])
+    ylim([48.22 48.24])
+    xlabel('Longitude'); ylabel('Latitude'); title('Cast track (colored by time)')
+
+    linkaxes([ax1, ax2, ax3], 'x')
+end
