@@ -6,7 +6,7 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'Echo_CTD_21Jul2026_and_22Jul2026_ebb.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_22Jul2026_flood.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 
@@ -75,7 +75,6 @@ end
 
 for i = 1:length(channel_name_list)
     [rsk, spike] = RSKdespike(rsk,'channel',channel_name_list{i},'threshold',2,'windowLength',11,'action','nan', 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
-fprintf('Max depth after step X: %.2f\n', max(rsk.data(i).values(:,7)));
 end
 
 
@@ -161,7 +160,7 @@ rsk = RSKderivevelocity(rsk);
 % Apply the algorithm:  Outputs: RSK - Structure with data filtered by threshold profiling speed and removal of loops.
 %                                flagidx - Index of the samples that are filtered.
 
-[rsk, flagidx] = RSKremoveloops(rsk,'threshold',0.25,'visualize',50); % 0.25 value: minimum speed at which profile must be taken (units: m/s). This is the default rate from Ruskin. 
+[rsk, flagidx] = RSKremoveloops(rsk,'threshold',0.25,'visualize',7); % 0.25 value: minimum speed at which profile must be taken (units: m/s). This is the default rate from Ruskin. 
 
 
 
@@ -235,7 +234,7 @@ clim(ax_hdl(1), [10, 18]);   % Temperature
 clim(ax_hdl(2), [10, 30]);    % Salinity
 clim(ax_hdl(3), [2, 12]);    % Dissolved O2
 
-saveas(gcf, "pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png")
+saveas(gcf, "pcolor_quicklook_SalTempDO.png")
 
 %% saving
 

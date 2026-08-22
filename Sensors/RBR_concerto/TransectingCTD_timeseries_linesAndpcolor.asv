@@ -624,8 +624,6 @@ for ii = 1:7        %length(matchedCTD_flood)
     castTimes = matchedCTD_flood(ii).castTimes(keepIdx);
     nCasts    = length(casts);
 
-    adcpTimes = datetime([ADCP_data_flood.lapData(ii).time], 'ConvertFrom', 'datenum');
-
     if nCasts == 0
         continue % nothing to plot for this line
     end

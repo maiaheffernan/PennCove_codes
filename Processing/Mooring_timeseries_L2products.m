@@ -1,0 +1,116 @@
+%%% Plotting timeseries plots for each mooring %%%
+
+% Created by Maia Heffernan, August 2026
+
+
+% This script is intended to make nice stacked timeseries of all the data
+% from each mooring for a given month of data from Penn Cove work.
+
+% You will first need to go through all the readin and quicklook scripts
+% and use a minimum L2 product for this script.
+
+
+clear all, close all
+
+%% load in the data
+
+
+% ---- For June to July ----
+
+% Solo T
+
+soloT_data = load('SoloTdata_JunJul2026_L2.mat');
+
+
+% TODO
+
+todo_data = load('TODOdata_JunJul2026_L3.mat');
+
+% Duo
+
+duo_data = load('DuoTD_data_InnerNorth_JunJul2026_240149_cleaned_L2.mat'); % only have inner north for June and July because the other broke
+
+% Concerto
+
+concerto_data = load('mooredConcertoData_MayJun2026_L2.mat');
+
+% miniDOTs
+
+miniDOT_data = load('miniDOT_JunJul2026_mooringdata_L2.mat');
+
+% YSI 600 LS Sonde
+
+YSI_data = load('YSI600LSdata_JunJul2026_L2.mat');
+
+% SWIFT data
+
+%% pull out the different moorings for each sensor and put them in their own structures
+
+
+% solo T
+
+soloT_LJN = [soloT_data.soloT_data.LoveJoyNorth];
+soloT_LJS = [soloT_data.soloT_data.LoveJoySouth];
+soloT_innerN = [soloT_data.soloT_data.InnerNorth];
+soloT_innerS = [soloT_data.soloT_data.InnerSouth];
+
+% TODO
+
+todo_LJN = [todo_data.TODO_data.LoveJoyNorth];
+todo_LJS = [todo_data.TODO_data.LoveJoySouth];
+todo_innerN = [todo_data.TODO_data.InnerNorth];
+todo_innerS = [todo_data.TODO_data.InnerSouth];
+
+
+% Duo
+
+
+% Concerto
+
+concerto_LJN = [concerto_data.concerto_data.LoveJoyNorth];
+
+% miniDOTs
+
+mini_LJN_13m = [miniDOT_data.LJN_13m];
+mini_LJN_26m = [miniDOT_data.LJN_26m];
+
+mini_LJS_16m = [miniDOT_data.LJS_16m];
+mini_LJS_32m = [miniDOT_data.LJS_32m];
+
+% YSIs
+
+YSI_LJN_4m = [YSI_data.LJN_4m];
+YSI_LJN_8m = [YSI_data.LJN_8m];
+
+YSI_LJS_4m = [YSI_data.LJS_4m];
+YSI_LJS_11m = [YSI_data.LJS_11m];
+
+%% determine the depths of each sensor in each mooring if need be
+
+
+% LJN
+
+
+% LJS
+
+
+% inner N
+
+
+% inner S
+
+
+
+%% plot the timeseries from each mooring 
+
+% LJN
+
+
+% LJS
+
+
+
+% inner N
+
+
+% inner S
