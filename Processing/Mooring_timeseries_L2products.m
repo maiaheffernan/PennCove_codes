@@ -28,7 +28,7 @@ todo_data = load('TODOdata_JunJul2026_L3.mat');
 
 % Duo
 
-duo_data = load('DuoTD_data_InnerNorth_JunJul2026_240149_cleaned_L2.mat'); % only have inner north for June and July because the other broke
+duo_data = load('DuoTD_JunJul2026_cleaned_L2.mat'); % only have inner north for June and July because the other broke
 
 % Concerto
 
@@ -64,6 +64,8 @@ todo_innerS = [todo_data.TODO_data.InnerSouth];
 
 % Duo
 
+duo_innerN_bottom = duo_data.cleaned_data.DuoTD_data_InnerNorth_JunJul2026_240150;
+duo_innerN_waterColumn = duo_data.cleaned_data.DuoTD_data_InnerNorth_JunJul2026_240150;
 
 % Concerto
 
@@ -106,11 +108,13 @@ YSI_LJS_11m = [YSI_data.LJS_11m];
 % LJN
 
 
+
 % LJS
 
 
 
 % inner N
+
 
 
 % inner S

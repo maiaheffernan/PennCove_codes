@@ -53,7 +53,7 @@ end
 
 %% save raw data
 
-save DuoTDdata_MayJun2026_raw.mat DuoTD_data
+save DuoTDdata_JunJul2026_raw.mat DuoTD_data
 
 %% plot a time series of the data with different colors 
 
@@ -116,14 +116,16 @@ title('Time series of pressure from June to July 2026');
 
 %% clean the data by de-spiking with a hampel loop and trimming the time
 
-struct_names = {'DuoTD_data_InnerNorth_MaytoJun2026_240149', ...
-                'DuoTD_data_InnerNorth_MaytoJun2026_240150', ...
-                'DuoTD_data_InnerSouth_MaytoJun2026_240151'}; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
+struct_names = {'DuoTD_data_InnerNorth_JunJul2026_240149', ...
+                'DuoTD_data_InnerNorth_JunJul2026_240150', ...
+                }; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
                 
 
 outputFolder = pwd;  
 
-for i = 1:3
+cleaned_data = struct();
+
+for i = 1:2 
 
     % time limits based on start and end times
     snFields = fieldnames(DuoTD_data.(struct_names{i}));
@@ -185,19 +187,22 @@ for i = 1:3
     title(struct_names{i}, 'Interpreter', 'none');
 
     % save out to its own .mat file
-    outFile = fullfile(outputFolder, [struct_names{i} '_cleaned_L2.mat']);
-    save(outFile, 'd_clean');
+   cleaned_data.(struct_names{i}) = d_clean;   
 
-    fprintf('Saved cleaned data for %s to %s\n', struct_names{i}, outFile);
+    fprintf('Cleaned data for %s added to combined struct\n', struct_names{i});
 end
 
+% save BOTH sensors together, one field each
+outFile = fullfile(outputFolder, 'DuoTD_JunJul2026_cleaned_L2.mat');
+save(outFile, 'cleaned_data');
+fprintf('Saved combined cleaned data to %s\n', outFile);
 %% plot the cleaned figures 
 
 % ===== first temperature =====
 
 figure; hold on;
 
-for i = 1:3 % 3 for MayJun
+for i = 1:2 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -213,14 +218,14 @@ hold off;
 legend('Inner North 240149','Inner North, 240150','Inner South, 240151');
 xlabel('Time');
 ylabel('Temperature (°C)');
-title('Time series of temperature from May to June 2026');
+title('Time series of temperature from June to July 2026');
 
 
 % ===== then pressure ====
 
 figure(2); hold on;
 
-for i = 1:3 % 3 for MayJun
+for i = 1:2 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -235,7 +240,5 @@ hold off;
 legend('SN 240149','SN 240150','SN 240151'); %,'SN 240151' for mayjun
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from May to June 2026');
-
-%% save out cleaned data
+title('Time series of pressure from June to July 2026');
 
