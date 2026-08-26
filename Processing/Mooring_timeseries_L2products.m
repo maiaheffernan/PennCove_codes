@@ -87,10 +87,12 @@ YSI_LJN_8m = [YSI_data.LJN_8m];
 YSI_LJS_4m = [YSI_data.LJS_4m];
 YSI_LJS_11m = [YSI_data.LJS_11m];
 
-%% determine the depths of each sensor in each mooring if need be
+%% determine the depths of each sensor in each mooring 
 
 
 % LJN
+
+
 
 
 % LJS
@@ -106,6 +108,19 @@ YSI_LJS_11m = [YSI_data.LJS_11m];
 %% plot the timeseries from each mooring 
 
 % LJN
+
+
+s1 = subplot(); % tide level
+
+s2 = subplot(); % bottom oxygen (and water colum oxygen if applicable)
+
+s3 = subplot(); % salinity
+
+s4 = subplot(); % temperature pcolor from the different levels of the temperature sensors
+
+s5 = subplot(); % velocity
+
+
 
 
 
