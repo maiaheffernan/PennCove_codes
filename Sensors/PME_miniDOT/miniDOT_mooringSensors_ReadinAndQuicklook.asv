@@ -13,10 +13,13 @@ clear all; close all;
 %% load the data
 
 
+
+/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Aug2026/Data/LoveJoyNorth_JulAug2026/miniDOT/LoveJoyNorth_JulAug2026_26m_sn419387
+
 % == MAKE SURE YOU ARE IN THE 'DATA' DIRECTORY FOR THE MONTH YOU ARE INTERESTED IN ==
 
 LJN_13m = readtable('LoveJoyNorth_JulAug2026/miniDOT/LoveJoyNorth_JulAug2026_13m_sn372740/Cat.TXT');
-LJN_26m = readtable('LoveJoyNorth_JulAug2026/miniDOT/LoveJoyNorth_JulAug2026_26m_sn419387/Cat.TXT');
+LJN_26m = readtable('LoveJoyNorth_JulAug2026/miniDOT/miniDOT_JulAug2026_26m_sn419387/Cat.TXT');
 
 LJS_16m = readtable('LoveJoySouth_JulAug2026/miniDOT/LoveJoySouth_JulAug2026_16m_sn279558/Cat.TXT');
 LJS_32m = readtable('LoveJoySouth_JulAug2026/miniDOT/LoveJoySouth_JulAug2026_32m_sn305219/Cat.TXT');
@@ -48,20 +51,13 @@ LJS_32m = readtable('LoveJoySouth_JulAug2026/miniDOT/LoveJoySouth_JulAug2026_32m
 
 % Define the time range for trimming the data
 
-
-% -- for julaug ----
-
-startTime = datetime(2026, 7, 25, 12, 0, 0);
-endTime = datetime(2026, 8, 25, 12, 0, 0);
-
-
 % -- for junjul --
 % startTime = datetime(2026, 6, 26, 00, 0, 0);
 % endTime = datetime(2026, 7, 21, 16, 30, 0);
 
 % -- for mayjune --
-% startTime = datetime(2026, 5, 27, 0, 0, 0);
-% endTime = datetime(2026, 6, 23, 20, 40, 0);
+startTime = datetime(2026, 5, 27, 0, 0, 0);
+endTime = datetime(2026, 6, 23, 20, 40, 0);
 
 % Trim the data for each mooring to the defined time range
 LJN_13m = LJN_13m(LJN_13m.UTC_Date___Time >= startTime & LJN_13m.UTC_Date___Time <= endTime, :);
@@ -108,33 +104,7 @@ xlabel('Time')
 ylabel('Temperature (°C)')
 title('Temperature time series from the moorings')
 
-% saveas(gcf, 'miniDOT_Temp_timeseries_JulAug2026_moorings.png');
-
-%% save the raw figure
-
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
-
-% make sure the directory exists; create it if not
-if ~exist(outDir, 'dir')
-    mkdir(outDir);
-end
-
-
-% -- do save --
-
-
-do_figName = sprintf('miniDOT_DO_timeseries_JulAug2026_moorings.png'); 
-do_outFile = fullfile(outDir, do_figName);
- 
-exportgraphics(figure(1), do_outFile, 'Resolution', 300);
-
-
-% -- temp save --
-
-temp_figName = sprintf('miniDOT_Temp_timeseries_JulAug2026_moorings.png'); 
-temp_outFile = fullfile(outDir, temp_figName);
-
-exportgraphics(figure(2), temp_outFile, 'Resolution', 300);
+%saveas(gcf, 'miniDOT_Temp_timeseries_May2026_moorings.png');
 
 
 %% Plot histograms for Dissolved Oxygen 
@@ -168,14 +138,7 @@ title('LoveJoySouth 32m')
 sgtitle('Dissolved Oxygen Distributions from the Moorings')
 
 linkaxes([s1 s2 s3 s4],'x')
-
-% -- save the figure --
-
-doHist_figName = sprintf('miniDOT_DO_histograms_JulAug2026_moorings.png'); 
-doHist_outFile = fullfile(outDir, doHist_figName);
-
-exportgraphics(figure(3), doHist_outFile, 'Resolution', 300);
-
+%saveas(gcf, 'miniDOT_DO_hist_May2026_moorings.png');
 
 %% Plot histograms for Temperature 
 
@@ -210,21 +173,13 @@ sgtitle('Temperature Distributions from the Moorings')
 
 
 linkaxes([s5 s6 s7 s8],'x')
-
-
-
-% -- save the figure --
-
-tempHist_figName = sprintf('miniDOT_temp_histograms_JulAug2026_moorings.png'); 
-tempHist_outFile = fullfile(outDir, tempHist_figName);
-
-exportgraphics(figure(4), tempHist_outFile, 'Resolution', 300);
+%saveas(gcf, 'miniDOT_Temp_hist_May2026_moorings.png');
 
 
 %% save out the data
 
 
-save miniDOT_JulAug2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
+save miniDOT_MayJun2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
 
 %% cleaning with a hampel filter and rate of change filter
 

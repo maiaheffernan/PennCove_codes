@@ -10,9 +10,9 @@ close all; clear all;
 
 SNs = {'240149', '240150'}; % , '240151'
 moorings = {'InnerNorth', 'InnerNorth'}; % these match the order of the serial numbers .... , 'InnerSouth'
-months_dir = 'JunJul2026'; % edit this based on the data you are downloading -- NOTE there is no InnerSouth data for JunJul because the Duo broke
+months_dir = 'JulAug2026'; % edit this based on the data you are downloading -- NOTE there is no InnerSouth data for JunJul because the Duo broke
 % months_dir = 'MaytoJun2026';
-months_file = 'JunJul2026'; %'MayJun2026';
+months_file = 'JulAug2026'; %'MayJun2026';
 
 DuoTD_data = struct(); % create an empty struct that I will read data into
 
@@ -53,22 +53,30 @@ end
 
 %% save raw data
 
-save DuoTDdata_JunJul2026_raw.mat DuoTD_data
+save DuoTDdata_JulAug2026_raw.mat DuoTD_data
 
 %% plot a time series of the data with different colors 
 
-struct_names = {'DuoTD_data_InnerNorth_JunJul2026_240149', 'DuoTD_data_InnerNorth_JunJul2026_240150'}; % 'DuoTD_data_InnerSouth_MayJun2026_240151'
+struct_names = {'DuoTD_data_InnerNorth_JulAug2026_240149', 'DuoTD_data_InnerNorth_JulAug2026_240150'}; % 'DuoTD_data_InnerSouth_MayJun2026_240151'
 
 % for may to june 2026
 % startTime = datetime(2026, 5, 27, 0, 0, 0);
 % endTime = datetime(2026, 6, 23, 20, 40, 0);
 
     % for JuneJul
-    startTime = datetime(2026, 6, 26, 00, 0, 0);
-    endTime = datetime(2026, 7, 21, 16, 30, 0);
-startTime_dn = datenum(startTime);
-endTime_dn   = datenum(endTime);
-     
+    % startTime = datetime(2026, 6, 26, 00, 0, 0);
+    % endTime = datetime(2026, 7, 21, 16, 30, 0);
+    % startTime_dn = datenum(startTime);
+    % endTime_dn   = datenum(endTime);
+    % 
+
+
+    % for Jul to August
+
+    startTime = datetime(2026, 7, 25, 12, 0, 0);
+    endTime = datetime(2026, 8, 25, 12, 0, 0);
+    startTime_dn = datenum(startTime);
+    endTime_dn   = datenum(endTime);
 
 % ===== first temperature =====
 
@@ -90,7 +98,7 @@ hold off;
 legend('Inner North 240149','Inner North, 240150'); %,'Inner South, 240151'
 xlabel('Time');
 ylabel('Temperature (°C)');
-title('Time series of temperature from June to July 2026');
+title('Time series of temperature from July to August 2026');
 
 
 % ===== then pressure ====
@@ -112,12 +120,42 @@ hold off;
 legend('SN 240149','SN 240150'); %,'SN 240151'
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from June to July 2026');
+title('Time series of pressure from July to August 2026');
+
+
+%% save the raw figure
+
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+
+% make sure the directory exists; create it if not
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+
+
+% -- temp save --
+
+temp_figName = sprintf('Duo_Temp_timeseries_JulAug2026.png'); 
+temp_outFile = fullfile(outDir, temp_figName);
+
+exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
+
+
+% -- pressure save --
+
+
+pres_figName = sprintf('Duo_pres_timeseries_JulAug2026.png'); 
+do_outFile = fullfile(outDir, pres_figName);
+
+exportgraphics(figure(2), do_outFile, 'Resolution', 300);
+
+
+
 
 %% clean the data by de-spiking with a hampel loop and trimming the time
 
-struct_names = {'DuoTD_data_InnerNorth_JunJul2026_240149', ...
-                'DuoTD_data_InnerNorth_JunJul2026_240150', ...
+struct_names = {'DuoTD_data_InnerNorth_JulAug2026_240149', ...
+                'DuoTD_data_InnerNorth_JulAug2026_240150', ...
                 }; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
                 
 

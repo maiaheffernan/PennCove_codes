@@ -32,7 +32,7 @@ clear all; close all;
 
 SNs = {'241787', '241789', '241791', '241792'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'MaytoJun2026'; % edit this based on the data you are downloading
+months = 'JulAug2026'; % edit this based on the data you are downloading
 
 TODO_data = struct(); % create an empty struct that I will read data into
 
@@ -147,7 +147,7 @@ end
 
 % CHANGE THE MONTH DIRECTORY IN THE FILE PATH BELOW AS NEEDED
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/MayJun2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -239,11 +239,22 @@ clear thisSensor swingDO_k swingTemp_k
 TODO_data = raw_values;  
 
 % trim the timestamps
-startTime = datetime(2026, 5, 27, 0, 0, 0);
-endTime = datetime(2026, 6, 23, 20, 40, 0);
+
+% for August 
+
+startTime = datetime(2026, 7, 25, 12, 0, 0);
+endTime = datetime(2026, 8, 25, 12, 0, 0);
 
 startTime_dn = datenum(startTime);
 endTime_dn   = datenum(endTime);
+
+
+% for July
+% startTime = datetime(2026, 5, 27, 0, 0, 0);
+% endTime = datetime(2026, 6, 23, 20, 40, 0);
+% 
+% startTime_dn = datenum(startTime);
+% endTime_dn   = datenum(endTime);
 
 
     % for June
@@ -375,7 +386,7 @@ end
 
 %% find the location of the spikes that still persist
 
-moorName = 'LoveJoyNorth';  % the one with the obvious spike near 07/12
+moorName = 'InnerSouth';  % LoveJoyNorth, the one with the obvious spike near 07/12
 d = TODO_data.(moorName).data;
 
 % high-going spikes
@@ -413,7 +424,7 @@ disp(d.values(max(1,spikeIdx-5):min(numel(d.tstamp),spikeIdx+5), 3))
 moorName = 'InnerNorth';
 d = TODO_data.(moorName).data;
 
-regionIdx = find(d.tstamp >= datenum(datetime(2026,6,26)) & d.tstamp <= datenum(datetime(2026,6,29)));
+regionIdx = find(d.tstamp >= datenum(datetime(2026,7,24)) & d.tstamp <= datenum(datetime(2026,8,25)));
 [~, localSortIdx] = sort(d.values(regionIdx,3), 'descend', 'MissingPlacement','last');
 candidateIdx = regionIdx(localSortIdx(1:10));
 
@@ -614,4 +625,4 @@ end
 
 %% save out the cleaned data
 
-save TODOdata_JunJul2026_L3.mat TODO_data
+save TODOdata_JulAug2026_L3.mat TODO_data
