@@ -231,7 +231,7 @@ for i = 1:2
 end
 
 % save BOTH sensors together, one field each
-outFile = fullfile(outputFolder, 'DuoTD_JunJul2026_cleaned_L2.mat');
+outFile = fullfile(outputFolder, 'DuoTD_JulAug2026_cleaned_L2.mat');
 save(outFile, 'cleaned_data');
 fprintf('Saved combined cleaned data to %s\n', outFile);
 %% plot the cleaned figures 
@@ -256,7 +256,7 @@ hold off;
 legend('Inner North 240149','Inner North, 240150','Inner South, 240151');
 xlabel('Time');
 ylabel('Temperature (°C)');
-title('Time series of temperature from June to July 2026');
+title('Time series of temperature from July to August 2026');
 
 
 % ===== then pressure ====
@@ -278,5 +278,5 @@ hold off;
 legend('SN 240149','SN 240150','SN 240151'); %,'SN 240151' for mayjun
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from June to July 2026');
+title('Time series of pressure from July to August 2026');
 

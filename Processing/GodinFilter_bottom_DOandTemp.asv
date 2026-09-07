@@ -1,0 +1,93 @@
+%%% Applying a Godin filter to the bottom DO data to see general trends
+
+% Maia, September 7 2026
+
+clear all, close all
+
+%% load in the bottom DO data
+
+% May to June
+
+MayJun = load('TODOdata_MayJun2026_L3.mat');
+
+% June to July
+
+JunJul = load('TODOdata_JunJul2026_L3.mat');
+
+% July to August
+
+JulAug = load('TODOdata_JulAug2026_L3.mat');
+
+%% pull out the different monthly data and timestamps and apply a godin filter
+
+
+months = {'MayJun', 'JunJul', 'JulAug'};
+moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'};
+
+for i = 1:length(months)
+    for ii = 1:length(moorings)
+
+    % Extract data and timestamps for the current month and mooring
+        currentMonthData = eval(months{i});
+        %thisMooring = currentMonthData.moorings{ii};
+        currentTime = currentMonthData.TODO_data.(moorings{ii}).data.tstamp;
+        currentValues = currentMonthData.TODO_data.(moorings{ii}).data.values;
+
+    % Apply the Godin filter to the current month's data
+    [filteredTime, filteredValues] = godin_filter(datetime(currentTime, 'ConvertFrom', 'datenum'), currentValues);
+
+    % Store the filtered values for the current mooring and month
+    results.(months{i}).(moorings{ii}) = table(filteredTime, filteredValues);
+    end
+end
+
+%% Plot it all together
+
+months = {'MayJun', 'JunJul', 'JulAug'};
+moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'};
+colors = lines(length(months));
+
+figure;
+for ii = 1:length(moorings)
+    subplot(length(moorings), 1, ii);
+    hold on;
+    for i = 1:length(months)
+        data = results.(months{i}).(moorings{ii});
+        DO = data.filteredValues(:,3);   % third column = DO, mg/L
+        plot(data.filteredTime, DO, ...
+            'Color', colors(i,:), 'DisplayName', months{i});
+    end
+    hold off;
+    title(moorings{ii}, 'Interpreter', 'none');
+    ylabel('DO (mg/L)');
+    legend('show');
+    grid on;
+end
+xlabel('Time');
+sgtitle('Godin-filtered DO concentration by mooring and month');
+
+%% pull out just the first month and plot it with the tide
+
+
+% tide data from May to June
+
+
+% Extract the first month's data for plotting with tide
+firstMonth = 'MayJun';
+tideData = load('DuoTD_data_InnerNorth_MaytoJun2026_240150_cleaned_L2.mat'); % Load tide data
+tideTime = tideData.d_clean.tstamp; % Assuming tide data has a time field
+tideValues = tideData.d_clean.values(); % Assuming tide data has a values field
+
+% Plot the first month's DO data with tide
+figure;
+hold on;
+data = results.(firstMonth).(moorings{1}); % Using the first mooring for example
+DO = data.filteredValues(:,3);
+plot(data.filteredTime, DO, 'DisplayName', 'DO (mg/L)');
+plot(tideTime, tideValues, 'DisplayName', 'Tide', 'Color', 'r');
+hold off;
+title(['DO and Tide for ', firstMonth], 'Interpreter', 'none');
+xlabel('Time');
+ylabel('Concentration / Tide');
+legend('show');
+grid on;

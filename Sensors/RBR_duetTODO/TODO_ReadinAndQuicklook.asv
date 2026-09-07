@@ -421,7 +421,7 @@ disp(d.values(max(1,spikeIdx-5):min(numel(d.tstamp),spikeIdx+5), 3))
 %% manually remove other outliers
 
 
-moorName = 'InnerSouth';
+moorName = 'InnerNorth';
 d = TODO_data.(moorName).data;
 
 regionIdx = find(d.tstamp >= datenum(datetime(2026,7,24)) & d.tstamp <= datenum(datetime(2026,8,25)));
