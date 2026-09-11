@@ -11,9 +11,9 @@ clear all; close all;
 
 % go into the mussel raft directory in the Data directort
 
-raft_1m = readtable("Raft_JulAug2026_3m_sn454936/Cat.TXT");
+raft_1m = readtable("miniDOT_1m_454936/Cat.TXT");
 
-%raft_7m = readtable("RaftSensor_MaytoJune_sn445289/Cat.TXT");
+raft_7m = readtable("miniDOT_7m_445289/Cat.TXT");
 
 %% Trim the data so that only date from the deployment time winow for all sensors is represented
 
@@ -26,9 +26,15 @@ raft_1m = readtable("Raft_JulAug2026_3m_sn454936/Cat.TXT");
 
 % Jul Aug
 
+% 
+% startTime = datetime(2026, 7, 25, 12, 0, 0);
+% endTime = datetime(2026, 8, 25, 12, 0, 0);
 
-startTime = datetime(2026, 7, 25, 12, 0, 0);
-endTime = datetime(2026, 8, 25, 12, 0, 0);
+
+% JunJul
+
+startTime = datetime(2026, 6, 26, 00, 0, 0);
+endTime = datetime(2026, 7, 21, 16, 30, 0);
 
 
 % MayJun
@@ -37,7 +43,7 @@ endTime = datetime(2026, 8, 25, 12, 0, 0);
 
 % Trim the data for each mooring to the defined time range
 raft_1m = raft_1m(raft_1m.UTC_Date___Time >= startTime & raft_1m.UTC_Date___Time <= endTime, :);
-% raft_7m  = raft_7m(raft_7m.UTC_Date___Time >= startTime & raft_7m.UTC_Date___Time <= endTime, :);
+raft_7m  = raft_7m(raft_7m.UTC_Date___Time >= startTime & raft_7m.UTC_Date___Time <= endTime, :);
 
 
 %% plot timeseries 
@@ -46,7 +52,7 @@ figure(1); clf;
 
 hold on;
 p1 = plot(raft_1m.UTC_Date___Time, raft_1m.DissolvedOxygen, 'b-', 'LineWidth', 2.0);
-% p2 = plot(raft_7m.UTC_Date___Time, raft_7m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
+%p2 = plot(raft_7m.UTC_Date___Time, raft_7m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
 yline(2, 'k--', 'LineWidth', 1.5)
 
 legend([p1], '3m depth') % legend([p1 p2], '1m depth', '7m depth')

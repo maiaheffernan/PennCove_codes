@@ -6,7 +6,7 @@
 
 clc, clear all, close all
 
-files = dir('Echo_ADCP_22Jul2026_flood.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
+files = dir('Echo_ADCP_26Aug2026_ebb.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
 
 for fi = 1:length(files),
 
@@ -61,6 +61,8 @@ north ( prune ) = NaN;
 up ( prune ) = NaN;
 error ( prune ) = NaN;
 
+
+
 %% ENU plot
 
 cmap = cmocean('balance');
@@ -110,21 +112,70 @@ print('-dpng',['./' files(fi).name(1:end-4) '_ENUquicklook.png'])
 
 %% location plot
 
+% figure(2), clf
+% plot(lon,lat, '.')
+% title( files(fi).name(1:end-4) , 'interpreter', 'none' )
+% hold on
+% %colorbar
+% %axis([-120.7182 -120.6318   34.8346   34.9715])
+% %axis([-120.9 -120.5   34.7   35.2])
+% axis equal
+% axis([-122.76 -122.60 48.21 48.24])
+% 
+% print('-dpng',['./' files(fi).name(1:end-4) '_track.png'])
+
+
+
+%% location plot colored by time
+
+
 figure(2), clf
-plot(lon,lat,'.')
+
+scatter(lon, lat, 15, time, 'filled')   % 15 = marker size, tweak as needed
+colormap(parula)
+cb = colorbar;
+ylabel(cb, 'Time')
+
+% --- Format colorbar ticks as datetimes instead of raw datenum ---
+n_ticks = 6;   % how many tick labels to show
+tick_vals = linspace(min(time), max(time), n_ticks);
+cb.Ticks = tick_vals;
+cb.TickLabels = datestr(tick_vals, 'mm/dd HH:MM');
+
 title( files(fi).name(1:end-4) , 'interpreter', 'none' )
 hold on
-%colorbar
-%axis([-120.7182 -120.6318   34.8346   34.9715])
-%axis([-120.9 -120.5   34.7   35.2])
 axis equal
 axis([-122.76 -122.60 48.21 48.24])
 
 print('-dpng',['./' files(fi).name(1:end-4) '_track.png'])
 
+%% track colored by time and on a map
 
+
+figure(2), clf
+
+ax = geoaxes;
+geobasemap(ax, 'satellite');
+geolimits(ax, [48.21 48.24], [-122.76 -122.60]);   % [lat_lim], [lon_lim]
+hold(ax, 'on');
+
+geoscatter(ax, lat, lon, 15, time, 'filled');   % note: lat, lon order (not lon, lat)
+colormap(ax, jet)
+cb = colorbar(ax);
+ylabel(cb, 'Time')
+
+% --- Format colorbar ticks as datetimes instead of raw datenum ---
+n_ticks = 6;
+tick_vals = linspace(min(time), max(time), n_ticks);
+cb.Ticks = tick_vals;
+cb.TickLabels = datestr(tick_vals, 'mm/dd HH:MM');
+
+title(ax, files(fi).name(1:end-4), 'Interpreter', 'none')
+hold(ax, 'off');
+
+print('-dpng',['./' files(fi).name(1:end-4) '_track.png'])
 %% save cleaned results with simple variable names to a Level2 directory
 
-save(['./' files(fi).name(1:end-4) '_cleaned.mat'],'time','east','north','up','z','depth','lat','lon','error','readme')
+% save(['./' files(fi).name(1:end-4) '_cleaned.mat'],'time','east','north','up','z','depth','lat','lon','error','readme')
 
 end

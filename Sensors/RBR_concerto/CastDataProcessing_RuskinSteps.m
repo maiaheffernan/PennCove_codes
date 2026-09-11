@@ -6,11 +6,11 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'WWS_25Aug2026_concerto.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_23Jul2026.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 
-rsk = RSKreadprofiles(rsk, 'direction', 'up');
+rsk = RSKreadprofiles(rsk, 'direction', 'down'); % !!! WAS 'up' !!!
 
 %% Renaming the temperature channel
 % --------------------
@@ -199,7 +199,7 @@ RSKprintchannels(rsk)
 
 
 [rsk, samplesinbin] = RSKbinaverage(rsk, 'binBy', 'Sea Pressure', 'binSize', 0.25,...
-    'boundary', [],'direction', 'up',...
+    'boundary', [],'direction', 'down',... % !!!! WAS 'up' !!!
     'visualize', 10);  %Outputs: RSK - Structure with binned data, samplesinbin - Amount of samples in each bin.
 h = findobj(gcf,'type','line');
 set(h(1:2:end),'marker','o','markerfacecolor','c')
@@ -233,7 +233,7 @@ rsk = RSKderiveO2(rsk, 'toDerive', 'concentration', 'unit', 'mg/l');
 
 figure(); 
 
-[im_hdl ax_hdl] = RSKimages(rsk, 'channel', {'Temperature', 'Salinity', 'Dissolved O23'}, 'direction', 'up');
+[im_hdl ax_hdl] = RSKimages(rsk, 'channel', {'Temperature', 'Salinity', 'Dissolved O23'}, 'direction', 'down'); % !! WAS 'up' !!!
 clim(ax_hdl(1), [10, 18]);   % Temperature
 clim(ax_hdl(2), [10, 30]);    % Salinity
 clim(ax_hdl(3), [2, 12]);    % Dissolved O2
@@ -245,12 +245,12 @@ saveas(gcf, "WWS_pcolor_quicklook_SalTempDO_JulAug2026.png") % pcolor_quicklook_
 
 %% saving
 
-save('WWS_JulAug2026_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
+save('Echo_CTD_23Jul2026_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
 
 data = rsk.data;
 channels = rsk.channels;
 
-save('WWS_JulAug2026_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
+save('Echo_CTD_23Jul2026_processed_L1_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
 
-save('WWS_JulAug2026_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
+save('Echo_CTD_23Jul2026_processed_L1_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
 

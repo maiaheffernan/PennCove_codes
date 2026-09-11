@@ -95,7 +95,7 @@ for i = 1:2 % 3 for MayJun
 end
 
 hold off;
-legend('Inner North 240149','Inner North, 240150'); %,'Inner South, 240151'
+legend('Inner North 240149','Inner North, 240150','Inner South, 240151'); %,'Inner South, 240151'
 xlabel('Time');
 ylabel('Temperature (°C)');
 title('Time series of temperature from July to August 2026');

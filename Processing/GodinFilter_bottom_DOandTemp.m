@@ -47,7 +47,7 @@ months = {'MayJun', 'JunJul', 'JulAug'};
 moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'};
 colors = lines(length(months));
 
-figure;
+figure(1);
 for ii = 1:length(moorings)
     subplot(length(moorings), 1, ii);
     hold on;
@@ -76,7 +76,7 @@ tideTime = datetime(tideData.d_clean.tstamp, 'ConvertFrom', 'datenum'); % Assumi
 presValues = tideData.d_clean.values(:,3); % channel 3 is sea pressure
 tideValues = presValues - mean(presValues, 'omitnan');
 
-
+figure(2); clf;
 % --- Tide subplot (plot once) ---
 s1 = subplot(2,1,1);
 plot(tideTime, tideValues, 'DisplayName', 'Tide', 'Color', 'r');
@@ -113,7 +113,7 @@ presValues = tideData.d_clean.values(:,3); % channel 3 is sea pressure
 tideValues = presValues - mean(presValues, 'omitnan');
 
 
-figure; clf;
+figure(3); clf;
 
 % --- Tide subplot (plot once) ---
 s1 = subplot(2,1,1);
@@ -140,37 +140,3 @@ linkaxes([s1 s2], 'x');
 
 clear tideTime tideData presValues tideValues
 
-%% July to August 
-
-% Extract the first month's data for plotting with tide
-thirdMonth = 'JulAug';
-tideData = load('DuoTD_data_InnerNorth_JunJul2026_240150_cleaned_L2.mat'); % Load tide data
-tideTime = datetime(tideData.d_clean.tstamp, 'ConvertFrom', 'datenum'); % Assuming tide data has a time field
-presValues = tideData.d_clean.values(:,3); % channel 3 is sea pressure
-tideValues = presValues - mean(presValues, 'omitnan');
-
-
-figure; clf;
-
-% --- Tide subplot (plot once) ---
-s1 = subplot(2,1,1);
-plot(tideTime, tideValues, 'DisplayName', 'Tide', 'Color', 'r');
-ylabel('SSH (m)');
-title(['DO and Tide for ', thirdMonth], 'Interpreter', 'none');
-
-
-% --- DO subplot (loop over moorings) ---
-s2 = subplot(2,1,2);
-hold on
-for iii = 1:length(moorings)
-    data = results.(thirdMonth).(moorings{iii});
-    DO = data.filteredValues(:,3);
-    plot(data.filteredTime, DO, 'DisplayName', moorings{iii});
-end
-hold off
-xlabel('Time');
-ylabel('DO concentration [mg/L]');
-legend show;
-grid off;
-
-linkaxes([s1 s2], 'x');
