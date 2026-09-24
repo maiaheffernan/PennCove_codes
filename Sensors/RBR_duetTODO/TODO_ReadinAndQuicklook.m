@@ -32,7 +32,7 @@ clear all; close all;
 
 SNs = {'241787', '241789', '241791', '241792'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'JulAug2026'; % edit this based on the data you are downloading
+months = 'AugSep2026'; % edit this based on the data you are downloading
 
 TODO_data = struct(); % create an empty struct that I will read data into
 
@@ -147,7 +147,7 @@ end
 
 % CHANGE THE MONTH DIRECTORY IN THE FILE PATH BELOW AS NEEDED
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -164,7 +164,7 @@ exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 raw_values = TODO_data; % in case I need to use it in this script
 
-save TODOdata_JulAug2026_raw.mat TODO_data
+save TODOdata_AugSep2026_raw.mat TODO_data
 
 %% clean the data with a hampel filter and rate of change flagging
 
@@ -240,13 +240,24 @@ TODO_data = raw_values;
 
 % trim the timestamps
 
-% for August 
 
-startTime = datetime(2026, 7, 25, 12, 0, 0);
-endTime = datetime(2026, 8, 25, 12, 0, 0);
+% ---- AugSep ----
+
+startTime = datetime(2026, 8, 27, 20, 0, 0);
+endTime = datetime(2026, 9, 22, 19, 0, 0);
 
 startTime_dn = datenum(startTime);
 endTime_dn   = datenum(endTime);
+
+
+
+% for JulAugust 
+
+% startTime = datetime(2026, 7, 25, 12, 0, 0);
+% endTime = datetime(2026, 8, 25, 12, 0, 0);
+% 
+% startTime_dn = datenum(startTime);
+% endTime_dn   = datenum(endTime);
 
 
 % for July
@@ -265,8 +276,8 @@ endTime_dn   = datenum(endTime);
 
 % rate of change thresholds (per 1-minute sample) -- update these based on
 % the pooled percentiles above
-maxRateDO   = 0.4;
-maxRateTemp = 0.5;
+maxRateDO   = 0.5;
+maxRateTemp = 0.4;
 
 windowSpan = 7;
 halfWin    = floor(windowSpan/2);   % centered window
@@ -386,7 +397,7 @@ end
 
 %% find the location of the spikes that still persist
 
-moorName = 'InnerSouth';  % LoveJoyNorth, the one with the obvious spike near 07/12
+moorName = 'LoveJoyNorth';  % LoveJoyNorth, the one with the obvious spike near 07/12
 d = TODO_data.(moorName).data;
 
 % high-going spikes
@@ -424,7 +435,7 @@ disp(d.values(max(1,spikeIdx-5):min(numel(d.tstamp),spikeIdx+5), 3))
 moorName = 'InnerSouth';
 d = TODO_data.(moorName).data;
 
-regionIdx = find(d.tstamp >= datenum(datetime(2026,7,24)) & d.tstamp <= datenum(datetime(2026,8,25)));
+regionIdx = find(d.tstamp >= datenum(datetime(2026,8,27)) & d.tstamp <= datenum(datetime(2026,9,22)));
 [~, localSortIdx] = sort(d.values(regionIdx,3), 'descend', 'MissingPlacement','last');
 candidateIdx = regionIdx(localSortIdx(1:10));
 

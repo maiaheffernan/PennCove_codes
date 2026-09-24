@@ -70,7 +70,7 @@ clear all, close all
 
 %% For .cap files
 
-fid = fopen('SBE19_Aug8-2026_PennCove-aski.cap', 'r'); % LoveJoySouth_JunJul2026_bottom_sn4762.cap, ''SBESeaCatPlus_May-June_commadeliminated.cap''
+fid = fopen('SBE19_Sept23-2026_PennCove-aski_capture.cap', 'r'); % LoveJoySouth_JunJul2026_bottom_sn4762.cap, ''SBESeaCatPlus_May-June_commadeliminated.cap''
 if fid == -1
     error('Cannot open file.');
 end
@@ -163,7 +163,7 @@ sum(corruptedLines);
 
 %% applying the time cutoff
 
-
+    
 
     % for May June
         % startTime = datetime(2026, 5, 27, 0, 0, 0);
@@ -175,8 +175,16 @@ sum(corruptedLines);
 
     % for July August
 
-    startTime = datetime(2026, 7, 25, 12, 0, 0);
-    endTime = datetime(2026, 8, 25, 12, 0, 0);
+    % startTime = datetime(2026, 7, 25, 12, 0, 0);
+    % endTime = datetime(2026, 8, 25, 12, 0, 0);
+
+
+    % for Aug September
+
+
+    startTime = datetime(2026, 8, 27, 20, 0, 0);
+    endTime = datetime(2026, 9, 22, 19, 0, 0);
+
 
 % Filter the seacatData based on the time cutoff
 outOfRange = seacatData.DateTime < startTime | seacatData.DateTime > endTime;
@@ -204,7 +212,7 @@ dataVars = seacatData.Properties.VariableNames;
 %% save the raw seabird data to the general data file
 
 % Save the seabird data to a .mat file for future analysis
-save('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Aug2026/Data/seabirdData_JulAug2026_raw.mat', 'seacatData')
+save('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Sep2026/Data/seabirdData_AugSep2026_raw.mat', 'seacatData')
 
 %% plot the raw data
 
@@ -214,7 +222,7 @@ s1 = subplot(2,1,1);
 
     p1 = plot(seacatData.DateTime, seacatData.Temperature, 'r.-');
         ylabel('Temperature (°C)')
-        title('Raw SeaBird CTD data for June to July')
+        title('Raw SeaBird CTD data for August to September')
 
 s2 = subplot(2,1,2);
 
@@ -229,7 +237,7 @@ s2 = subplot(2,1,2);
 
  %% save out the figure
 
- outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+ outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
  % make sure the directory exists; create it if not
  if ~exist(outDir, 'dir')
@@ -239,7 +247,7 @@ s2 = subplot(2,1,2);
 
  % -- temp save --
 
-figName = sprintf('SeaBird_TempSal_rawtimeseries_JulAug2026.png'); 
+figName = sprintf('SeaBird_TempSal_rawtimeseries_AugSep2026.png'); 
 outFile = fullfile(outDir, figName);
 
  exportgraphics(figure(1), outFile, 'Resolution', 300);

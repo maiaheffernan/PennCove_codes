@@ -24,6 +24,8 @@ clear all, close all
 % 
 % CTD_flood = 
 % CTD_ebb = 
+
+% ---- from August detail ----
 %% find the ADCP timestamp that is closest to each ctd cast FLOOD
 
 % --- flood ---

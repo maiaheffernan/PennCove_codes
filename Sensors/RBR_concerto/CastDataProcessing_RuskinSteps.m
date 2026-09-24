@@ -6,7 +6,7 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'Echo_CTD_23Jul2026.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_26Aug2026_flood.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 
@@ -238,19 +238,19 @@ clim(ax_hdl(1), [10, 18]);   % Temperature
 clim(ax_hdl(2), [10, 30]);    % Salinity
 clim(ax_hdl(3), [2, 12]);    % Dissolved O2
 
-saveas(gcf, "WWS_pcolor_quicklook_SalTempDO_JulAug2026.png") % pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png
+saveas(gcf, "pcolor_quicklook_SalTempDO_26Aug2026_flood.png") % pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png
 
 
 
 
 %% saving
 
-save('Echo_CTD_23Jul2026_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
+save('Echo_CTD_26Aug2026_flood_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
 
 data = rsk.data;
 channels = rsk.channels;
 
-save('Echo_CTD_23Jul2026_processed_L1_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
+save('Echo_CTD_26Aug2026_flood_processed_L1_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
 
-save('Echo_CTD_23Jul2026_processed_L1_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
+save('Echo_CTD_26Aug2026_flood_processed_L1_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
 

@@ -11,9 +11,9 @@ clear all; close all;
 
 % go into the mussel raft directory in the Data directort
 
-raft_1m = readtable("miniDOT_1m_454936/Cat.TXT");
+raft_1m = readtable("musselRaft_1m_AugSep2026/Cat.TXT");
 
-raft_7m = readtable("miniDOT_7m_445289/Cat.TXT");
+raft_3m = readtable("musselRaft_3m_AugSep2026/Cat.TXT");
 
 %% Trim the data so that only date from the deployment time winow for all sensors is represented
 
@@ -22,6 +22,12 @@ raft_7m = readtable("miniDOT_7m_445289/Cat.TXT");
 % the first mooring was recovered.
 
 % Define the time range for trimming the data
+
+% AugSep
+
+startTime = datetime(2026, 8, 27, 20, 0, 0);
+endTime = datetime(2026, 9, 22, 20, 0, 0);
+
 
 
 % Jul Aug
@@ -33,8 +39,8 @@ raft_7m = readtable("miniDOT_7m_445289/Cat.TXT");
 
 % JunJul
 
-startTime = datetime(2026, 6, 26, 00, 0, 0);
-endTime = datetime(2026, 7, 21, 16, 30, 0);
+% startTime = datetime(2026, 6, 26, 00, 0, 0);
+% endTime = datetime(2026, 7, 21, 16, 30, 0);
 
 
 % MayJun
@@ -43,7 +49,7 @@ endTime = datetime(2026, 7, 21, 16, 30, 0);
 
 % Trim the data for each mooring to the defined time range
 raft_1m = raft_1m(raft_1m.UTC_Date___Time >= startTime & raft_1m.UTC_Date___Time <= endTime, :);
-raft_7m  = raft_7m(raft_7m.UTC_Date___Time >= startTime & raft_7m.UTC_Date___Time <= endTime, :);
+raft_3m  = raft_3m(raft_3m.UTC_Date___Time >= startTime & raft_3m.UTC_Date___Time <= endTime, :);
 
 
 %% plot timeseries 
@@ -52,10 +58,10 @@ figure(1); clf;
 
 hold on;
 p1 = plot(raft_1m.UTC_Date___Time, raft_1m.DissolvedOxygen, 'b-', 'LineWidth', 2.0);
-%p2 = plot(raft_7m.UTC_Date___Time, raft_7m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
+p2 = plot(raft_3m.UTC_Date___Time, raft_3m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
 yline(2, 'k--', 'LineWidth', 1.5)
 
-legend([p1], '3m depth') % legend([p1 p2], '1m depth', '7m depth')
+legend([p1 p2], '1m depth', '3m depth') % legend([p1 p2], '1m depth', '7m depth')
 xlabel('Time')
 ylabel('Dissolved Oxygen (mgL^{-1})')
 title('Dissolved oxygen time series from the shellfish rafts')
@@ -64,7 +70,7 @@ hold off
 
 % -- save the figure --
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -72,7 +78,7 @@ if ~exist(outDir, 'dir')
 end
 
 
-do_figName = sprintf('miniDOT_DO_timeseries_JulAug2026_rafts.png'); 
+do_figName = sprintf('miniDOT_DO_timeseries_AugSep2026_rafts.png'); 
 do_outFile = fullfile(outDir, do_figName);
 
 exportgraphics(figure(1), do_outFile, 'Resolution', 300);
@@ -84,16 +90,16 @@ figure(2); clf;
 
 p1 = plot(raft_1m.UTC_Date___Time, raft_1m.Temperature, 'b-', 'LineWidth', 2.0);
 hold on;
-%p2 = plot(raft_7m.UTC_Date___Time, raft_7m.Temperature, 'm-', 'LineWidth', 2.0);
+p2 = plot(raft_3m.UTC_Date___Time, raft_3m.Temperature, 'm-', 'LineWidth', 2.0);
 
-legend([p1], '3m depth') % legend([p1 p2], '1m depth', '7m depth')
+legend([p1 p2], '1m depth', '3m depth') % legend([p1 p2], '1m depth', '7m depth')
 xlabel('Time')
 ylabel('Temperature (°C)')
 title('Temperature time series from the shellfish rafts')
 axis tight
 
 % save it out
-temp_figName = sprintf('miniDOT_temp_timeseries_JulAug2026_rafts.png'); 
+temp_figName = sprintf('miniDOT_temp_timeseries_AugSep2026_rafts.png'); 
 temp_outFile = fullfile(outDir, temp_figName);
 
 exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
@@ -109,16 +115,16 @@ xlabel('Dissolved oxygen concentration (mgL^{-1})')
 ylabel('Frequency')
 title('1m shellfish raft sensor DO distribution')
 
-saveas(gcf, 'miniDOT_1mDO_hist_May2026_rafts.png');
+saveas(gcf, 'miniDOT_1mDO_hist_AugSep2026_rafts.png');
 
 figure(4); clf;
 
-hist(raft_7m.DissolvedOxygen);
+hist(raft_3m.DissolvedOxygen);
 xlabel('Dissolved oxygen concentration (mgL^{-1})')
 ylabel('Frequency')
 title('7m shellfish raft sensor DO distribution')
 
-% saveas(gcf, 'miniDOT_7mDO_hist_May2026_rafts.png');
+saveas(gcf, 'miniDOT_7mDO_hist_AugSep2026_rafts.png');
 
 %% Plot histograms for Temperature
 
@@ -129,16 +135,16 @@ xlabel('Temperature (°C)')
 ylabel('Frequency')
 title('1m shellfish raft sensor Temperature distribution')
 
-saveas(gcf, 'miniDOT_1mTemp_hist_May2026_rafts.png');
+saveas(gcf, 'miniDOT_1mTemp_hist_AugSep2026_rafts.png');
 
 
 figure(6); clf;
-hist(raft_7m.Temperature);
+hist(raft_3m.Temperature);
 xlabel('Temperature (°C)')
 ylabel('Frequency')
 title('7m shellfish raft sensor Temperature distribution')
 
-% saveas(gcf, 'miniDOT_7mTemp_hist_May2026_rafts.png');
+saveas(gcf, 'miniDOT_7mTemp_hist_AugSep2026_rafts.png');
 
 
 %% Data cleaning
@@ -155,4 +161,4 @@ title('7m shellfish raft sensor Temperature distribution')
 %% save the data
 
 
-save miniDOT_JulAug2026_raftdata_raw.mat raft_1m %raft_7m
+save miniDOT_AugSep2026_raftdata_raw.mat raft_1m raft_3m

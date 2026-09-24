@@ -52,7 +52,7 @@ LJS_32m = readtable('LoveJoySouth_AugSep2026/miniDOT/LoveJoySouth_AugSep2026_32m
 % ---- AugSep ----
 
 startTime = datetime(2026, 8, 27, 20, 0, 0);
-endTime = datetime(2026, 9, 22, 19, 0, 0);
+endTime = datetime(2026, 9, 22, 20, 0, 0);
 
 
 
@@ -179,7 +179,7 @@ linkaxes([s1 s2 s3 s4],'x')
 
 % -- save the figure --
 
-doHist_figName = sprintf('miniDOT_DO_histograms_AugSep2026_moorings.png'); 
+doHist_figName = sprintf('miniDOT_DO_histograms_JulAug2026_moorings.png'); 
 doHist_outFile = fullfile(outDir, doHist_figName);
 
 exportgraphics(figure(3), doHist_outFile, 'Resolution', 300);
@@ -223,7 +223,7 @@ linkaxes([s5 s6 s7 s8],'x')
 
 % -- save the figure --
 
-tempHist_figName = sprintf('miniDOT_temp_histograms_AugSep2026_moorings.png'); 
+tempHist_figName = sprintf('miniDOT_temp_histograms_JulAug2026_moorings.png'); 
 tempHist_outFile = fullfile(outDir, tempHist_figName);
 
 exportgraphics(figure(4), tempHist_outFile, 'Resolution', 300);
@@ -232,7 +232,7 @@ exportgraphics(figure(4), tempHist_outFile, 'Resolution', 300);
 %% save out the data
 
 
-save miniDOT_AugSep2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
+save miniDOT_JulAug2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
 
 %% cleaning with a hampel filter and rate of change filter
 
