@@ -57,7 +57,7 @@ for k = 1:numel(files)
 
     oxy = T.(files(k).oxyCol);
 
-    % ---- Hard sanity-range filter (catches gross sensor/data errors) ----
+    % ---- sanity-range filter (catches bad sensor/data errors) ----
     % A spike into the thousands/millions (stuck sensor, corrupted field,
     % etc.) will corrupt the local median/std that the Hampel filter
     % relies on if it isn't removed first, so this runs before Hampel.
@@ -213,25 +213,26 @@ linkaxes(ax2, 'x');
 MayJun = load('TODOdata_MayJun2026_L3.mat');
 JunJul = load('TODOdata_JunJul2026_L3.mat');
 JulAug = load('TODOdata_JulAug2026_L3.mat');
+AugSep = load('TODOdata_AugSep2026_L3.mat');
 
 
 %% concatenate the data in time
 
 % LJN
-LJN_alldata_time = [MayJun.TODO_data.LoveJoyNorth.data.tstamp; JunJul.TODO_data.LoveJoyNorth.data.tstamp; JulAug.TODO_data.LoveJoyNorth.data.tstamp]; 
-LJN_alldata_values = [MayJun.TODO_data.LoveJoyNorth.data.values; JunJul.TODO_data.LoveJoyNorth.data.values; JulAug.TODO_data.LoveJoyNorth.data.values]; 
+LJN_alldata_time = [MayJun.TODO_data.LoveJoyNorth.data.tstamp; JunJul.TODO_data.LoveJoyNorth.data.tstamp; JulAug.TODO_data.LoveJoyNorth.data.tstamp; AugSep.TODO_data.LoveJoyNorth.data.tstamp]; 
+LJN_alldata_values = [MayJun.TODO_data.LoveJoyNorth.data.values; JunJul.TODO_data.LoveJoyNorth.data.values; JulAug.TODO_data.LoveJoyNorth.data.values; AugSep.TODO_data.LoveJoyNorth.data.values]; 
 
 %LJS
-LJS_alldata_time = [MayJun.TODO_data.LoveJoySouth.data.tstamp; JunJul.TODO_data.LoveJoySouth.data.tstamp; JulAug.TODO_data.LoveJoySouth.data.tstamp];
-LJS_alldata_values = [MayJun.TODO_data.LoveJoySouth.data.values; JunJul.TODO_data.LoveJoySouth.data.values; JulAug.TODO_data.LoveJoySouth.data.values]; 
+LJS_alldata_time = [MayJun.TODO_data.LoveJoySouth.data.tstamp; JunJul.TODO_data.LoveJoySouth.data.tstamp; JulAug.TODO_data.LoveJoySouth.data.tstamp; AugSep.TODO_data.LoveJoySouth.data.tstamp];
+LJS_alldata_values = [MayJun.TODO_data.LoveJoySouth.data.values; JunJul.TODO_data.LoveJoySouth.data.values; JulAug.TODO_data.LoveJoySouth.data.values; AugSep.TODO_data.LoveJoySouth.data.values]; 
 
 % Inner N
-InnerN_alldata_time = [MayJun.TODO_data.InnerNorth.data.tstamp; JunJul.TODO_data.InnerNorth.data.tstamp; JulAug.TODO_data.InnerNorth.data.tstamp];
-InnerN_alldata_values = [MayJun.TODO_data.InnerNorth.data.values; JunJul.TODO_data.InnerNorth.data.values; JulAug.TODO_data.InnerNorth.data.values]; 
+InnerN_alldata_time = [MayJun.TODO_data.InnerNorth.data.tstamp; JunJul.TODO_data.InnerNorth.data.tstamp; JulAug.TODO_data.InnerNorth.data.tstamp; AugSep.TODO_data.InnerNorth.data.tstamp];
+InnerN_alldata_values = [MayJun.TODO_data.InnerNorth.data.values; JunJul.TODO_data.InnerNorth.data.values; JulAug.TODO_data.InnerNorth.data.values; AugSep.TODO_data.InnerNorth.data.values]; 
 
 % Inner S
-InnerS_alldata_time = [MayJun.TODO_data.InnerSouth.data.tstamp; JunJul.TODO_data.InnerSouth.data.tstamp; JulAug.TODO_data.InnerSouth.data.tstamp];
-InnerS_alldata_values = [MayJun.TODO_data.InnerSouth.data.values; JunJul.TODO_data.InnerSouth.data.values; JulAug.TODO_data.InnerSouth.data.values]; 
+InnerS_alldata_time = [MayJun.TODO_data.InnerSouth.data.tstamp; JunJul.TODO_data.InnerSouth.data.tstamp; JulAug.TODO_data.InnerSouth.data.tstamp; AugSep.TODO_data.InnerSouth.data.tstamp];
+InnerS_alldata_values = [MayJun.TODO_data.InnerSouth.data.values; JunJul.TODO_data.InnerSouth.data.values; JulAug.TODO_data.InnerSouth.data.values; AugSep.TODO_data.InnerSouth.data.values]; 
 
 
 %% remove gaps larger than 12 hours
@@ -321,7 +322,320 @@ grid on;
 legend([h1 h2], 'Location', 'best');
 xlabel('Date');
 
+%% Pull in the surface DO data from the LJN SWIFT
 
+% SWIFT 28 is the LJN swift
+
+% read in the concatrnated data
+
+% Read and concatenate SWIFT 28 surface dissolved oxygen data
+swift28Files = {'swift28_MayJun2026_cat.mat','swift28_JunJul2026_cat.mat', ...
+    'swift28_JulAug2026_cat.mat', 'swift28_AugSep2026_cat.mat'};
+
+
+swift28_time   = [];
+swift28_O2mgl = [];
+
+for i = 1:numel(swift28Files)
+    tmp = load(swift28Files{i});
+    vn  = fieldnames(tmp);
+    s   = tmp.(vn{1});                 % 1x262 struct array
+
+    % Pull the field out of every element, force each to a column, stack them
+    t = cellfun(@(x) x(:), {s.time},  'UniformOutput', false);
+    v = cellfun(@(x) x(:), {s.O2conc}, 'UniformOutput', false);  
+
+    swift28_time   = [swift28_time;   vertcat(t{:})];
+    swift28_O2mgl = [swift28_O2mgl; vertcat(v{:})];
+end
+
+%% adjust that data as well
+
+[swift28_time, swift28_O2mgl] = insert_gap_nans(swift28_time, swift28_O2mgl, 0.5);
+swift28_time = datetime(swift28_time, 'ConvertFrom', 'datenum');   
+
+
+
+
+%% --- NEW SECTION ADDED SEPTEMBER 28 2026 --- %%
+%%
+
+
+%% ================== ADDENDUM: DAY-OF-YEAR OVERLAY PLOT ==================
+% Paste this AFTER the LJN daily-mean section (it needs results, colors,
+% fullDaysLJN, filledMeanLJN, filledStdLJN) and BEFORE the helper
+% function section at the bottom of your script.
+%
+% Top panel:    BOTTOM oxygen. King County bottom (one line per year)
+%               + your LJN mooring (thick dashed line with markers).
+% Bottom panel: SURFACE oxygen, King County (one line per year).
+%
+% x-axis is "day of year", drawn on a dummy leap year (2000) so the ticks
+% can be labeled by month and Feb 29 is handled properly.
+
+% Map any datetime onto the dummy year 2000 (same month/day)
+toDummy = @(d) datetime(2000, month(d), day(d));
+
+% Year colors (Okabe-Ito, colorblind-friendly). Add more rows if needed.
+yearList   = [2023 2024 2025 2026];
+yearColors = [  0 114 178;    % 2023 blue
+              230 159   0;    % 2024 orange
+                0 158 115;    % 2025 green
+               86 180 233] / 255;  % 2026 sky blue
+ljnColor2  = [204 121 167] / 255;  % reddish-purple for your mooring
+
+figure('Position',[100 100 950 800]);
+ax3 = gobjects(2,1);
+
+panelIdx   = [2 1];                       % results index: 2 = Bottom, 1 = Surface
+panelTitle = {'Bottom dissolved oxygen: King County Penn Cove Entrance Buoy vs. our LJN mooring', ...
+              'Surface dissolved oxygen: King County Penn Cove Entrance Buoy'};
+
+for p = 1:2
+    ax3(p) = subplot(2,1,p);
+    hold on;
+    k = panelIdx(p);
+
+    d = results(k).days(:);
+    m = results(k).dailyMean(:);
+    yrs = year(d);
+
+    hYear = gobjects(0);
+    for j = 1:numel(yearList)
+        sel = (yrs == yearList(j));
+        if ~any(sel), continue; end
+        hYear(end+1) = plot(toDummy(d(sel)), m(sel), ...
+            'Color', yearColors(j,:), 'LineWidth', 1.4, ...
+            'DisplayName', sprintf('King County %d', yearList(j))); %#ok<SAGROW>
+    end
+
+    yline(2, '--', '2 mg/L', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.2, ...
+        'LabelHorizontalAlignment', 'left', 'HandleVisibility', 'off');
+
+    % ---- Highlight your LJN data on the bottom panel only ----
+    if p == 1
+        okLJN = ~isnan(filledMeanLJN);
+        xL = toDummy(fullDaysLJN(:));
+        mL = filledMeanLJN(:);
+        sL = filledStdLJN(:);
+
+        % Light +/- 1 SD band behind the line
+        fill([xL; flipud(xL)], [mL+sL; flipud(mL-sL)], ljnColor2, ...
+            'FaceAlpha', 0.20, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+
+        % Thick dashed line with markers so it stands out from the solid KC lines
+        hLJN = plot(xL, mL, '--', 'Color', ljnColor2, 'LineWidth', 3, ...
+            'Marker', 'o', 'MarkerSize', 4, 'MarkerFaceColor', ljnColor2, ...
+            'MarkerIndices', find(okLJN, 1):3:numel(mL), ...
+            'DisplayName', sprintf('OUR LJN mooring, bottom (%d)', year(fullDaysLJN(1))));
+
+        legend([hYear hLJN], 'Location', 'best');
+    else
+        legend(hYear, 'Location', 'best');
+    end
+
+    hold off;
+    ylabel('Oxygen (mg/L)');
+    title(panelTitle{p}, 'Interpreter', 'none');
+    grid on;
+    box on;
+    xlim([datetime(2000,1,1) datetime(2000,12,31)]);
+    ylim([0 17]);
+    xtickformat('MMM');
+end
+
+% Shade the date range covered by your LJN deployment on the bottom panel
+% (drawn behind everything else) to make it obvious which part is "new"
+xLJNrange = toDummy([fullDaysLJN(1) fullDaysLJN(end)]);
+yl = ylim(ax3(1));
+hold(ax3(1), 'on');   % IMPORTANT: without this, fill() wipes the existing lines
+hBand = fill(ax3(1), [xLJNrange(1) xLJNrange(2) xLJNrange(2) xLJNrange(1)], ...
+             [yl(1) yl(1) yl(2) yl(2)], ljnColor2, ...
+             'FaceAlpha', 0.07, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+uistack(hBand, 'bottom');
+hold(ax3(1), 'off');
+
+xlabel(ax3(2), 'Month (day of year)');
+sgtitle('Dissolved oxygen by day of year, all years overlaid');
+
+linkaxes(ax3, 'xy');
+
+
+%% ============ ADD swift28 SURFACE DATA TO THE SURFACE PANEL ============
+% Run AFTER the code above. Needs swift28_time (datetime) and
+% swift28_values from your loading/gap-insertion steps.
+
+swTime = swift28_time(:);
+swOxy  = swift28_O2mgl(:,1);    
+swOxy  = swOxy * 0.032;           % convert µmol/L -> mg/L (O2 = 32 g/mol)
+oxyRangeSw = [0, 17];             % mg/L sanity bound (same as the KC surface data)
+
+% Drop missing, then sort chronologically
+valid  = ~isnat(swTime) & ~isnan(swOxy);
+swTime = swTime(valid);
+swOxy  = swOxy(valid);
+[swTime, sortIdx] = sort(swTime);
+swOxy  = swOxy(sortIdx);
+
+% Same Hampel + range filters used for the other datasets
+[~, isOutlier] = hampel(swOxy, 2, 2);
+swOxy(isOutlier) = NaN;
+swOxy(swOxy < oxyRangeSw(1) | swOxy > oxyRangeSw(2)) = NaN;
+keep   = ~isnan(swOxy);
+swTime = swTime(keep);
+swOxy  = swOxy(keep);
+
+% Daily mean/std on a continuous calendar (gaps break the line)
+dayOf = dateshift(swTime, 'start', 'day');
+[uniqueDaysSw, ~, ic] = unique(dayOf);
+dailyMeanSw = accumarray(ic, swOxy, [], @mean);
+dailyStdSw  = accumarray(ic, swOxy, [], @std);
+
+fullDaysSw = (uniqueDaysSw(1) : caldays(1) : uniqueDaysSw(end))';
+[isPresent, loc] = ismember(fullDaysSw, uniqueDaysSw);
+filledMeanSw = NaN(size(fullDaysSw));
+filledStdSw  = NaN(size(fullDaysSw));
+filledMeanSw(isPresent) = dailyMeanSw(loc(isPresent));
+filledStdSw(isPresent)  = dailyStdSw(loc(isPresent));
+
+% ---- Add to the SURFACE panel (ax3(2)) of the day-of-year figure ----
+swColor = [204 121 167] / 255;    % same reddish-purple as the LJN bottom mooring
+xS = toDummy(fullDaysSw(:));
+mS = filledMeanSw(:);
+sS = filledStdSw(:);
+okSw = ~isnan(mS);
+
+hold(ax3(2), 'on');               % keep hold on so nothing gets wiped
+
+% Light shaded deployment window (behind everything)
+xSwRange = toDummy([fullDaysSw(1) fullDaysSw(end)]);
+ylS = ylim(ax3(2));
+hBandS = fill(ax3(2), [xSwRange(1) xSwRange(2) xSwRange(2) xSwRange(1)], ...
+              [ylS(1) ylS(1) ylS(2) ylS(2)], swColor, ...
+              'FaceAlpha', 0.07, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+uistack(hBandS, 'bottom');
+
+% +/- 1 SD band
+fill(ax3(2), [xS; flipud(xS)], [mS+sS; flipud(mS-sS)], swColor, ...
+    'FaceAlpha', 0.20, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+
+% Thick dashed line with markers, matching the LJN style
+hSw = plot(ax3(2), xS, mS, '--', 'Color', swColor, 'LineWidth', 3, ...
+    'Marker', 'o', 'MarkerSize', 4, 'MarkerFaceColor', swColor, ...
+    'MarkerIndices', find(okSw, 1):3:numel(mS), ...
+    'DisplayName', sprintf('OUR swift28 mooring, surface (%d)', year(fullDaysSw(1))));
+
+hold(ax3(2), 'off');
+
+% Rebuild the legend (hYear still holds the KC surface handles from the loop above)
+legend(ax3(2), [hYear hSw], 'Location', 'best');
+title(ax3(2), 'Surface dissolved oxygen: King County Penn Cove Entrance Buoy vs. our swift28 mooring', ...
+    'Interpreter', 'none');
+
+
+
+
+
+
+
+%% ===== stop here ===== %%
+
+
+%% addendum to plot this as day of year plot instead of one long timeseries
+
+% Top panel:    BOTTOM oxygen. King County bottom (one line per year)
+%               + LJN mooring (thick dashed line with markers).
+% Bottom panel: SURFACE oxygen, King County (one line per year).
+%
+% x-axis is "day of year", drawn on a dummy leap year (2000) so the ticks
+% can be labeled by month and Feb 29 is handled properly.
+ 
+% Map any datetime onto the dummy year 2000 (same month/day)
+% toDummy = @(d) datetime(2000, month(d), day(d));
+% 
+% % Year colors (Okabe-Ito, colorblind-friendly). Add more rows if needed.
+% yearList   = [2023 2024 2025 2026];
+% yearColors = [  0 114 178;    % 2023 blue
+%               230 159   0;    % 2024 orange
+%                 0 158 115;    % 2025 green
+%                86 180 233] / 255;  % 2026 sky blue
+% ljnColor2  = [204 121 167] / 255;  % reddish-purple for your mooring
+% 
+% figure('Position',[100 100 950 800]);
+% ax3 = gobjects(2,1);
+% 
+% panelIdx   = [2 1];                       % results index: 2 = Bottom, 1 = Surface
+% panelTitle = {'Bottom dissolved oxygen: King County Penn Cove Entrance Buoy vs. our LJN mooring', ...
+%               'Surface dissolved oxygen: King County Penn Cove Entrance Buoy'};
+% 
+% for p = 1:2
+%     ax3(p) = subplot(2,1,p);
+%     hold on;
+%     k = panelIdx(p);
+% 
+%     d = results(k).days(:);
+%     m = results(k).dailyMean(:);
+%     yrs = year(d);
+% 
+%     hYear = gobjects(0);
+%     for j = 1:numel(yearList)
+%         sel = (yrs == yearList(j));
+%         if ~any(sel), continue; end
+%         hYear(end+1) = plot(toDummy(d(sel)), m(sel), ...
+%             'Color', yearColors(j,:), 'LineWidth', 1.4, ...
+%             'DisplayName', sprintf('King County %d', yearList(j))); %#ok<SAGROW>
+%     end
+% 
+%     yline(2, '--', '2 mg/L', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.2, ...
+%         'LabelHorizontalAlignment', 'left', 'HandleVisibility', 'off');
+% 
+%     % ---- Highlight your LJN data on the bottom panel only ----
+%     if p == 1
+%         okLJN = ~isnan(filledMeanLJN);
+%         xL = toDummy(fullDaysLJN(:));
+%         mL = filledMeanLJN(:);
+%         sL = filledStdLJN(:);
+% 
+%         % Light +/- 1 SD band behind the line
+%         fill([xL; flipud(xL)], [mL+sL; flipud(mL-sL)], ljnColor2, ...
+%             'FaceAlpha', 0.20, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+% 
+%         % Thick dashed line with markers so it stands out from the solid KC lines
+%         hLJN = plot(xL, mL, '--', 'Color', ljnColor2, 'LineWidth', 3, ...
+%             'Marker', 'o', 'MarkerSize', 4, 'MarkerFaceColor', ljnColor2, ...
+%             'MarkerIndices', find(okLJN, 1):3:numel(mL), ...
+%             'DisplayName', sprintf('OUR LJN mooring, bottom (%d)', year(fullDaysLJN(1))));
+% 
+%         legend([hYear hLJN], 'Location', 'best');
+%     else
+%         legend(hYear, 'Location', 'best');
+%     end
+% 
+%     hold off;
+%     ylabel('Oxygen (mg/L)');
+%     title(panelTitle{p}, 'Interpreter', 'none');
+%     grid on;
+%     box on;
+%     xlim([datetime(2000,1,1) datetime(2000,12,31)]);
+%     ylim([0 17]);
+%     xtickformat('MMM');
+% end
+% 
+% % Shade the date range covered by your LJN deployment on the bottom panel
+% % (drawn behind everything else) to make it obvious which part is "new"
+% xLJNrange = toDummy([fullDaysLJN(1) fullDaysLJN(end)]);
+% yl = ylim(ax3(1));
+% hold(ax3(1), 'on');   % IMPORTANT: without this, fill() wipes the existing lines
+% hBand = fill(ax3(1), [xLJNrange(1) xLJNrange(2) xLJNrange(2) xLJNrange(1)], ...
+%              [yl(1) yl(1) yl(2) yl(2)], ljnColor2, ...
+%              'FaceAlpha', 0.07, 'EdgeColor', 'none', 'HandleVisibility', 'off');
+% uistack(hBand, 'bottom');
+% hold(ax3(1), 'off');
+% 
+% xlabel(ax3(2), 'Month (day of year)');
+% sgtitle('Dissolved oxygen by day of year, all years overlaid');
+% 
+% linkaxes(ax3, 'xy');
 
 %% helper function for putting gaps between deployments in the data
 

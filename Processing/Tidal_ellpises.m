@@ -7,7 +7,7 @@ clear all, close all
 %% load in the SWIFT sig data
 
 % this is coming from the MayJun 2026 period
-
+% 
 SWIFT09_WWS = load('SWIFT09_SDcard_MayJun2026_SIG.mat');
 
 SWIFT18_WWN = load('SWIFT18_SDcard_MayJun2026_SIG.mat');
@@ -20,6 +20,18 @@ SWIFT28_LJN = load('SWIFT28_SDcard_MayJun2026_SIG.mat');
 
 SWIFT29_InS = load('SWIFT29_SDcard_MayJun2026_SIG.mat');
 
+
+% SWIFT09_WWS = load('SWIFT09_SDcard_JulAug2026_SIG.mat');
+% 
+% SWIFT18_WWN = load('SWIFT18_SDcard_JulAug2026_SIG.mat');
+% 
+% SWIFT26_InN = load('SWIFT26_SDcard_JulAug2026_SIG.mat');
+% 
+% SWIFT27_LJS = load('SWIFT27_SDcard_JulAug2026_SIG.mat');
+% 
+% SWIFT28_LJN = load('SWIFT28_SDcard_JulAug2026_SIG.mat');
+% 
+% SWIFT29_InS = load('SWIFT29_SDcard_JulAug2026_SIG.mat');
 
 %% Run all through Utide to get the tidal velocity component
 
@@ -54,8 +66,8 @@ SWIFT29_InS = load('SWIFT29_SDcard_MayJun2026_SIG.mat');
 lat = 48.23; % for PEnn Cove
  
 % Same two depth bins for every mooring
-depthBins    = [2, 15];   % actual depth (m), for labeling
-depthIndices = [4, 30];       % index into profile(k).u / profile(k).v
+depthBins    = [2, 12];   % actual depth (m), for labeling, was 15
+depthIndices = [4, 24];       % index into profile(k).u / profile(k).v, was 30
 nDepths      = numel(depthIndices);
  
 names   = {'InnerN', 'LJN', 'WWN', ...
@@ -195,8 +207,9 @@ end
 %  (shallow depth vs. deep depth, overlaid in the same axes per mooring)
 %  ========================================================================
 
-depthColors = [0.85 0.33 0.10;    % shallow bin -> orange
-               0.00 1 1];   % deep bin    -> blue  0.00 0.45 0.74]; 
+depthColors = [0.00 1 1; % shallow bin    -> blue  0.00 0.45 0.74]; 
+    0.85 0.33 0.10;    % deep bin bin -> orange
+    ];  
 
 figure('Color', 'w', 'Position', [100 100 1200 700]);
 

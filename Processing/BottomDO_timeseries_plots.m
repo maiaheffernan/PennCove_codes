@@ -23,23 +23,27 @@ JunJul = load('TODOdata_JunJul2026_L3.mat');
 
 JulAug = load('TODOdata_JulAug2026_L3.mat');
 
+% August to September
+
+AugSep = load('TODOdata_AugSep2026_L3.mat');
+
 %% concatenate the data in time
 
 % LJN
-LJN_alldata_time = [MayJun.TODO_data.LoveJoyNorth.data.tstamp; JunJul.TODO_data.LoveJoyNorth.data.tstamp; JulAug.TODO_data.LoveJoyNorth.data.tstamp]; 
-LJN_alldata_values = [MayJun.TODO_data.LoveJoyNorth.data.values; JunJul.TODO_data.LoveJoyNorth.data.values; JulAug.TODO_data.LoveJoyNorth.data.values]; 
+LJN_alldata_time = [MayJun.TODO_data.LoveJoyNorth.data.tstamp; JunJul.TODO_data.LoveJoyNorth.data.tstamp; JulAug.TODO_data.LoveJoyNorth.data.tstamp; AugSep.TODO_data.LoveJoyNorth.data.tstamp]; 
+LJN_alldata_values = [MayJun.TODO_data.LoveJoyNorth.data.values; JunJul.TODO_data.LoveJoyNorth.data.values; JulAug.TODO_data.LoveJoyNorth.data.values; AugSep.TODO_data.LoveJoyNorth.data.values]; 
 
 %LJS
-LJS_alldata_time = [MayJun.TODO_data.LoveJoySouth.data.tstamp; JunJul.TODO_data.LoveJoySouth.data.tstamp; JulAug.TODO_data.LoveJoySouth.data.tstamp];
-LJS_alldata_values = [MayJun.TODO_data.LoveJoySouth.data.values; JunJul.TODO_data.LoveJoySouth.data.values; JulAug.TODO_data.LoveJoySouth.data.values]; 
+LJS_alldata_time = [MayJun.TODO_data.LoveJoySouth.data.tstamp; JunJul.TODO_data.LoveJoySouth.data.tstamp; JulAug.TODO_data.LoveJoySouth.data.tstamp; AugSep.TODO_data.LoveJoySouth.data.tstamp];
+LJS_alldata_values = [MayJun.TODO_data.LoveJoySouth.data.values; JunJul.TODO_data.LoveJoySouth.data.values; JulAug.TODO_data.LoveJoySouth.data.values; AugSep.TODO_data.LoveJoySouth.data.values]; 
 
 % Inner N
-InnerN_alldata_time = [MayJun.TODO_data.InnerNorth.data.tstamp; JunJul.TODO_data.InnerNorth.data.tstamp; JulAug.TODO_data.InnerNorth.data.tstamp];
-InnerN_alldata_values = [MayJun.TODO_data.InnerNorth.data.values; JunJul.TODO_data.InnerNorth.data.values; JulAug.TODO_data.InnerNorth.data.values]; 
+InnerN_alldata_time = [MayJun.TODO_data.InnerNorth.data.tstamp; JunJul.TODO_data.InnerNorth.data.tstamp; JulAug.TODO_data.InnerNorth.data.tstamp; AugSep.TODO_data.InnerNorth.data.tstamp];
+InnerN_alldata_values = [MayJun.TODO_data.InnerNorth.data.values; JunJul.TODO_data.InnerNorth.data.values; JulAug.TODO_data.InnerNorth.data.values; AugSep.TODO_data.InnerNorth.data.values]; 
 
 % Inner S
-InnerS_alldata_time = [MayJun.TODO_data.InnerSouth.data.tstamp; JunJul.TODO_data.InnerSouth.data.tstamp; JulAug.TODO_data.InnerSouth.data.tstamp];
-InnerS_alldata_values = [MayJun.TODO_data.InnerSouth.data.values; JunJul.TODO_data.InnerSouth.data.values; JulAug.TODO_data.InnerSouth.data.values]; 
+InnerS_alldata_time = [MayJun.TODO_data.InnerSouth.data.tstamp; JunJul.TODO_data.InnerSouth.data.tstamp; JulAug.TODO_data.InnerSouth.data.tstamp; AugSep.TODO_data.InnerSouth.data.tstamp];
+InnerS_alldata_values = [MayJun.TODO_data.InnerSouth.data.values; JunJul.TODO_data.InnerSouth.data.values; JulAug.TODO_data.InnerSouth.data.values; AugSep.TODO_data.InnerSouth.data.values]; 
 
 
 %% remove gaps larger than 12 hours
@@ -199,21 +203,27 @@ grid off;
 
 linkaxes([s3 s4], 'x');
 
+axis tight
+
 %% save this figure to the outdirectory in github
 
-% OutDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures';
-% 
-% % save the figures here
-% 
-% saveas(figure(1), fullfile(OutDir, 'BottomDO_MaytoAug.png'));
-% 
-% saveas(figure(2), fullfile(OutDir, 'BottomTemp_MaytoAug.png'));
-% 
-% saveas(figure(3), fullfile(OutDir, 'Bottom_DOandTemp_MaytoAug.png'));
-% 
+OutDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures';
 
+% save the figures here
+
+saveas(figure(1), fullfile(OutDir, 'BottomDO_MaytoSep_wholeTimeSeries.png'));
+
+saveas(figure(2), fullfile(OutDir, 'BottomTemp_MaytoSep_wholeTimeSeries.png'));
+
+saveas(figure(3), fullfile(OutDir, 'Bottom_DOandTemp_MaytoSep_wholeTimeSeries.png'));
+
+saveas(figure(4), fullfile(OutDir, 'DailyAveraged_BottomDO_MaytoSep.png'));
+
+saveas(figure(5), fullfile(OutDir, 'DailyAveraged_BottomDOandTemp_MaytoSep.png'));
 
 %% ---- helper functions ----
+
+%% plotting shaded lines
 
 function plot_shaded(t, meanVals, stdVals, colorSpec, dispName)
 % Plots meanVals vs t with a shaded +/- stdVals band, using colorSpec
@@ -263,7 +273,7 @@ end
 
 
 
-%% helper function for putting gaps between deployments in the data
+%% function for putting gaps between deployments in the data
 
 function [t_out, v_out] = insert_gap_nans(t_in, v_in, gap_thresh_days)
 % t_in: datetime vector, v_in: matching data matrix (rows = time), 
@@ -281,5 +291,29 @@ for k = length(gap_idx):-1:1
     t_nan = t_in(i) + (t_in(i+1) - t_in(i))/2; % midpoint timestamp
     t_out = [t_out(1:i); t_nan; t_out(i+1:end)];
     v_out = [v_out(1:i,:); NaN(1,size(v_in,2)); v_out(i+1:end,:)];
+end
+end
+
+
+%% daily average function
+
+
+function [dailyT, dailyMean, dailyStd] = daily_average(t, v)
+% t: datetime vector, v: matching Nx3 (or NxM) data matrix
+% Returns one row per calendar day, using 'omitnan' throughout so
+% gap-markers / missing samples don't propagate into NaN days.
+
+dayKey = dateshift(t, 'start', 'day');
+dailyT = unique(dayKey);
+nDays = length(dailyT);
+nCols = size(v, 2);
+
+dailyMean = nan(nDays, nCols);
+dailyStd  = nan(nDays, nCols);
+
+for d = 1:nDays
+    idx = (dayKey == dailyT(d));
+    dailyMean(d,:) = mean(v(idx,:), 1, 'omitnan');
+    dailyStd(d,:)  = std(v(idx,:), 0, 1, 'omitnan');
 end
 end

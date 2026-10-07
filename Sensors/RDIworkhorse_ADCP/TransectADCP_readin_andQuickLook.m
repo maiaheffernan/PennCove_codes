@@ -6,9 +6,9 @@
 
 clc, clear all, close all
 
-files = dir('Echo_ADCP_26Aug2026_ebb.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
+files = dir('Echo_ADCP_23Sep2026_ebb.mat'); %'Robertson_ADCP_27May2026_lap*.mat'
 
-for fi = 1:length(files),
+for fi = 1:length(files)
 
 
 %% read in exports and make simple variables
@@ -31,7 +31,7 @@ lat = mean( [ AnFLatDeg AnLLatDeg ]');
 lon = mean( [ AnFLonDeg AnLLonDeg ]');
 
 % basic info
-readme = 'RV Sounder underway ADCP data as East-North-Up current profiles in m/s.  Currents are in the fixed earth reference frame, using bottom tracking as a reference.  Times at matlab datenum in UTC.';
+readme = 'RV Echo underway ADCP data as East-North-Up current profiles in m/s.  Currents are in the fixed earth reference frame, using bottom tracking as a reference.  Times at matlab datenum in UTC.';
 
 
 %% mean bottom track depth
@@ -176,6 +176,6 @@ hold(ax, 'off');
 print('-dpng',['./' files(fi).name(1:end-4) '_track.png'])
 %% save cleaned results with simple variable names to a Level2 directory
 
-% save(['./' files(fi).name(1:end-4) '_cleaned.mat'],'time','east','north','up','z','depth','lat','lon','error','readme')
+save(['./' files(fi).name(1:end-4) '_cleaned.mat'],'time','east','north','up','z','depth','lat','lon','error','readme')
 
 end

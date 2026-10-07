@@ -6,7 +6,7 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'Echo_CTD_26Aug2026_flood.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_23Sep2026_ebb.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 
@@ -77,7 +77,7 @@ end
 % concerto the window length must be 11 !! =======
 
 for i = 1:length(channel_name_list)
-    [rsk, spike] = RSKdespike(rsk,'channel',channel_name_list{i},'threshold',2,'windowLength',3,'action','nan', 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
+    [rsk, spike] = RSKdespike(rsk,'channel',channel_name_list{i},'threshold',2,'windowLength',11,'action','nan', 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
     fprintf('Max depth after step X: %.2f\n', max(rsk.data(i).values(:,7)));
 end
 
@@ -106,7 +106,7 @@ samplingperiod = readsamplingperiod(rsk); %determine logger sampling, in seconds
 
 % smoothing conductivity and temperature
 rsk = RSKsmooth(rsk,'channel',{'temperature','conductivity', 'salinity'},...
- 'windowLength', 3, 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
+ 'windowLength', 5, 'visualize', 10); % the value of 10 at the being proflie 10, which is what will get visualized in the plot
 
 
 
@@ -238,19 +238,19 @@ clim(ax_hdl(1), [10, 18]);   % Temperature
 clim(ax_hdl(2), [10, 30]);    % Salinity
 clim(ax_hdl(3), [2, 12]);    % Dissolved O2
 
-saveas(gcf, "pcolor_quicklook_SalTempDO_26Aug2026_flood.png") % pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png
+saveas(gcf, "pcolor_quicklook_SalTempDO_23Sep2026_ebb.png") % pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png
 
 
 
 
 %% saving
 
-save('Echo_CTD_26Aug2026_flood_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
+save('Echo_CTD_23Sep2026_ebb_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
 
 data = rsk.data;
 channels = rsk.channels;
 
-save('Echo_CTD_26Aug2026_flood_processed_L1_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
+save('Echo_CTD_23Sep2026_ebb_processed_L1_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
 
-save('Echo_CTD_26Aug2026_flood_processed_L1_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
+save('Echo_CTD_23Sep2026_ebb_processed_L1_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
 
