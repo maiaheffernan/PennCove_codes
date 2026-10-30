@@ -6,7 +6,7 @@ clear all, close all
 
 %% read with RSKtools
 
-rsk = RSKopen( [ 'Echo_CTD_23Sep2026_ebb.rsk' ]);
+rsk = RSKopen( [ 'Echo_CTD_24Sep2026.rsk' ]);
 % print a list of all the channels in the rsk file
 RSKprintchannels(rsk)
 % read the downcast from profiles 
@@ -164,7 +164,7 @@ rsk = RSKderivevelocity(rsk);
 % Apply the algorithm:  Outputs: RSK - Structure with data filtered by threshold profiling speed and removal of loops.
 %                                flagidx - Index of the samples that are filtered.
 
-[rsk, flagidx] = RSKremoveloops(rsk,'threshold',0.25,'visualize',50); % 0.25 value: minimum speed at which profile must be taken (units: m/s). This is the default rate from Ruskin. 
+[rsk, flagidx] = RSKremoveloops(rsk,'direction', 'down','threshold', 0.25,'visualize', 50); % 0.25 value: minimum speed at which profile must be taken (units: m/s). This is the default rate from Ruskin. 
 
 
 
@@ -238,19 +238,19 @@ clim(ax_hdl(1), [10, 18]);   % Temperature
 clim(ax_hdl(2), [10, 30]);    % Salinity
 clim(ax_hdl(3), [2, 12]);    % Dissolved O2
 
-saveas(gcf, "pcolor_quicklook_SalTempDO_23Sep2026_ebb.png") % pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png
+saveas(gcf, "pcolor_quicklook_SalTempDO_24Sep2026.png") % pcolor_quicklook_SalTempDO_21Jul2026_and22Jul2026_ebb.png
 
 
 
 
 %% saving
 
-save('Echo_CTD_23Sep2026_ebb_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
+save('Echo_CTD_24Sep2026_processed_L1.mat','rsk') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_processed_L1.mat
 
 data = rsk.data;
 channels = rsk.channels;
 
-save('Echo_CTD_23Sep2026_ebb_processed_L1_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
+save('Echo_CTD_24Sep2026_processed_DataAndChannelsOnly_L1.mat','data', 'channels') % Echo_CTD_22Jul2026_flood_TowYo_DataAndChannelsOnly_processed_L1.mat
 
-save('Echo_CTD_23Sep2026_ebb_processed_L1_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
+save('Echo_CTD_24Sep2026_processed_raw_L0.mat', 'raw') % Echo_CTD_22Jul2026_flood_TowYo_RSKdata_raw_L0.mat
 

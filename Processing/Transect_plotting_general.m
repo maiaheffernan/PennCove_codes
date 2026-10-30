@@ -22,16 +22,16 @@ clear all, close all
 
     % August
     
-    adcp_ebb = load('Echo_ADCP_26Aug2026_ebb_cleaned.mat');
-    adcp_flood = load('Echo_ADCP_26Aug2026_flood_cleaned.mat');
+    adcp_ebb = load('Echo_ADCP_23Sep2026_ebb_cleaned.mat');
+    adcp_flood = load('Echo_ADCP_23Sep2026_flood_cleaned.mat');
 
 
 % casting CTDO
 
     % August
 
-    ctd_ebb = load("Echo_CTD_26Aug2026_ebb_L2_withlatlon.mat");
-    ctd_flood = load("Echo_CTD_26Aug2026_flood_L2_withlatlon.mat");
+    ctd_ebb = load("Echo_CTD_23Sep2026_ebb_L2_withlatlon.mat");
+    ctd_flood = load("Echo_CTD_23Sep2026_flood_L2_withlatlon.mat");
 
 %% Plot the transect paths
 
@@ -74,11 +74,11 @@ subtitle('Flood')
 
 % save figure
 
-targetFolder = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/TransectSurveys'; 
-fileName = 'Echo_surveyTracks_26Aug2026.png';
-fullPath = fullfile(targetFolder, fileName);
+% targetFolder = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures'; %/TransectSurveys/SepTransecting2026'
+% fileName = 'Echo_surveyTracks_24Jun2026.png';
+% fullPath = fullfile(targetFolder, fileName);
 
-saveas(gcf, fullPath);
+% saveas(gcf, fullPath);
 
 
 %% add datetimes to the files
@@ -92,6 +92,7 @@ ctd_ebb.CTD_ebb.datetime = datetime([ctd_ebb.CTD_ebb.data.tstamp], "ConvertFrom"
 ctd_flood.CTD_flood.datetime = datetime([ctd_flood.CTD_flood.data.tstamp], "ConvertFrom", "datenum");
 
 
+
 %% Plot pcolors of the CTD and the velocity from the ADCP for the whole timeseries
 
 
@@ -102,34 +103,148 @@ ctd_flood.CTD_flood.datetime = datetime([ctd_flood.CTD_flood.data.tstamp], "Conv
     % channel 14: DO mg/L
 
 %% Build CTD matrices from the cast struct array 
-S = ctd_ebb.CTD_ebb;
-casts = S.data;                        % 303x1 struct array, one per cast
-nCasts = numel(casts);
-nSamples = size(casts(1).values, 1);   % 128, confirmed uniform across all casts
+% S = ctd_ebb.CTD_ebb;
+% casts = S.data;                        % 303x1 struct array, one per cast
+% nCasts = numel(casts);
+% nSamples = size(casts(1).values, 1);   % 128, confirmed uniform across all casts
+% 
+% depthMat = nan(nSamples, nCasts);
+% salMat   = nan(nSamples, nCasts);
+% tempMat  = nan(nSamples, nCasts);
+% doMat    = nan(nSamples, nCasts);
+% timeMat  = NaT(nSamples, nCasts);
+% 
+% for i = 1:nCasts
+%     v = casts(i).values;
+%     depthMat(:,i) = v(:,7);    % Depth (m)
+%     salMat(:,i)   = v(:,8);    % Salinity (PSU)
+%     tempMat(:,i)  = v(:,2);    % Temperature (°C)
+%     doMat(:,i)    = v(:,14);   % Dissolved oxygen (mg/L)
+%     timeMat(:,i)  = datetime(casts(i).tstamp, 'ConvertFrom', 'datenum');
+% end
 
-depthMat = nan(nSamples, nCasts);
-salMat   = nan(nSamples, nCasts);
-tempMat  = nan(nSamples, nCasts);
-doMat    = nan(nSamples, nCasts);
-timeMat  = NaT(nSamples, nCasts);
+%% make sure I am only pulling out the first CTD timestep and data point for each cast
 
-for i = 1:nCasts
-    v = casts(i).values;
-    depthMat(:,i) = v(:,7);    % Depth (m)
-    salMat(:,i)   = v(:,8);    % Salinity (PSU)
-    tempMat(:,i)  = v(:,2);    % Temperature (°C)
-    doMat(:,i)    = v(:,14);   % Dissolved oxygen (mg/L)
-    timeMat(:,i)  = datetime(casts(i).tstamp, 'ConvertFrom', 'datenum');
+% S = ctd_ebb.CTD_ebb;
+% casts = S.data;
+% nCasts = numel(casts);
+% nSamples = size(casts(1).values, 1);
+
+data  = ctd_ebb.CTD_ebb.data;
+nCast = numel(data);
+nBin  = max(arrayfun(@(d) size(d.values,1), data));   % in case casts differ in length
+
+Z   = nan(nBin, nCast);   % depth (col 7)
+Sal = nan(nBin, nCast);   % col 8
+Tmp = nan(nBin, nCast);   % col 2
+DO  = nan(nBin, nCast);   % col 14
+
+for i = 1:nCast
+    v = data(i).values;
+    n = size(v,1);
+    Z(1:n,i)   = v(:,7);
+    Sal(1:n,i) = v(:,8);
+    Tmp(1:n,i) = v(:,2);
+    DO(1:n,i)  = v(:,14);
 end
 
+% One time per cast, as a 1x181 vector
+% t = [data.tstamp];             % or use your existing ctd_ebb.CTD_ebb.datetime if it's already 1x181
+% T = repmat(t(:)', nBin, 1);    % expand to 116x181 to match Z
+
+
+%% trying to align the time
+
+D = ctd_ebb.CTD_ebb.datetime;            % 116x181 datetime
+
+[~, idx] = max(~isnat(D), [], 1);        % row of first non-NaT in each column
+t = D(sub2ind(size(D), idx, 1:size(D,2)));   % 1x181 datetime
+
+T = repmat(t, size(Z,1), 1); % make it a 116x181 of the same time value for each timestamp so it works with pcolor. 
+                                % this might seem weird, but otherwise the
+                                % time values are not aligned and the ADCP
+                                % bottom track is totally skewed
+
+
+
+%% check for gaps in the CTD data that are from cleaning script or the CTD being turned off for turning between transects
+
+% from visual inspection if you run the plotting script, there should be 9
+% gaps: one before the transecting and then one in between each leg of the
+% transect
+
+[ts, order] = sort(t);                 % make sure they're in time order
+dt   = diff(ts);                       % duration between consecutive casts
+gapIdx = find(dt > minutes(1));        % index of the cast just before each gap
+
+fprintf('Median cast spacing: %.1f min\n', minutes(median(dt)));
+for g = gapIdx(:)'
+    fprintf('Gap of %.1f min between %s and %s\n', ...
+        minutes(dt(g)), string(ts(g), 'HH:mm:ss'), string(ts(g+1), 'HH:mm:ss'));
+end
+
+
+% Median cast spacing: 0.6 min
+% Gap of 3.1 min between 12:27:58 and 12:31:05
+% Gap of 5.5 min between 12:31:05 and 12:36:32
+% Gap of 7.0 min between 13:03:14 and 13:10:16
+% Gap of 1.4 min between 13:10:16 and 13:11:39
+% Gap of 5.4 min between 13:18:07 and 13:23:34
+% Gap of 1.3 min between 13:23:34 and 13:24:51
+% Gap of 5.4 min between 13:50:09 and 13:55:31
+% Gap of 4.5 min between 14:03:36 and 14:08:09
+% Gap of 5.3 min between 14:33:05 and 14:38:24
+% Gap of 2.0 min between 14:46:02 and 14:48:00
+
+%% insert blank columns at gaps so pcolor doesn't stretch casts across them
+
+% apply the time sort to the data matrices (your script sorted t but not these)
+Z   = Z(:, order);
+Sal = Sal(:, order);
+Tmp = Tmp(:, order);
+DO  = DO(:, order);
+t   = ts;
+
+fillSpacing = minutes(median(dt));     % ~0.6 min: how long the last cast before a gap is drawn
+
+for g = fliplr(gapIdx(:)')             % go backward so earlier indices stay valid
+    nanCol = nan(size(Z,1), 1);
+    t   = [t(1:g),     t(g) + fillSpacing, t(g+1:end)];
+    Z   = [Z(:,1:g),   nanCol, Z(:,g+1:end)];
+    Sal = [Sal(:,1:g), nanCol, Sal(:,g+1:end)];
+    Tmp = [Tmp(:,1:g), nanCol, Tmp(:,g+1:end)];
+    DO  = [DO(:,1:g),  nanCol, DO(:,g+1:end)];
+end
+
+T = repmat(t, size(Z,1), 1);           % rebuild the 2-D time matrix to match
+
+%% trim all datasets to the CTD end time (14:56)
+% 
+% tEnd = dateshift(t(1), 'start', 'day') + hours(14) + minutes(56);   % 14:56 on the survey date
+% 
+% % --- ADCP: keep only samples up to tEnd ---
+% keepA = adcp_ebb.datetime <= tEnd;
+% adcp_ebb.east     = adcp_ebb.east(keepA, :);     % rows are time (you plot east' against datetime)
+% adcp_ebb.north    = adcp_ebb.north(keepA, :);
+% adcp_ebb.depth    = adcp_ebb.depth(keepA);       % bottom track
+% adcp_ebb.datetime = adcp_ebb.datetime(keepA);    % do this last, since keepA matches the original length
+% 
+% % --- CTD: keep only casts up to tEnd ---
+% keepC = t <= tEnd;                               % t is the 1xN time vector (padded if you use that block)
+% t   = t(keepC);
+% Z   = Z(:, keepC);
+% Sal = Sal(:, keepC);
+% Tmp = Tmp(:, keepC);
+% DO  = DO(:, keepC);
+% T   = repmat(t, size(Z,1), 1);                   % rebuild the 2-D time matrix
 %% ---- Plotting ----
 figure(2); clf;
 
-s3 = subplot(4,1,1); % ADCP velocity
+s3 = subplot(5,1,1); % ADCP velocity east
     hold on
     pcolor(adcp_ebb.datetime, adcp_ebb.z, adcp_ebb.east');
         shading flat
-        cmap = cmocean('balance');
+        cmap = colormap(gca, cmocean('balance'));
         cb = colorbar;
         caxis([-0.5 0.5]);
         cb.Label.String = 'East / west velocity (ms^{-1})';
@@ -138,14 +253,30 @@ s3 = subplot(4,1,1); % ADCP velocity
     set(gca, 'YDir', 'reverse')
     ylabel('Depth (m)', 'FontSize', 14);
     title('Ebb transect data', 'FontSize', 18)
-    subtitle('Velocity from ADCP', 'FontSize', 16)
+    subtitle('East/west velocity from ADCP', 'FontSize', 16)
     hold off
 
-s4 = subplot(4,1,2); % CTD salinity
+
+s4 = subplot(5,1,2); % ADCP velocity north
+hold on
+pcolor(adcp_ebb.datetime, adcp_ebb.z, adcp_ebb.north');
+shading flat
+cmap = colormap(gca, cmocean('balance'));
+cb = colorbar;
+caxis([-0.5 0.5]);
+cb.Label.String = 'North / south velocity (ms^{-1})';
+cb.Label.FontSize = 14;
+plot(adcp_ebb.datetime, adcp_ebb.depth, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off');
+set(gca, 'YDir', 'reverse')
+ylabel('Depth (m)', 'FontSize', 14);
+subtitle('North/south velocity from ADCP', 'FontSize', 16)
+hold off
+
+s5 = subplot(5,1,3); % CTD salinity
     hold on
-    pcolor(timeMat, depthMat, salMat);
+    pcolor(T, Z, Sal);
         shading flat
-        cmap = cmocean('haline');
+        cmap = colormap(gca, cmocean('haline'));
         cb2 = colorbar;
         caxis([8 30]);
         cb2.Label.String = 'Salinity (PSU)';
@@ -156,11 +287,11 @@ s4 = subplot(4,1,2); % CTD salinity
     subtitle('Salinity', 'FontSize', 16)
     hold off
 
-s5 = subplot(4,1,3); % CTD temperature
+s6 = subplot(5,1,4); % CTD temperature
     hold on
-    pcolor(timeMat, depthMat, tempMat);
+    pcolor(T, Z, Tmp);
         shading flat
-        cmap = cmocean('thermal');
+        cmap = colormap(gca, cmocean('thermal'));
         cb2 = colorbar;
         caxis([10 30]);
         cb2.Label.String = 'Temperature (°C)';
@@ -171,11 +302,11 @@ s5 = subplot(4,1,3); % CTD temperature
     subtitle('Temperature', 'FontSize', 16)
     hold off
 
-s6 = subplot(4,1,4); % CTD DO
+s7 = subplot(5,1,5); % CTD DO
     hold on
-    pcolor(timeMat, depthMat, doMat);
+    pcolor(T, Z, DO);
         shading flat
-        cmap = cmocean('matter');
+        cmap = colormap(gca, cmocean('matter'));
         cb2 = colorbar;
         caxis([0 16]);
         cb2.Label.String = 'Dissolved oxygen (mg/L)';
@@ -186,7 +317,54 @@ s6 = subplot(4,1,4); % CTD DO
     subtitle('Dissolved oxygen', 'FontSize', 16)
     hold off
 
-linkaxes([s3 s4 s5 s6], 'xy')
+linkaxes([s3 s4 s5 s6 s7], 'xy')
+%xlim(s3, [min(T) max(T)]);
+
+(set(gcf, 'Position', [100 100 1400 900]))
+
+
+%% Okay so all of the months of CTD data have been time dilated
+
+% let's fix this !
+
+% 1) line up the CTD and ADCP starting times
+
+% t_ref  : time vector of the good sensor (seconds), the ADCP
+% t_bad  : time vector of the drifting sensor (seconds), the CTD
+% y_bad  : data from the drifting sensor
+
+% Matched events: start and end of the recording in each sensor
+ref_start = adcp_ebb.time(1);   ref_end = t_ref(end);
+bad_start = t_bad(1);   bad_end = t_bad(end);
+
+% Dilation factor and offset
+a = (ref_end - ref_start) / (bad_end - bad_start);
+b = ref_start - a * bad_start;
+
+fprintf('Dilation factor: %.8f (%.2f ppm)\n', a, (a-1)*1e6);
+
+% Corrected time vector
+t_corrected = a * t_bad + b;
+
+
+
+
+% 2) line up the CTD and ADCP ending times
+
+
+% 3) there should be a coefficient in there that then I can apply to all
+% the values
+
+
+
+
+
+
+
+
+
+
+
 
 %% Plot pcolors of the CTD and velocity data from the ADCP for each lap leg
 
@@ -199,3 +377,260 @@ linkaxes([s3 s4 s5 s6], 'xy')
 %% Plot waterfall plots of CTD properties for each leg
 
 % add bottom track!
+
+
+
+%% ============ PLOTTING FOR THE FLOOD ================
+
+
+
+adcp_flood.datetime = datetime([adcp_flood.time], "ConvertFrom", "datenum");
+adcp_flood.datetime = datetime([adcp_flood.time], "ConvertFrom", "datenum");
+
+
+ctd_flood.CTD_flood.datetime = datetime([ctd_flood.CTD_flood.data.tstamp], "ConvertFrom", "datenum");
+ctd_flood.CTD_flood.datetime = datetime([ctd_flood.CTD_flood.data.tstamp], "ConvertFrom", "datenum");
+
+
+
+%% Plot pcolors of the CTD and the velocity from the ADCP for the whole timeseries
+
+
+% channel numbers for hte CTD:
+    % channel 7: depth
+    % channel 8: salinity
+    % channel 2: temp
+    % channel 14: DO mg/L
+
+%% Build CTD matrices from the cast struct array 
+% S = ctd_flood.CTD_flood;
+% casts = S.data;                        % 303x1 struct array, one per cast
+% nCasts = numel(casts);
+% nSamples = size(casts(1).values, 1);   % 128, confirmed uniform across all casts
+% 
+% depthMat = nan(nSamples, nCasts);
+% salMat   = nan(nSamples, nCasts);
+% tempMat  = nan(nSamples, nCasts);
+% doMat    = nan(nSamples, nCasts);
+% timeMat  = NaT(nSamples, nCasts);
+% 
+% for i = 1:nCasts
+%     v = casts(i).values;
+%     depthMat(:,i) = v(:,7);    % Depth (m)
+%     salMat(:,i)   = v(:,8);    % Salinity (PSU)
+%     tempMat(:,i)  = v(:,2);    % Temperature (°C)
+%     doMat(:,i)    = v(:,14);   % Dissolved oxygen (mg/L)
+%     timeMat(:,i)  = datetime(casts(i).tstamp, 'ConvertFrom', 'datenum');
+% end
+
+%% make sure I am only pulling out the first CTD timestep and data point for each cast
+
+% S = ctd_flood.CTD_flood;
+% casts = S.data;
+% nCasts = numel(casts);
+% nSamples = size(casts(1).values, 1);
+
+data  = ctd_flood.CTD_flood.data;
+nCast = numel(data);
+nBin  = max(arrayfun(@(d) size(d.values,1), data));   % in case casts differ in length
+
+Z   = nan(nBin, nCast);   % depth (col 7)
+Sal = nan(nBin, nCast);   % col 8
+Tmp = nan(nBin, nCast);   % col 2
+DO  = nan(nBin, nCast);   % col 14
+
+for i = 1:nCast
+    v = data(i).values;
+    n = size(v,1);
+    Z(1:n,i)   = v(:,7);
+    Sal(1:n,i) = v(:,8);
+    Tmp(1:n,i) = v(:,2);
+    DO(1:n,i)  = v(:,14);
+end
+
+% One time per cast, as a 1x181 vector
+% t = [data.tstamp];             % or use your existing ctd_flood.CTD_flood.datetime if it's already 1x181
+% T = repmat(t(:)', nBin, 1);    % expand to 116x181 to match Z
+
+
+%% trying to align the time
+
+D = ctd_flood.CTD_flood.datetime;            % 116x181 datetime
+
+[~, idx] = max(~isnat(D), [], 1);        % row of first non-NaT in each column
+t = D(sub2ind(size(D), idx, 1:size(D,2)));   % 1x181 datetime
+
+T = repmat(t, size(Z,1), 1); % make it a 116x181 of the same time value for each timestamp so it works with pcolor. 
+                                % this might seem weird, but otherwise the
+                                % time values are not aligned and the ADCP
+                                % bottom track is totally skewed
+
+
+
+%% check for gaps in the CTD data that are from cleaning script or the CTD being turned off for turning between transects
+
+% from visual inspection if you run the plotting script, there should be 9
+% gaps: one before the transecting and then one in between each leg of the
+% transect
+
+[ts, order] = sort(t);                 % make sure they're in time order
+dt   = diff(ts);                       % duration between consecutive casts
+gapIdx = find(dt > minutes(1));        % index of the cast just before each gap
+
+fprintf('Median cast spacing: %.1f min\n', minutes(median(dt)));
+for g = gapIdx(:)'
+    fprintf('Gap of %.1f min between %s and %s\n', ...
+        minutes(dt(g)), string(ts(g), 'HH:mm:ss'), string(ts(g+1), 'HH:mm:ss'));
+end
+
+
+% Median cast spacing: 0.6 min
+% Gap of 3.1 min between 12:27:58 and 12:31:05
+% Gap of 5.5 min between 12:31:05 and 12:36:32
+% Gap of 7.0 min between 13:03:14 and 13:10:16
+% Gap of 1.4 min between 13:10:16 and 13:11:39
+% Gap of 5.4 min between 13:18:07 and 13:23:34
+% Gap of 1.3 min between 13:23:34 and 13:24:51
+% Gap of 5.4 min between 13:50:09 and 13:55:31
+% Gap of 4.5 min between 14:03:36 and 14:08:09
+% Gap of 5.3 min between 14:33:05 and 14:38:24
+% Gap of 2.0 min between 14:46:02 and 14:48:00
+
+%% insert blank columns at gaps so pcolor doesn't stretch casts across them
+
+% apply the time sort to the data matrices (your script sorted t but not these)
+Z   = Z(:, order);
+Sal = Sal(:, order);
+Tmp = Tmp(:, order);
+DO  = DO(:, order);
+t   = ts;
+
+fillSpacing = minutes(median(dt));     % ~0.6 min: how long the last cast before a gap is drawn
+
+for g = fliplr(gapIdx(:)')             % go backward so earlier indices stay valid
+    nanCol = nan(size(Z,1), 1);
+    t   = [t(1:g),     t(g) + fillSpacing, t(g+1:end)];
+    Z   = [Z(:,1:g),   nanCol, Z(:,g+1:end)];
+    Sal = [Sal(:,1:g), nanCol, Sal(:,g+1:end)];
+    Tmp = [Tmp(:,1:g), nanCol, Tmp(:,g+1:end)];
+    DO  = [DO(:,1:g),  nanCol, DO(:,g+1:end)];
+end
+
+T = repmat(t, size(Z,1), 1);           % rebuild the 2-D time matrix to match
+
+%% trim all datasets to the CTD end time (14:56)
+% 
+% tEnd = dateshift(t(1), 'start', 'day') + hours(14) + minutes(56);   % 14:56 on the survey date
+% 
+% % --- ADCP: keep only samples up to tEnd ---
+% keepA = adcp_flood.datetime <= tEnd;
+% adcp_flood.east     = adcp_flood.east(keepA, :);     % rows are time (you plot east' against datetime)
+% adcp_flood.north    = adcp_flood.north(keepA, :);
+% adcp_flood.depth    = adcp_flood.depth(keepA);       % bottom track
+% adcp_flood.datetime = adcp_flood.datetime(keepA);    % do this last, since keepA matches the original length
+% 
+% % --- CTD: keep only casts up to tEnd ---
+% keepC = t <= tEnd;                               % t is the 1xN time vector (padded if you use that block)
+% t   = t(keepC);
+% Z   = Z(:, keepC);
+% Sal = Sal(:, keepC);
+% Tmp = Tmp(:, keepC);
+% DO  = DO(:, keepC);
+% T   = repmat(t, size(Z,1), 1);                   % rebuild the 2-D time matrix
+%% ---- Plotting ----
+figure(3); clf;
+
+s3 = subplot(5,1,1); % ADCP velocity east
+    hold on
+    pcolor(adcp_flood.datetime, adcp_flood.z, adcp_flood.east');
+        shading flat
+        cmap = colormap(gca, cmocean('balance'));
+        cb = colorbar;
+        caxis([-0.5 0.5]);
+        cb.Label.String = 'East / west velocity (ms^{-1})';
+        cb.Label.FontSize = 14;
+    plot(adcp_flood.datetime, adcp_flood.depth, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off');
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)', 'FontSize', 14);
+    title('Flood transect data', 'FontSize', 18)
+    subtitle('East/west velocity from ADCP', 'FontSize', 16)
+    hold off
+
+
+s4 = subplot(5,1,2); % ADCP velocity north
+hold on
+pcolor(adcp_flood.datetime, adcp_flood.z, adcp_flood.north');
+shading flat
+cmap = colormap(gca, cmocean('balance'));
+cb = colorbar;
+caxis([-0.5 0.5]);
+cb.Label.String = 'North / south velocity (ms^{-1})';
+cb.Label.FontSize = 14;
+plot(adcp_flood.datetime, adcp_flood.depth, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off');
+set(gca, 'YDir', 'reverse')
+ylabel('Depth (m)', 'FontSize', 14);
+subtitle('North/south velocity from ADCP', 'FontSize', 16)
+hold off
+
+s5 = subplot(5,1,3); % CTD salinity
+    hold on
+    pcolor(T, Z, Sal);
+        shading flat
+        cmap = colormap(gca, cmocean('haline'));
+        cb2 = colorbar;
+        caxis([8 30]);
+        cb2.Label.String = 'Salinity (PSU)';
+        cb2.Label.FontSize = 14;
+    plot(adcp_flood.datetime, adcp_flood.depth, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off');
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)', 'FontSize', 14);
+    subtitle('Salinity', 'FontSize', 16)
+    hold off
+
+s6 = subplot(5,1,4); % CTD temperature
+    hold on
+    pcolor(T, Z, Tmp);
+        shading flat
+        cmap = colormap(gca, cmocean('thermal'));
+        cb2 = colorbar;
+        caxis([10 30]);
+        cb2.Label.String = 'Temperature (°C)';
+        cb2.Label.FontSize = 14;
+    plot(adcp_flood.datetime, adcp_flood.depth, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off');
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)', 'FontSize', 14);
+    subtitle('Temperature', 'FontSize', 16)
+    hold off
+
+s7 = subplot(5,1,5); % CTD DO
+    hold on
+    pcolor(T, Z, DO);
+        shading flat
+        cmap = colormap(gca, cmocean('matter'));
+        cb2 = colorbar;
+        caxis([0 16]);
+        cb2.Label.String = 'Dissolved oxygen (mg/L)';
+        cb2.Label.FontSize = 14;
+    plot(adcp_flood.datetime, adcp_flood.depth, 'k-', 'LineWidth', 1.5, 'HandleVisibility', 'off');
+    set(gca, 'YDir', 'reverse')
+    ylabel('Depth (m)', 'FontSize', 14);
+    subtitle('Dissolved oxygen', 'FontSize', 16)
+    hold off
+
+linkaxes([s3 s4 s5 s6 s7], 'xy')
+%xlim(s3, [min(T) max(T)]);
+
+(set(gcf, 'Position', [100 100 1400 900]))
+
+%% Plot pcolors of the CTD and velocity data from the ADCP for each lap leg
+
+% add bottom track!
+
+%% Plot average bottom and surface DO concentrations from the CTDs at each lat/lon value
+
+
+
+%% Plot waterfall plots of CTD properties for each leg
+
+% add bottom track!
+

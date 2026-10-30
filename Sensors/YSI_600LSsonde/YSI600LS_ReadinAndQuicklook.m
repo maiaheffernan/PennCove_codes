@@ -12,11 +12,11 @@ close all; clear all;
 
 % will need to change the file names to adjust for the proper month
 
-LJN_4m = readtable('LoveJoyNorth_JulAug2026/YSI600LS/LoveJoyNorth_JulAug2026_4m_sn2005.txt'); %'LoveJoyNorth_MaytoJun2026/YSI600LS/LoveJoyNorth_MaytoJune2026_sn2005.txt', 'LoveJoyNorth_JunJul2026/YSI_600LS/LoveJoyNorth_JunJul2026_4m_sn2005.txt'
-LJN_8m = readtable('LoveJoyNorth_JulAug2026/YSI600LS/LoveJoyNorth_JulAug2026_9m_sn2006.txt'); % LoveJoyNorth_MaytoJun2026/YSI600LS/LoveJoyNorth_MaytoJune2026_sn2006.txt, 'LoveJoyNorth_JunJul2026/YSI_600LS/LoveJoyNorth_JunJul2026_9m_sn2006.txt'
+LJN_4m = readtable('LoveJoyNorth_AugSep2026/YSI600LS/LoveJoyNorth_AugSep2026_4m_sn2005.txt'); %'LoveJoyNorth_MaytoJun2026/YSI600LS/LoveJoyNorth_MaytoJune2026_sn2005.txt', 'LoveJoyNorth_JunJul2026/YSI_600LS/LoveJoyNorth_JunJul2026_4m_sn2005.txt'
+LJN_8m = readtable('LoveJoyNorth_AugSep2026/YSI600LS/LoveJoyNorth_AugSep2026_9m_sn2006.txt'); % LoveJoyNorth_MaytoJun2026/YSI600LS/LoveJoyNorth_MaytoJune2026_sn2006.txt, 'LoveJoyNorth_JunJul2026/YSI_600LS/LoveJoyNorth_JunJul2026_9m_sn2006.txt'
 
-LJS_4m = readtable('LoveJoySouth_JulAug2026/YSI600LS/LoveJoySouth_JulAug2026_4m_sn2001.txt'); % LoveJoySouth_MaytoJun2026/YSI600LS/LoveJoySouth_MaytoJune_4m_sn15M002001.txt, LoveJoySouth_JunJul2026/YSI_600LS/LoveJoySouth_JunJul2026_4m_sn2001.txt
-LJS_11m = readtable('LoveJoySouth_JulAug2026/YSI600LS/LoveJoySouth_JulAug2026_9m_sn2004.txt'); % LoveJoySouth_MaytoJun2026/YSI600LS/LoveJoySouth_MaytoJune_9m_sn15M002004.txt, LoveJoySouth_JunJul2026/YSI_600LS/LoveJoySouth_JunJul2026_9m_sn2004.txt
+LJS_4m = readtable('LoveJoySouth_AugSep2026/YSI600LS/LoveJoySouth_AugSep2026_4m_sn2001.txt'); % LoveJoySouth_MaytoJun2026/YSI600LS/LoveJoySouth_MaytoJune_4m_sn15M002001.txt, LoveJoySouth_JunJul2026/YSI_600LS/LoveJoySouth_JunJul2026_4m_sn2001.txt
+LJS_11m = readtable('LoveJoySouth_AugSep2026/YSI600LS/LoveJoySouth_AugSep2026_9m_sn2004.txt'); % LoveJoySouth_MaytoJun2026/YSI600LS/LoveJoySouth_MaytoJune_9m_sn15M002004.txt, LoveJoySouth_JunJul2026/YSI_600LS/LoveJoySouth_JunJul2026_9m_sn2004.txt
 
 
 %% ----------------------------
@@ -58,8 +58,13 @@ LJS_11m.DateTime = dateCol_LJS11m + LJS_11m.Time;
         % endTime = datetime(2026, 7, 21, 16, 30, 0);
 
     % for julaug
-        startTime = datetime(2026, 7, 25, 12, 0, 0);
-        endTime = datetime(2026, 8, 25, 12, 0, 0);
+        % startTime = datetime(2026, 7, 25, 12, 0, 0);
+        % endTime = datetime(2026, 8, 25, 12, 0, 0);
+     
+    % for AugSep
+
+    startTime = datetime(2026, 8, 27, 20, 0, 0);
+    endTime = datetime(2026, 9, 22, 20, 0, 0);
         
 
 
@@ -128,7 +133,7 @@ grid on;
 
 %% save the raw data plots
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -138,7 +143,7 @@ end
 
 % -- temp save --
 
-temp_figName = sprintf('YSI_Temp_timeseries_JulAug2026.png'); 
+temp_figName = sprintf('YSI_Temp_timeseries_AugSep2026.png'); 
 temp_outFile = fullfile(outDir, temp_figName);
 
 exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
@@ -147,7 +152,7 @@ exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
 % -- salinity save --
 
 
-salinity_figName = sprintf('YSI_Salinity_timeseries_JulAug2026.png'); 
+salinity_figName = sprintf('YSI_Salinity_timeseries_AugSep2026.png'); 
 salinity_outFile = fullfile(outDir, salinity_figName);
 
 exportgraphics(figure(2), salinity_outFile, 'Resolution', 300);
@@ -156,7 +161,7 @@ exportgraphics(figure(2), salinity_outFile, 'Resolution', 300);
 
 %% save the raw data 
 
-save YSI600LSdata_JulAug2026_raw.mat LJN_4m LJN_8m LJS_11m LJS_4m
+save YSI600LSdata_AugSep2026_raw.mat LJN_4m LJN_8m LJS_11m LJS_4m
 %% clean using the hampel filter
 
 
@@ -212,7 +217,7 @@ legend show;
 %% save cleaned data
 
 
-save YSI600LSdata_JunJul2026_L2.mat LJN_4m LJN_8m LJS_11m LJS_4m
+save YSI600LSdata_AugSep2026_L2.mat LJN_4m LJN_8m LJS_11m LJS_4m
 
 
 

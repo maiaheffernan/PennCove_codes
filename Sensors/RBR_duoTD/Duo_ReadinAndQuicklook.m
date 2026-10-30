@@ -8,11 +8,11 @@ close all; clear all;
 
 % ==== make sur eyou are in the 'Data' directory that is higher up ===
 
-SNs = {'240149', '240150'}; % , '240151'
-moorings = {'InnerNorth', 'InnerNorth'}; % these match the order of the serial numbers .... , 'InnerSouth'
-months_dir = 'JulAug2026'; % edit this based on the data you are downloading -- NOTE there is no InnerSouth data for JunJul because the Duo broke
+SNs = {'240149', '240150', '240151'}; % , '240151'
+moorings = {'InnerNorth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers .... , 'InnerSouth'
+months_dir = 'AugSep2026'; % edit this based on the data you are downloading -- NOTE there is no InnerSouth data for JunJul because the Duo broke
 % months_dir = 'MaytoJun2026';
-months_file = 'JulAug2026'; %'MayJun2026';
+months_file = 'AugSep2026'; %'MayJun2026';
 
 DuoTD_data = struct(); % create an empty struct that I will read data into
 
@@ -53,11 +53,11 @@ end
 
 %% save raw data
 
-save DuoTDdata_JulAug2026_raw.mat DuoTD_data
+save DuoTDdata_AugSep2026_raw.mat DuoTD_data
 
 %% plot a time series of the data with different colors 
 
-struct_names = {'DuoTD_data_InnerNorth_JulAug2026_240149', 'DuoTD_data_InnerNorth_JulAug2026_240150'}; % 'DuoTD_data_InnerSouth_MayJun2026_240151'
+struct_names = {'DuoTD_data_InnerNorth_AugSep2026_240149', 'DuoTD_data_InnerNorth_AugSep2026_240150', 'DuoTD_data_InnerSouth_AugSep2026_240151'}; % 'DuoTD_data_InnerSouth_MayJun2026_240151'
 
 % for may to june 2026
 % startTime = datetime(2026, 5, 27, 0, 0, 0);
@@ -72,17 +72,23 @@ struct_names = {'DuoTD_data_InnerNorth_JulAug2026_240149', 'DuoTD_data_InnerNort
 
 
     % for Jul to August
+    % 
+    % startTime = datetime(2026, 7, 25, 12, 0, 0);
+    % endTime = datetime(2026, 8, 25, 12, 0, 0);
 
-    startTime = datetime(2026, 7, 25, 12, 0, 0);
-    endTime = datetime(2026, 8, 25, 12, 0, 0);
+
+    % for AugSep
+
+    startTime = datetime(2026, 8, 27, 20, 0, 0);
+    endTime = datetime(2026, 9, 22, 20, 0, 0);
     startTime_dn = datenum(startTime);
     endTime_dn   = datenum(endTime);
-
+%%
 % ===== first temperature =====
 
 figure; clf; hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun, AugSep
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -95,17 +101,17 @@ for i = 1:2 % 3 for MayJun
 end
 
 hold off;
-legend('Inner North 240149','Inner North, 240150','Inner South, 240151'); %,'Inner South, 240151'
+legend('Inner North 240149','Inner North, 240150','Inner South, 240151','Inner South, 240151'); %,'Inner South, 240151'
 xlabel('Time');
 ylabel('Temperature (°C)');
-title('Time series of temperature from July to August 2026');
+title('Time series of temperature from August to September 2026');
 
 
 % ===== then pressure ====
 
 figure(2); clf; hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun  AugSep
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -117,15 +123,15 @@ for i = 1:2 % 3 for MayJun
 end
 
 hold off;
-legend('SN 240149','SN 240150'); %,'SN 240151'
+legend('SN 240149','SN 240150','SN 240151'); %,'SN 240151'
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from July to August 2026');
+title('Time series of pressure from August to September 2026');
 
 
 %% save the raw figure
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -135,7 +141,7 @@ end
 
 % -- temp save --
 
-temp_figName = sprintf('Duo_Temp_timeseries_JulAug2026.png'); 
+temp_figName = sprintf('Duo_Temp_timeseries_AugSep2026.png'); 
 temp_outFile = fullfile(outDir, temp_figName);
 
 exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
@@ -144,7 +150,7 @@ exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
 % -- pressure save --
 
 
-pres_figName = sprintf('Duo_pres_timeseries_JulAug2026.png'); 
+pres_figName = sprintf('Duo_pres_timeseries_AugSep2026.png'); 
 do_outFile = fullfile(outDir, pres_figName);
 
 exportgraphics(figure(2), do_outFile, 'Resolution', 300);
@@ -154,16 +160,16 @@ exportgraphics(figure(2), do_outFile, 'Resolution', 300);
 
 %% clean the data by de-spiking with a hampel loop and trimming the time
 
-struct_names = {'DuoTD_data_InnerNorth_JulAug2026_240149', ...
-                'DuoTD_data_InnerNorth_JulAug2026_240150', ...
-                }; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
+struct_names = {'DuoTD_data_InnerNorth_AugSep2026_240149', ...
+                'DuoTD_data_InnerNorth_AugSep2026_240150', ...
+                'DuoTD_data_InnerSouth_AugSep2026_240151'}; % , ...'DuoTD_data_InnerSouth_MayJun2026_240151'
                 
 
 outputFolder = pwd;  
 
 cleaned_data = struct();
 
-for i = 1:2 
+for i = 1:3 
 
     % time limits based on start and end times
     snFields = fieldnames(DuoTD_data.(struct_names{i}));
@@ -231,7 +237,7 @@ for i = 1:2
 end
 
 % save BOTH sensors together, one field each
-outFile = fullfile(outputFolder, 'DuoTD_JulAug2026_cleaned_L2.mat');
+outFile = fullfile(outputFolder, 'DuoTD_AugSep2026_cleaned_L2.mat');
 save(outFile, 'cleaned_data');
 fprintf('Saved combined cleaned data to %s\n', outFile);
 %% plot the cleaned figures 
@@ -240,7 +246,7 @@ fprintf('Saved combined cleaned data to %s\n', outFile);
 
 figure; hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -263,7 +269,7 @@ title('Time series of temperature from July to August 2026');
 
 figure(2); hold on;
 
-for i = 1:2 % 3 for MayJun
+for i = 1:3 % 3 for MayJun
     d = DuoTD_data.(struct_names{i}).data;   % go into struct inside each cell
     
      t = datetime(d.tstamp, 'ConvertFrom', 'datenum');
@@ -275,8 +281,8 @@ for i = 1:2 % 3 for MayJun
 end
 
 hold off;
-legend('SN 240149','SN 240150','SN 240151'); %,'SN 240151' for mayjun
+legend('SN 240149','SN 240150','SN 240151'); %,'SN 240151' for mayjun and AugSep
 xlabel('Time');
 ylabel('dbar');
-title('Time series of pressure from July to August 2026');
+title('Time series of pressure from August to September 2026');
 

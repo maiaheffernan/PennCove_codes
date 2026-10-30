@@ -6,7 +6,7 @@ clear all, close all
 
 %% data
 
-flist = dir('Robertson_ADCP_27May2026_*_cleaned.mat');
+flist = dir('Robertson_ADCP_23Sep2026_*_cleaned.mat');
 
 % don't want the LTA files for this analysis
 isLTA = contains({flist.name}, 'LTA');

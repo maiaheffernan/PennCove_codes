@@ -21,7 +21,7 @@ solo_SNs = { ...
     {'212868', '212869', '212870', '212871', '212872', '212873', '212874'}, ...  % InnerNorth
     {'212875', '212876', '212877', '212878', '212879', '212880', '212881'} ...   % InnerSouth
     };
-months_dir  = 'JulAug2026';  % used for the DIRECTORY name (includes year)
+months_dir  = 'AugSep2026';  % used for the DIRECTORY name (includes year)
 
 soloT_data = struct();  % top-level struct; one field per mooring
 
@@ -69,9 +69,14 @@ end
 
 
     % for July to August
-        startTime = datetime(2026, 7, 25, 12, 0, 0);
-        endTime = datetime(2026, 8, 25, 12, 0, 0);
+        % startTime = datetime(2026, 7, 25, 12, 0, 0);
+        % endTime = datetime(2026, 8, 25, 12, 0, 0);
     
+
+    % for Aug to Sep
+        startTime = datetime(2026, 8, 27, 20, 0, 0);
+        endTime = datetime(2026, 9, 22, 20, 0, 0);
+
         
         
         
@@ -160,7 +165,7 @@ linkaxes(ax, 'xy');
 
 %% save figures
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -170,7 +175,7 @@ end
 
 % -- temp save --
 
-temp_figName = sprintf('soloT_Temp_timeseries_JulAug2026.png'); 
+temp_figName = sprintf('soloT_Temp_timeseries_AugSep2026.png'); 
 temp_outFile = fullfile(outDir, temp_figName);
 
 exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
@@ -179,7 +184,7 @@ exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
 % -- temp histogram save --
 
 
-hist_figName = sprintf('soloT_Temp_histogram_JulAug2026.png'); 
+hist_figName = sprintf('soloT_Temp_histogram_AugSep2026.png'); 
 hist_outFile = fullfile(outDir, hist_figName);
 
 exportgraphics(figure(2), hist_outFile, 'Resolution', 300);
@@ -190,7 +195,7 @@ exportgraphics(figure(2), hist_outFile, 'Resolution', 300);
 
 %% save the raw data -- MAKE SURE THE MONTHS ARE CORRECT IN THE NAME
 
-save SoloTdata_JulAug2026_raw.mat soloT_data
+save SoloTdata_AugSep2026_raw.mat soloT_data
 
 %% remove the data points before startTime and after endTime
 
@@ -261,4 +266,4 @@ linkaxes(ax, 'xy');
 
 %% save cleaned data
 
-save SoloTdata_MayJun2026_L2.mat soloT_data
+save SoloTdata_AugSep2026_L2.mat soloT_data
