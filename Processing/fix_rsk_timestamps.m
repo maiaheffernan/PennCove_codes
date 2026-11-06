@@ -75,7 +75,7 @@ if ~isfield(opts,'lagRange'),          opts.lagRange = 120;            end
 if ~isfield(opts,'minProfileSamples'), opts.minProfileSamples = 20;    end
 
 %% ======================================================================
-%% 1. READ THE RSK FILE (a .rsk file is just a SQLite database)
+%% 1. READ THE RSK FILE 
 %% ======================================================================
 % ---- make sure the .rsk file can actually be found ---------------------
 % SQLite reports a missing file as the vague "unable to open database file",
