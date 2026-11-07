@@ -11,10 +11,10 @@ clear all, close all
 % === Sea-Bird data as .hex files ===
 
 
-% fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r'); %'May192026_SBEbucketTest.cnv'
-% nHeaders = 0;
-% colNames = {};
-% while ~feof(fid)
+%fid = fopen('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoyNorth_SepOct2026/SBE/SBE19_21Oct2026.hex', 'r'); %'May192026_SBEbucketTest.cnv', 'Robertson_CTD_25May2026_SAR003.hex'
+%nHeaders = 0;
+%colNames = {};
+%while ~feof(fid)
 %     line = fgetl(fid);
 %     nHeaders = nHeaders + 1;
 %     if contains(line, '# name')
@@ -28,17 +28,17 @@ clear all, close all
 %     end
 % end
 % fclose(fid);
-% 
-% % Read the data
-% seabirdData = readmatrix('Robertson_CTD_25May2026_SAR003.hex', 'FileType', 'text', 'NumHeaderLines', nHeaders);
-% 
-% % Check your columns
+ 
+ % Read the data
+% seabirdData = readmatrix('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoyNorth_SepOct2026/SBE/SBE19_21Oct2026.hex', 'FileType', 'text', 'NumHeaderLines', nHeaders);
+ 
+ % Check your columns
 % for i = 1:length(colNames)
 %     fprintf('Column %d: %s\n', i, colNames{i});
 % end
 % 
 % 
-% % === pulling out the variables ===
+ % === pulling out the variables ===
 % 
 % SBE_salinity_PSU = seabirdData(:, 1);
 % SBE_temp_degC = seabirdData(:, 5);
@@ -49,28 +49,28 @@ clear all, close all
 % SBE_juliandays = seabirdData(:, 9);
 % 
 % 
-% % === putting the time data into a datetime ===
+ % === putting the time data into a datetime ===
 % 
 % year = 2026;
 % SBE_datetime = datetime(year, 1, 1) - days(1) + days(SBE_juliandays);
 % 
 % %%
 % 
-% % Open the binary file
-% fid = fopen('Robertson_CTD_25May2026_SAR003.hex', 'r');
+ % Open the binary file
+% fid = fopen('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoyNorth_SepOct2026/SBE/SBE19_21Oct2026.hex', 'r');
 % 
-% % Read the raw bytes as unsigned 8-bit integers
+ % Read the raw bytes as unsigned 8-bit integers
 % rawBytes = fread(fid, Inf, 'uint8');
 % 
-% % Close the file
+ % Close the file
 % fclose(fid);
 % 
-% % Convert the raw bytes into a readable Hex string matrix
+ % Convert the raw bytes into a readable Hex string matrix
 % hexStrings = dec2hex(rawBytes);
 
 %% For .cap files
 
-fid = fopen('SBE19_Sept23-2026_PennCove-aski_capture.cap', 'r'); % LoveJoySouth_JunJul2026_bottom_sn4762.cap, ''SBESeaCatPlus_May-June_commadeliminated.cap''
+fid = fopen('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoyNorth_SepOct2026/SBE/SBE19_Oct21-2026_PennCove-aski_capture.cap', 'r'); % LoveJoySouth_JunJul2026_bottom_sn4762.cap, ''SBESeaCatPlus_May-June_commadeliminated.cap''
 if fid == -1
     error('Cannot open file.');
 end
@@ -182,8 +182,12 @@ sum(corruptedLines);
     % for Aug September
 
 
-    startTime = datetime(2026, 8, 27, 20, 0, 0);
-    endTime = datetime(2026, 9, 22, 19, 0, 0);
+    %startTime = datetime(2026, 8, 27, 20, 0, 0);
+   % endTime = datetime(2026, 9, 22, 19, 0, 0);
+
+   % for September to October
+        startTime = datetime(2026, 9, 24, 19, 30, 0);
+        endTime = datetime(2026, 10, 20, 19, 15, 0);
 
 
 % Filter the seacatData based on the time cutoff
@@ -212,7 +216,7 @@ dataVars = seacatData.Properties.VariableNames;
 %% save the raw seabird data to the general data file
 
 % Save the seabird data to a .mat file for future analysis
-save('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Sep2026/Data/seabirdData_AugSep2026_raw.mat', 'seacatData')
+save('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/seabirdData_SepOct2026_raw.mat', 'seacatData')
 
 %% plot the raw data
 
@@ -222,7 +226,7 @@ s1 = subplot(2,1,1);
 
     p1 = plot(seacatData.DateTime, seacatData.Temperature, 'r.-');
         ylabel('Temperature (°C)')
-        title('Raw SeaBird CTD data for August to September')
+        title('Raw SeaBird CTD data for September to October 2026')
 
 s2 = subplot(2,1,2);
 
@@ -237,7 +241,7 @@ s2 = subplot(2,1,2);
 
  %% save out the figure
 
- outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
+ outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
 
  % make sure the directory exists; create it if not
  if ~exist(outDir, 'dir')
@@ -247,7 +251,7 @@ s2 = subplot(2,1,2);
 
  % -- temp save --
 
-figName = sprintf('SeaBird_TempSal_rawtimeseries_AugSep2026.png'); 
+figName = sprintf('SeaBird_TempSal_rawtimeseries_SepOct2026.png'); 
 outFile = fullfile(outDir, figName);
 
  exportgraphics(figure(1), outFile, 'Resolution', 300);

@@ -9,6 +9,11 @@
 close all; clear all;
 
 
+%%% NOTE FROM NOV 7!! I changed the end time to October 20 at 14:30 because there was some data from LJS that weirdly looked 
+%%% bad after that even though the mooring was still deployed. In the rest of the read-in scripts this cutoff time is 
+%%% Octboer 20 at 19:15 because this fits with our notes from the recovery day.
+
+
 %% load in the data
 
 % === make sure you are  in the higher-up DATA directory for the month oyu
@@ -21,7 +26,7 @@ solo_SNs = { ...
     {'212868', '212869', '212870', '212871', '212872', '212873', '212874'}, ...  % InnerNorth
     {'212875', '212876', '212877', '212878', '212879', '212880', '212881'} ...   % InnerSouth
     };
-months_dir  = 'AugSep2026';  % used for the DIRECTORY name (includes year)
+months_dir  = 'SepOct2026';  % used for the DIRECTORY name (includes year)
 
 soloT_data = struct();  % top-level struct; one field per mooring
 
@@ -74,8 +79,12 @@ end
     
 
     % for Aug to Sep
-        startTime = datetime(2026, 8, 27, 20, 0, 0);
-        endTime = datetime(2026, 9, 22, 20, 0, 0);
+        %startTime = datetime(2026, 8, 27, 20, 0, 0);
+        %endTime = datetime(2026, 9, 22, 20, 0, 0);
+
+    % Sep Oct
+        startTime = datetime(2026, 9, 24, 19, 30, 0);
+        endTime = datetime(2026, 10, 20, 14, 30, 0);
 
         
         
@@ -165,7 +174,7 @@ linkaxes(ax, 'xy');
 
 %% save figures
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -175,7 +184,7 @@ end
 
 % -- temp save --
 
-temp_figName = sprintf('soloT_Temp_timeseries_AugSep2026.png'); 
+temp_figName = sprintf('soloT_Temp_timeseries_SepOct2026.png'); 
 temp_outFile = fullfile(outDir, temp_figName);
 
 exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
@@ -184,7 +193,7 @@ exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
 % -- temp histogram save --
 
 
-hist_figName = sprintf('soloT_Temp_histogram_AugSep2026.png'); 
+hist_figName = sprintf('soloT_Temp_histogram_SepOct2026.png'); 
 hist_outFile = fullfile(outDir, hist_figName);
 
 exportgraphics(figure(2), hist_outFile, 'Resolution', 300);
@@ -195,7 +204,7 @@ exportgraphics(figure(2), hist_outFile, 'Resolution', 300);
 
 %% save the raw data -- MAKE SURE THE MONTHS ARE CORRECT IN THE NAME
 
-save SoloTdata_AugSep2026_raw.mat soloT_data
+save SoloTdata_SepOct2026_raw.mat soloT_data
 
 %% remove the data points before startTime and after endTime
 
@@ -264,6 +273,31 @@ end
 xlabel('Time');
 linkaxes(ax, 'xy');
 
+%% save the cleaned plots
+
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/CleanedData_timeseries';
+
+% make sure the directory exists; create it if not
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+
+
+% -- temp save --
+
+temp_figName = sprintf('soloT_Temp_timeseriesCleaned_SepOct2026.png'); 
+temp_outFile = fullfile(outDir, temp_figName);
+
+exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
+
+
+% -- temp histogram save --
+
+
+hist_figName = sprintf('soloT_Temp_histogramCleaned_SepOct2026.png'); 
+hist_outFile = fullfile(outDir, hist_figName);
+
+exportgraphics(figure(2), hist_outFile, 'Resolution', 300);
 %% save cleaned data
 
-save SoloTdata_AugSep2026_L2.mat soloT_data
+save SoloTdata_SepOct2026_L2.mat soloT_data
