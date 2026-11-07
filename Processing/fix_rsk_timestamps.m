@@ -7,6 +7,9 @@ function out = fix_rsk_timestamps(rskFile, opts)
 %
 %   out = fix_rsk_timestamps('Echo_CTD_23Sep2026_ebb.rsk', opts)
 %
+%   Example call: out = fix_rsk_timestamps('Echo_CTD_23Sep2026_flood.rsk', struct('adcpRawFile','Echo_ADCP_23Sep2026_flood.mat'));
+%
+%
 % BACKGROUND
 %   The .rsk timestamps are NOMINAL: tstamp(n) = t0 + n/fs_nominal, with
 %   fs_nominal = 32 Hz. The file contains no independent clock, so the true
@@ -374,7 +377,7 @@ if opts.makePlots
     p = getVar(raw,varNames,'pres',true);        % CTD pressure for the plots
 
     % ---- Figure 1: before/after time axis and the main variables -------
-    figure('Name','Time correction','Color','w');
+    fig1 = figure('Name','Time correction','Color','w');          % <-- CHANGED 11/6
     tl = tiledlayout(3,1,'TileSpacing','compact');
 
     nexttile; hold on
@@ -394,7 +397,7 @@ if opts.makePlots
     linkaxes(tl.Children,'x');                   % zoom all three together
 
     % ---- Figure 2: individual casts coloured by direction --------------
-    figure('Name','Casts','Color','w'); hold on
+    fig2 = figure('Name','Casts','Color','w'); hold on            % <-- CHANGED 11/6
     plot(tCorr, p, 'Color',[.8 .8 .8]);          % whole record in light grey
     for k = 1:height(casts)
         m = tCorr >= casts.start(k) & tCorr <= casts.stop(k);
@@ -406,11 +409,9 @@ if opts.makePlots
 
     % ---- Figure 3: ADCP validation -------------------------------------
     if haveADCP
-        figure('Name','ADCP validation','Color','w');
+        fig3 = figure('Name','ADCP validation','Color','w');      % <-- CHANGED 11/6
         tl3 = tiledlayout(3,1,'TileSpacing','compact');
 
-        % (a) correlation versus x: a sharp single peak means x is well
-        %     determined. Only available when the ADCP search was run.
         nexttile;
         if ~isempty(rCurve)
             plot(xGrid, rCurve,'k'); hold on
@@ -418,7 +419,6 @@ if opts.makePlots
             xlabel('scale factor x'); ylabel('correlation r'); grid on
             title('Cast max depth vs ADCP bottom depth');
         else
-            % When the rate was supplied, evaluate the same curve for context.
             xg = opts.xRange(1):opts.xStep:opts.xRange(2);
             rr = adcpMatchScore(t0_ms,tPk_ms,zPk,adcpMs(adcpGood),adcpZ(adcpGood),xg,0);
             plot(xg, rr,'k'); hold on; xline(x,'r','LineWidth',1.5);
@@ -426,28 +426,41 @@ if opts.makePlots
             title('Match quality vs x (red = value used)');
         end
 
-        % (b) time series: ADCP seafloor depth (black) against the corrected
-        %     CTD depth (blue). Cast bottoms should touch/approach the black
-        %     line where the water is shallow.
         nexttile; hold on
         plot(adcpDT(adcpGood), adcpZ(adcpGood),'k.-');
         plot(tCorr, zCTD,'b');
         tPk_corr = toDT(fixMs(tPk_ms));
-        plot(tPk_corr, zPk,'ro');                % deepest point of each profile
+        plot(tPk_corr, zPk,'ro');
         set(gca,'YDir','reverse'); ylabel('Depth (m)'); grid on
         legend('ADCP bottom depth','CTD depth','profile max depth','Location','best');
         xlabel('Time (UTC, corrected)');
 
-        % (c) scatter: deepest CTD point vs ADCP bottom depth at that time.
         nexttile;
         zBot = interp1(adcpMs(adcpGood), adcpZ(adcpGood), fixMs(tPk_ms), 'linear');
         plot(zBot, zPk, 'ko'); hold on
         lims = [0 max([zBot; zPk])*1.05];
-        plot(lims, lims, 'r--');                 % 1:1 line
+        plot(lims, lims, 'r--');
         xlim(lims); ylim(lims); axis square; grid on
         xlabel('ADCP bottom depth (m)'); ylabel('CTD profile max depth (m)');
-    end
-end
+    end   % end of "if haveADCP"
+
+    % ---- Save the figures, named by figure title + date + tide stage ---- % <-- NEW 11/6
+    if opts.saveOutput                                                       % <-- NEW 11/6
+        [d,n] = fileparts(rskFile);                                          % <-- NEW 11/6 
+        % Pull "23Sep2026_flood" out of e.g. "Echo_CTD_23Sep2026_flood"
+        tok = regexp(n,'(\d{1,2}[A-Za-z]{3}\d{4})_([A-Za-z]+)$','tokens','once'); % <-- NEW 11/6
+        if isempty(tok), tag = n; else, tag = [tok{1} '_' tok{2}]; end       % <-- NEW 11/6
+
+        figList = [fig1, fig2];                                              % <-- NEW 11/6
+        if haveADCP, figList(end+1) = fig3; end                              % <-- NEW 11/6
+        for f = figList                                                      % <-- NEW 11/6
+            figTitle = strrep(f.Name,' ','_');                               % <-- NEW 11/6
+            exportgraphics(f, fullfile(d, sprintf('%s_%s.png', figTitle, tag)), ... % <-- NEW 11/6
+                           'Resolution', 300);                               % <-- NEW 11/6
+        end                                                                  % <-- NEW 11/6
+        fprintf('Saved %d figures with tag %s\n', numel(figList), tag);      % <-- NEW 11/6
+    end                                                                      % <-- NEW 11/6
+end   % end of "if opts.makePlots"
 
 %% ======================================================================
 %% 9. OUTPUT
