@@ -79,10 +79,10 @@ struct_names = {'DuoTD_data_InnerNorth_SepOct2026_240149', 'DuoTD_data_InnerNort
 
     % for AugSep
 
-    startTime = datetime(2026, 8, 27, 20, 0, 0);
-    endTime = datetime(2026, 9, 22, 20, 0, 0);
-    startTime_dn = datenum(startTime);
-    endTime_dn   = datenum(endTime);
+   % startTime = datetime(2026, 8, 27, 20, 0, 0);
+   % endTime = datetime(2026, 9, 22, 20, 0, 0);
+   % startTime_dn = datenum(startTime);
+   % endTime_dn   = datenum(endTime);
 
     % For SepOct
 

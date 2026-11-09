@@ -32,7 +32,7 @@ clear all; close all;
 
 SNs = {'241787', '241789', '241791', '241792'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'AugSep2026'; % edit this based on the data you are downloading
+months = 'SepOct2026'; % edit this based on the data you are downloading
 
 TODO_data = struct(); % create an empty struct that I will read data into
 
@@ -147,7 +147,7 @@ end
 
 % CHANGE THE MONTH DIRECTORY IN THE FILE PATH BELOW AS NEEDED
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -164,7 +164,7 @@ exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 raw_values = TODO_data; % in case I need to use it in this script
 
-save TODOdata_AugSep2026_raw.mat TODO_data
+save TODOdata_SepOct2026_raw.mat TODO_data
 
 %% clean the data with a hampel filter and rate of change flagging
 
@@ -241,13 +241,20 @@ TODO_data = raw_values;
 % trim the timestamps
 
 
+% --- SepOct---
+
+        startTime = datetime(2026, 9, 24, 19, 30, 0);
+        endTime = datetime(2026, 10, 20, 19, 15, 0);
+        startTime_dn = datenum(startTime);
+        endTime_dn   = datenum(endTime);
+
 % ---- AugSep ----
 
-startTime = datetime(2026, 8, 27, 20, 0, 0);
-endTime = datetime(2026, 9, 22, 19, 0, 0);
+%startTime = datetime(2026, 8, 27, 20, 0, 0);
+%endTime = datetime(2026, 9, 22, 19, 0, 0);
 
-startTime_dn = datenum(startTime);
-endTime_dn   = datenum(endTime);
+%startTime_dn = datenum(startTime);
+%endTime_dn   = datenum(endTime);
 
 
 
@@ -432,111 +439,111 @@ disp(d.values(max(1,spikeIdx-5):min(numel(d.tstamp),spikeIdx+5), 3))
 %% manually remove other outliers
 
 
-moorName = 'InnerSouth';
-d = TODO_data.(moorName).data;
+% moorName = 'InnerSouth';
+% d = TODO_data.(moorName).data;
 
-regionIdx = find(d.tstamp >= datenum(datetime(2026,8,27)) & d.tstamp <= datenum(datetime(2026,9,22)));
-[~, localSortIdx] = sort(d.values(regionIdx,3), 'descend', 'MissingPlacement','last');
-candidateIdx = regionIdx(localSortIdx(1:10));
+% regionIdx = find(d.tstamp >= datenum(datetime(2026,8,27)) & d.tstamp <= datenum(datetime(2026,9,22)));
+% [~, localSortIdx] = sort(d.values(regionIdx,3), 'descend', 'MissingPlacement','last');
+% candidateIdx = regionIdx(localSortIdx(1:10));
 
-for k = 1:10
-    fprintf('idx %d | %s | DO %.2f\n', candidateIdx(k), datestr(d.tstamp(candidateIdx(k))), d.values(candidateIdx(k),3));
-end
+% for k = 1:10
+%     fprintf('idx %d | %s | DO %.2f\n', candidateIdx(k), datestr(d.tstamp(candidateIdx(k))), d.values(candidateIdx(k),3));
+% end
 
 
 %% manually flag remaining spikes that survived automated filtering
 
 % Each entry: mooring name, approximate datetime, brief reason
 
-manualFlags = {
-    'InnerNorth',   datetime(2026,6,27,14,32,0), 'single-point DO spike, visually obvious in plot';
-    'InnerNorth',   datetime(2026,6,27,14,45,0), 'single-point temp spike';
-    % 'InnerNorth', datetime(2026,6,27,3,50,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,49,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,48,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,47,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,46,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,45,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,44,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,43,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,42,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,3,41,0), 'single-point DO spike';
-    'InnerNorth', datetime(2026,6,27,5,51,0), 'single-point DO spike';
-    'InnerNorth', datetime(2026,6,27,5,55,0), 'single-point DO spike';
-    'InnerNorth', datetime(2026,6,27,5,53,0), 'single-point DO spike';
-    'InnerNorth', datetime(2026,6,27,5,52,0), 'single-point DO spike';
-    'InnerNorth', datetime(2026,6,27,5,54,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,6,20,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,6,17,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,6,19,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,6,18,0), 'single-point DO spike';
-    % 'InnerNorth', datetime(2026,6,27,6,16,0), 'single-point DO spike';
+% manualFlags = {
+%     'InnerNorth',   datetime(2026,6,27,14,32,0), 'single-point DO spike, visually obvious in plot';
+%     'InnerNorth',   datetime(2026,6,27,14,45,0), 'single-point temp spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,50,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,49,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,48,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,47,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,46,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,45,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,44,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,43,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,42,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,3,41,0), 'single-point DO spike';
+%     'InnerNorth', datetime(2026,6,27,5,51,0), 'single-point DO spike';
+%     'InnerNorth', datetime(2026,6,27,5,55,0), 'single-point DO spike';
+%     'InnerNorth', datetime(2026,6,27,5,53,0), 'single-point DO spike';
+%     'InnerNorth', datetime(2026,6,27,5,52,0), 'single-point DO spike';
+%     'InnerNorth', datetime(2026,6,27,5,54,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,6,20,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,6,17,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,6,19,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,6,18,0), 'single-point DO spike';
+%     % 'InnerNorth', datetime(2026,6,27,6,16,0), 'single-point DO spike';
 
 
-    'InnerSouth', datetime(2026,6,27,3,50,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,49,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,48,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,47,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,46,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,45,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,44,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,43,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,42,0), 'single-point DO spike';
-    'InnerSouth', datetime(2026,6,27,3,41,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,50,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,49,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,48,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,47,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,46,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,45,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,44,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,43,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,42,0), 'single-point DO spike';
+%     'InnerSouth', datetime(2026,6,27,3,41,0), 'single-point DO spike';
 
-    'LoveJoyNorth', datetime(2026,6,26,12,11,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,26,12,13,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,26,12,12,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,26,12,09,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,26,12,16,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,26,12,10,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,26,12,15,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,7,3,9,10,0),   'single-point DO dropout near 07/03';
-    'LoveJoyNorth', datetime(2026,6,27,3,49,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,27,3,50,0),   'single-point DO spike';
-    'LoveJoyNorth', datetime(2026,6,27,3,51,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,11,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,13,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,12,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,09,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,16,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,10,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,26,12,15,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,7,3,9,10,0),   'single-point DO dropout near 07/03';
+%     'LoveJoyNorth', datetime(2026,6,27,3,49,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,27,3,50,0),   'single-point DO spike';
+%     'LoveJoyNorth', datetime(2026,6,27,3,51,0),   'single-point DO spike';
 
-    'LoveJoySouth', datetime(2026,6,28,11,11,0), 'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,11,10,0), 'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,12,7,0),  'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,11,7,0),  'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,12,11,0), 'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,12,4,0),  'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,11,49,0), 'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,11,19,0), 'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,11,48,0), 'single-point DO spike';
-    'LoveJoySouth', datetime(2026,6,28,11,45,0), 'single-point DO spike';
-};
+%     'LoveJoySouth', datetime(2026,6,28,11,11,0), 'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,11,10,0), 'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,12,7,0),  'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,11,7,0),  'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,12,11,0), 'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,12,4,0),  'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,11,49,0), 'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,11,19,0), 'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,11,48,0), 'single-point DO spike';
+%     'LoveJoySouth', datetime(2026,6,28,11,45,0), 'single-point DO spike';
+% };
     
     
-for m = 1:length(moorings)
-    n = length(TODO_data.(moorings{m}).data.tstamp);
-    TODO_data.(moorings{m}).data.manual_flag = false(n,1);
-end
+% for m = 1:length(moorings)
+%     n = length(TODO_data.(moorings{m}).data.tstamp);
+%     TODO_data.(moorings{m}).data.manual_flag = false(n,1);
+% end
 
-for i = 1:size(manualFlags,1)
-    moorName = manualFlags{i,1};
-    targetTime = datenum(manualFlags{i,2});
+% for i = 1:size(manualFlags,1)
+%     moorName = manualFlags{i,1};
+%     targetTime = datenum(manualFlags{i,2});
 
-    d = TODO_data.(moorName).data;
+%     d = TODO_data.(moorName).data;
 
-    % find nearest sample in time
-    [~, idx] = min(abs(d.tstamp - targetTime));
+%     % find nearest sample in time
+%     [~, idx] = min(abs(d.tstamp - targetTime));
 
-    [minDiff, idx] = min(abs(d.tstamp - targetTime));
-    if minDiff*24*60 > 2  % more than 2 minutes off
-        warning('%s: nearest timestamp is %.1f min from target %s — check this one', ...
-            moorName, minDiff*24*60, datestr(targetTime));
-    end
+%     [minDiff, idx] = min(abs(d.tstamp - targetTime));
+%     if minDiff*24*60 > 2  % more than 2 minutes off
+%         warning('%s: nearest timestamp is %.1f min from target %s — check this one', ...
+%             moorName, minDiff*24*60, datestr(targetTime));
+%     end
 
-    fprintf('%s: flagging idx %d (%s), DO=%.2f, Temp=%.2f\n', ...
-        moorName, idx, datestr(d.tstamp(idx)), d.values(idx,3), d.values(idx,1));
+%     fprintf('%s: flagging idx %d (%s), DO=%.2f, Temp=%.2f\n', ...
+%         moorName, idx, datestr(d.tstamp(idx)), d.values(idx,3), d.values(idx,1));
 
-    d.values(idx, :) = NaN;
-    d.manual_flag(idx) = true;   % record of manual removals
+%     d.values(idx, :) = NaN;
+%     d.manual_flag(idx) = true;   % record of manual removals
 
-    TODO_data.(moorName).data = d;
-end
+%     TODO_data.(moorName).data = d;
+% end
 
 %% interactive cleanup with brushing - cycles through all moorings
 
@@ -633,7 +640,11 @@ end
         legend('Location', 'best');
         axis tight
 
+     
 
 %% save out the cleaned data
 
-save TODOdata_AugSep2026_L3.mat TODO_data
+save TODOdata_SepOct2026_L2.mat TODO_data
+
+%% save out hte clean data figures
+

@@ -12,7 +12,7 @@ clear all, close all
 
 SNs = {'066057', '209886'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'JulAug2026'; % edit this based on the data you are downloading
+months = 'SepOct2026'; % edit this based on the data you are downloading
 
 concerto_data = struct(); % create an empty struct that I will read data into
 
@@ -69,10 +69,16 @@ end
    % for July to August
 
 
-       startTime = datetime(2026, 7, 25, 12, 0, 0);
-       endTime = datetime(2026, 8, 25, 12, 0, 0);
-       startTime_dn = datenum(startTime);
-       endTime_dn   = datenum(endTime);
+    %    startTime = datetime(2026, 7, 25, 12, 0, 0);
+    %    endTime = datetime(2026, 8, 25, 12, 0, 0);
+    %    startTime_dn = datenum(startTime);
+    %    endTime_dn   = datenum(endTime);
+
+    % for September to October
+startTime = datetime(2026, 9, 24, 19, 30, 0);
+        endTime = datetime(2026, 10, 20, 19, 15, 0);
+        startTime_dn = datenum(startTime);
+        endTime_dn   = datenum(endTime);
 
 for i = 1:length(moorings)
     moorName  = moorings{i};
@@ -184,16 +190,16 @@ ax3 = subplot(3,1,3); hold(ax3, 'on');
  linkaxes([ax1 ax2 ax3], 'x')
 
 
- % --- save the figure to github ---
+ %% --- save the figure to github ---
 
- outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/JulAug2026/RawData_plots';
+ outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
 
  % make sure the directory exists; create it if not
  if ~exist(outDir, 'dir')
      mkdir(outDir);
  end
 
-figName = sprintf('BottomConcerto_timeseries_JulAug2026.png'); 
+figName = sprintf('BottomConcerto_timeseries_SepOct2026.png'); 
 outFile = fullfile(outDir, figName);
 
 exportgraphics(figure(1), outFile, 'Resolution', 300);
@@ -205,26 +211,39 @@ exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 raw_values = concerto_data;
 
-save mooredConcertoData_JulAug_2026_raw.mat concerto_data
+save mooredConcertoData_SepOct_2026_raw.mat concerto_data
 
 %% clean the data 
 
 concerto_data = raw_values;  
 
-% starting with the Ruskin despike function
+% starting with the Ruskin despike function 
 
-channel_name_list = {'Conductivity', 'Temperature', 'Pressure', 'Backscatter1', ...
-    'Backscatter2', 'Backscatter3', 'Sea Pressure', 'Depth', 'Salinity', ...
-    'Speed of Sound', 'Specific conductivity'};
+% the LoveJoy North sensor has 11 channels, the Inner South sensor has 14 channels. The channel names are as follows:
+
+channel_names_LJN = {'Conductivity', 'Temperature', 'Pressure',  ...
+    'Sea Pressure', 'Depth', 'Salinity', ...
+    'Speed of Sound', 'Specific conductivity'}; % 'Backscatter1', 'Backscatter2', 'Backscatter3', 
+
+channel_names_IS = {'Conductivity', 'Temperature', 'Pressure', ...
+    'Sea Pressure', 'Depth', 'Salinity', ...
+    'Speed of Sound', 'Specific conductivity'}; % 'Optode Temperature', 'Dissolved O21',  'Dissolved O22', 'CT Cell Temperature',,  'Pressure Gauge Temperature'
 
 for j = 1:length(SNs)
     fieldName = sprintf('%s', moorings{j});
     rsk = concerto_data.(fieldName);   % start from this mooring's data
 
-    for i = 1:length(channel_name_list)
-        [rsk, spike] = RSKdespike(rsk, 'channel', channel_name_list{i}, ...
+    for i = 1:length(channel_names_LJN)  % loop through each channel for LoveJoy North
+        [rsk, spike] = RSKdespike(rsk, 'channel', channel_names_LJN{i}, ...
             'threshold', 1, 'windowLength', 11, 'action', 'nan'); % each sample point is every 2 minutes, so this looks at hte surroudning 22 minutes of data. This seems like a robust amount of time to compare for spiking.
-        fprintf('%s - %s: %d spikes flagged\n', fieldName, channel_name_list{i}, length(spike));
+        fprintf('%s - %s: %d spikes flagged\n', fieldName, channel_names_LJN{i}, length(spike));
+    end
+
+    % loop throuhg each channel for Inner South
+    for i = 1:length(channel_names_IS)
+        [rsk, spike] = RSKdespike(rsk, 'channel', channel_names_IS{i}, ...
+            'threshold', 1, 'windowLength', 11, 'action', 'nan');
+        fprintf('%s - %s: %d spikes flagged\n', fieldName, channel_names_IS{i}, length(spike));
     end
 
     concerto_data.(fieldName) = rsk;   % write the fully despiked rsk back
@@ -330,4 +349,4 @@ end
 fprintf('\nDone. Re-plot to check results.\n');
  %% save out the cleaned data
 
- save("CleanedData/mooredConcertoData_MayJun2026_L2.mat", "concerto_data")
+ save("CleanedData/mooredConcertoData_SepOct2026_L2.mat", "concerto_data")

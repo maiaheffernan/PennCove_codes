@@ -6,8 +6,8 @@ clear all, close all
 
 %% load in the data
 
-fname1 = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Sep2026/Data/Echo/PoleCT/Echo_PoleCT_23Sep2026_ebbt';
-fname2 = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Sep2026/Data/Echo/PoleCT/Echo_PoleCT_23Sep2026_flood';
+fname1 = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/Echo/PoleCT/Echo_PoleCT_23Sep2026_ebbt';
+fname2 = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/Echo/PoleCT/Echo_PoleCT_23Sep2026_flood';
 
 poleCTdata_ebb = readtable(fname1);
 poleCTdata_flood = readtable(fname2);

@@ -15,11 +15,15 @@ clear all; close all;
 
 % == MAKE SURE YOU ARE IN THE 'DATA' DIRECTORY FOR THE MONTH YOU ARE INTERESTED IN ==
 
-LJN_13m = readtable('LoveJoyNorth_AugSep2026/miniDOT/LoveJoyNorth_AugSep2026_13m_sn372740/Cat.TXT');
-LJN_26m = readtable('LoveJoyNorth_AugSep2026/miniDOT/LoveJoyNorth_AugSep2026_26m_sn419387/Cat.TXT');
+LJN_13m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoyNorth_SepOct2026/miniDOTs/LoveJoyNorth_SepOct2026_13m_sn372740/Cat.TXT');
+LJN_26m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoyNorth_SepOct2026/miniDOTs/LoveJoyNorth_SepOct2026_26m_sn419387/Cat.TXT');
 
-LJS_16m = readtable('LoveJoySouth_AugSep2026/miniDOT/LoveJoySouth_AugSep2026_16m_sn279558/Cat.TXT');
-LJS_32m = readtable('LoveJoySouth_AugSep2026/miniDOT/LoveJoySouth_AugSep2026_32m_sn305219/Cat.TXT');
+
+LJS_16m = array2table(NaN(size(LJN_26m)), ...
+    'VariableNames', LJN_26m.Properties.VariableNames);
+ % placeholder for LJS_16m data, since the line for reading it is commented out
+%LJS_16m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoySouth_SepOct2026/miniDOTs/LoveJoySouth_SepOct2026_16m_sn279558/Cat.TXT');
+LJS_32m = readtable('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/LoveJoySouth_SepOct2026/miniDOTs/LoveJoySouth_SepOct2026_32m_sn305219/Cat.TXT');
 
 
 % --- for May ---
@@ -48,11 +52,15 @@ LJS_32m = readtable('LoveJoySouth_AugSep2026/miniDOT/LoveJoySouth_AugSep2026_32m
 
 % Define the time range for trimming the data
 
+% --- SepOct ----
+
+    startTime = datetime(2026, 9, 24, 19, 30, 0);
+    endTime = datetime(2026, 10, 20, 19, 15, 0);
 
 % ---- AugSep ----
 
-startTime = datetime(2026, 8, 27, 20, 0, 0);
-endTime = datetime(2026, 9, 22, 19, 0, 0);
+% startTime = datetime(2026, 8, 27, 20, 0, 0);
+% endTime = datetime(2026, 9, 22, 19, 0, 0);
 
 
 
@@ -74,7 +82,7 @@ endTime = datetime(2026, 9, 22, 19, 0, 0);
 % Trim the data for each mooring to the defined time range
 LJN_13m = LJN_13m(LJN_13m.UTC_Date___Time >= startTime & LJN_13m.UTC_Date___Time <= endTime, :);
 LJN_26m = LJN_26m(LJN_26m.UTC_Date___Time >= startTime & LJN_26m.UTC_Date___Time <= endTime, :);
-LJS_16m = LJS_16m(LJS_16m.UTC_Date___Time >= startTime & LJS_16m.UTC_Date___Time <= endTime, :);
+%LJS_16m = LJS_16m(LJS_16m.UTC_Date___Time >= startTime & LJS_16m.UTC_Date___Time <= endTime, :);
 LJS_32m = LJS_32m(LJS_32m.UTC_Date___Time >= startTime & LJS_32m.UTC_Date___Time <= endTime, :);
 
 
@@ -120,7 +128,7 @@ title('Temperature time series from the moorings')
 
 %% save the raw figure
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/Aug2Sep026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -131,7 +139,7 @@ end
 % -- do save --
 
 
-do_figName = sprintf('miniDOT_DO_timeseries_AugSep2026_moorings.png'); 
+do_figName = sprintf('miniDOT_DO_timeseries_SepOct2026_moorings.png'); 
 do_outFile = fullfile(outDir, do_figName);
  
 exportgraphics(figure(1), do_outFile, 'Resolution', 300);
@@ -139,7 +147,7 @@ exportgraphics(figure(1), do_outFile, 'Resolution', 300);
 
 % -- temp save --
 
-temp_figName = sprintf('miniDOT_Temp_timeseries_AugSep2026_moorings.png'); 
+temp_figName = sprintf('miniDOT_Temp_timeseries_SepOct2026_moorings.png'); 
 temp_outFile = fullfile(outDir, temp_figName);
 
 exportgraphics(figure(2), temp_outFile, 'Resolution', 300);
@@ -179,7 +187,7 @@ linkaxes([s1 s2 s3 s4],'x')
 
 % -- save the figure --
 
-doHist_figName = sprintf('miniDOT_DO_histograms_AugSep2026_moorings.png'); 
+doHist_figName = sprintf('miniDOT_DO_histograms_SepOct2026_moorings.png'); 
 doHist_outFile = fullfile(outDir, doHist_figName);
 
 exportgraphics(figure(3), doHist_outFile, 'Resolution', 300);
@@ -223,7 +231,7 @@ linkaxes([s5 s6 s7 s8],'x')
 
 % -- save the figure --
 
-tempHist_figName = sprintf('miniDOT_temp_histograms_AugSep2026_moorings.png'); 
+tempHist_figName = sprintf('miniDOT_temp_histograms_SepOct2026_moorings.png'); 
 tempHist_outFile = fullfile(outDir, tempHist_figName);
 
 exportgraphics(figure(4), tempHist_outFile, 'Resolution', 300);
@@ -232,7 +240,7 @@ exportgraphics(figure(4), tempHist_outFile, 'Resolution', 300);
 %% save out the data
 
 
-save miniDOT_AugSep2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
+save miniDOT_SepOct2026_mooringdata_raw LJN_26m LJN_13m LJS_16m LJS_32m
 
 %% cleaning with a hampel filter and rate of change filter
 
@@ -327,4 +335,4 @@ p17 = plot(LJS_32m.UTC_Date___Time, LJS_32m.Temp_C_cleaned, 'r-', 'LineWidth', 1
 
 %% save out the cleaned data
 
- save miniDOT_JunJul2026_mooringdata_L2.mat LJN_26m LJN_13m LJS_16m LJS_32m
+ save miniDOT_SepOct2026_mooringdata_L2.mat LJN_26m LJN_13m LJS_16m LJS_32m
