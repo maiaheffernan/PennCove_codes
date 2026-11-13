@@ -61,16 +61,22 @@ for i = 1:length(moorings)
     end
 end
 
+
+
+%% save the raw data -- MAKE SURE THE MONTHS ARE CORRECT IN THE NAME
+
+save SoloTdata_SepOct2026_raw.mat soloT_data
+
 %% plot a time series of the data with different colors 
 
 % ===== put in the start and end times =====
 
     % for May to June
-        % startTime = datetime(2026, 5, 27, 0, 0, 0);
-        % endTime = datetime(2026, 6, 23, 20, 40, 0);
+        %startTime = datetime(2026, 5, 27, 0, 0, 0);
+        %endTime = datetime(2026, 6, 23, 20, 40, 0);
     % for JuneJul
-        % startTime = datetime(2026, 6, 25, 19, 0, 0);
-        % endTime = datetime(2026, 7, 21, 16, 30, 0);
+        %startTime = datetime(2026, 6, 25, 19, 0, 0);
+        %endTime = datetime(2026, 7, 21, 16, 30, 0);
 
 
     % for July to August
@@ -79,8 +85,8 @@ end
     
 
     % for Aug to Sep
-        %startTime = datetime(2026, 8, 27, 20, 0, 0);
-        %endTime = datetime(2026, 9, 22, 20, 0, 0);
+        % startTime = datetime(2026, 8, 27, 20, 0, 0);
+        % endTime = datetime(2026, 9, 22, 20, 0, 0);
 
     % Sep Oct
         startTime = datetime(2026, 9, 24, 19, 30, 0);
@@ -96,52 +102,52 @@ endTime_dn   = datenum(endTime);
 
 
     % Clean the temperature data by de-spiking with a Hampel filter
-    for i = 1:length(moorings)
-        moorName = moorings{i};
-        snFields = fieldnames(soloT_data.(moorName));
-
-        for j = 1:length(snFields)
-            sn = snFields{j};
-            thisSensor = soloT_data.(moorName).(sn);
-
-            % De-spike the temperature values
-            thisSensor.data.values = hampel(thisSensor.data.values, 7, 3);
-            soloT_data.(moorName).(sn) = thisSensor;  % Update the struct with cleaned data
-        end
-    end
-startTime_dn =datenum(startTime);
-endTime_dn =datenum(endTime);
-
-moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'};
-
-figure;
-ax = gobjects(length(moorings), 1);
-
-for i = 1:length(moorings)
-    moorName = moorings{i};
-    ax(i) = subplot(length(moorings), 1, i);
-    hold on
-
-    snFields = fieldnames(soloT_data.(moorName));
-
-    for j = 1:length(snFields)
-        sn = snFields{j};
-        thisSensor = soloT_data.(moorName).(sn);
-
-        t = datetime(thisSensor.data.tstamp, 'ConvertFrom', 'datenum');  % convert datenum -> datetime
-        plot(t, thisSensor.data.values, 'DisplayName', sn);
-    end
-
-    title(moorName, 'Interpreter', 'none');
-    ylabel('Temp (\circC)');
-    legend('show', 'Location', 'eastoutside');
-    grid on
-end
-
-xlabel('Time');
-linkaxes(ax, 'xy');
-
-xlim(ax(1), [startTime, endTime]);
+%     for i = 1:length(moorings)
+%         moorName = moorings{i};
+%         snFields = fieldnames(soloT_data.(moorName));
+% 
+%         for j = 1:length(snFields)
+%             sn = snFields{j};
+%             thisSensor = soloT_data.(moorName).(sn);
+% 
+%             % De-spike the temperature values
+%             thisSensor.data.values = hampel(thisSensor.data.values, 7, 3);
+%             soloT_data.(moorName).(sn) = thisSensor;  % Update the struct with cleaned data
+%         end
+%     end
+% startTime_dn =datenum(startTime);
+% endTime_dn =datenum(endTime);
+% 
+% moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'};
+% 
+% figure;
+% ax = gobjects(length(moorings), 1);
+% 
+% for i = 1:length(moorings)
+%     moorName = moorings{i};
+%     ax(i) = subplot(length(moorings), 1, i);
+%     hold on
+% 
+%     snFields = fieldnames(soloT_data.(moorName));
+% 
+%     for j = 1:length(snFields)
+%         sn = snFields{j};
+%         thisSensor = soloT_data.(moorName).(sn);
+% 
+%         t = datetime(thisSensor.data.tstamp, 'ConvertFrom', 'datenum');  % convert datenum -> datetime
+%         plot(t, thisSensor.data.values, 'DisplayName', sn);
+%     end
+% 
+%     title(moorName, 'Interpreter', 'none');
+%     ylabel('Temp (\circC)');
+%     legend('show', 'Location', 'eastoutside');
+%     grid on
+% end
+% 
+% xlabel('Time');
+% linkaxes(ax, 'xy');
+% 
+% xlim(ax(1), [startTime, endTime]);
 
 %% plot histograms of the data to see the distribution
 
@@ -204,7 +210,7 @@ exportgraphics(figure(2), hist_outFile, 'Resolution', 300);
 
 %% save the raw data -- MAKE SURE THE MONTHS ARE CORRECT IN THE NAME
 
-save SoloTdata_SepOct2026_raw.mat soloT_data
+%save SoloTdata_SepOct2026_raw.mat soloT_data
 
 %% remove the data points before startTime and after endTime
 

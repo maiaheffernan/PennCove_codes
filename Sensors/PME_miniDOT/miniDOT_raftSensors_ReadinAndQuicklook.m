@@ -11,9 +11,9 @@ clear all; close all;
 
 % go into the mussel raft directory in the Data directort
 
-raft_1m = readtable("musselRaft_1m_AugSep2026/Cat.TXT");
+raft_7m = readtable("musselRaft_7m_SepOct2026/Cat.TXT");
 
-raft_3m = readtable("musselRaft_3m_AugSep2026/Cat.TXT");
+raft_3m = readtable("musselRaft_3m_SepOct2026/Cat.TXT");
 
 %% Trim the data so that only date from the deployment time winow for all sensors is represented
 
@@ -23,10 +23,16 @@ raft_3m = readtable("musselRaft_3m_AugSep2026/Cat.TXT");
 
 % Define the time range for trimming the data
 
+
+% Sep Oct
+startTime = datetime(2026, 9, 24, 19, 30, 0);
+endTime = datetime(2026, 10, 20, 19, 15, 0);
+
+
 % AugSep
 
-startTime = datetime(2026, 8, 27, 20, 0, 0);
-endTime = datetime(2026, 9, 22, 20, 0, 0);
+% startTime = datetime(2026, 8, 27, 20, 0, 0);
+% endTime = datetime(2026, 9, 22, 20, 0, 0);
 
 
 
@@ -48,7 +54,7 @@ endTime = datetime(2026, 9, 22, 20, 0, 0);
 % endTime = datetime(2026, 6, 23, 20, 0, 0);
 
 % Trim the data for each mooring to the defined time range
-raft_1m = raft_1m(raft_1m.UTC_Date___Time >= startTime & raft_1m.UTC_Date___Time <= endTime, :);
+raft_7m = raft_7m(raft_7m.UTC_Date___Time >= startTime & raft_7m.UTC_Date___Time <= endTime, :);
 raft_3m  = raft_3m(raft_3m.UTC_Date___Time >= startTime & raft_3m.UTC_Date___Time <= endTime, :);
 
 
@@ -57,11 +63,11 @@ raft_3m  = raft_3m(raft_3m.UTC_Date___Time >= startTime & raft_3m.UTC_Date___Tim
 figure(1); clf;
 
 hold on;
-p1 = plot(raft_1m.UTC_Date___Time, raft_1m.DissolvedOxygen, 'b-', 'LineWidth', 2.0);
+p1 = plot(raft_7m.UTC_Date___Time, raft_7m.DissolvedOxygen, 'b-', 'LineWidth', 2.0);
 p2 = plot(raft_3m.UTC_Date___Time, raft_3m.DissolvedOxygen, 'm-', 'LineWidth', 2.0);
 yline(2, 'k--', 'LineWidth', 1.5)
 
-legend([p1 p2], '1m depth', '3m depth') % legend([p1 p2], '1m depth', '7m depth')
+legend([p1 p2], '7m depth', '3m depth') % legend([p1 p2], '7m depth', '7m depth')
 xlabel('Time')
 ylabel('Dissolved Oxygen (mgL^{-1})')
 title('Dissolved oxygen time series from the shellfish rafts')
@@ -88,11 +94,11 @@ exportgraphics(figure(1), do_outFile, 'Resolution', 300);
 
 figure(2); clf;
 
-p1 = plot(raft_1m.UTC_Date___Time, raft_1m.Temperature, 'b-', 'LineWidth', 2.0);
+p1 = plot(raft_7m.UTC_Date___Time, raft_7m.Temperature, 'b-', 'LineWidth', 2.0);
 hold on;
 p2 = plot(raft_3m.UTC_Date___Time, raft_3m.Temperature, 'm-', 'LineWidth', 2.0);
 
-legend([p1 p2], '1m depth', '3m depth') % legend([p1 p2], '1m depth', '7m depth')
+legend([p1 p2], '7m depth', '3m depth') % legend([p1 p2], '7m depth', '7m depth')
 xlabel('Time')
 ylabel('Temperature (°C)')
 title('Temperature time series from the shellfish rafts')
@@ -110,19 +116,19 @@ exportgraphics(figure(1), temp_outFile, 'Resolution', 300);
 
 figure(3); clf;
 
-hist(raft_1m.DissolvedOxygen);
+hist(raft_7m.DissolvedOxygen);
 xlabel('Dissolved oxygen concentration (mgL^{-1})')
 ylabel('Frequency')
-title('1m shellfish raft sensor DO distribution')
+title('7m shellfish raft sensor DO distribution')
 
-saveas(gcf, 'miniDOT_1mDO_hist_AugSep2026_rafts.png');
+saveas(gcf, 'miniDOT_7mDO_hist_AugSep2026_rafts.png');
 
 figure(4); clf;
 
 hist(raft_3m.DissolvedOxygen);
 xlabel('Dissolved oxygen concentration (mgL^{-1})')
 ylabel('Frequency')
-title('7m shellfish raft sensor DO distribution')
+title('3m shellfish raft sensor DO distribution')
 
 saveas(gcf, 'miniDOT_7mDO_hist_AugSep2026_rafts.png');
 
@@ -130,19 +136,19 @@ saveas(gcf, 'miniDOT_7mDO_hist_AugSep2026_rafts.png');
 
 figure(5); clf;
 
-hist(raft_1m.Temperature);
+hist(raft_7m.Temperature);
 xlabel('Temperature (°C)')
 ylabel('Frequency')
-title('1m shellfish raft sensor Temperature distribution')
+title('7m shellfish raft sensor Temperature distribution')
 
-saveas(gcf, 'miniDOT_1mTemp_hist_AugSep2026_rafts.png');
+saveas(gcf, 'miniDOT_7mTemp_hist_AugSep2026_rafts.png');
 
 
 figure(6); clf;
 hist(raft_3m.Temperature);
 xlabel('Temperature (°C)')
 ylabel('Frequency')
-title('7m shellfish raft sensor Temperature distribution')
+title('3m shellfish raft sensor Temperature distribution')
 
 saveas(gcf, 'miniDOT_7mTemp_hist_AugSep2026_rafts.png');
 
@@ -154,11 +160,11 @@ saveas(gcf, 'miniDOT_7mTemp_hist_AugSep2026_rafts.png');
 
 
 % Calculate the median and standard deviation for filtering
-% medianDO_1m = movmedian(raft_1m.DissolvedOxygen, 6);
-% stdDO_1m = movstd(raft_1m.DissolvedOxygen, 6);
+% medianDO_7m = movmedian(raft_7m.DissolvedOxygen, 6);
+% stdDO_7m = movstd(raft_7m.DissolvedOxygen, 6);
 
 
 %% save the data
 
 
-save miniDOT_AugSep2026_raftdata_raw.mat raft_1m raft_3m
+save miniDOT_AugSep2026_raftdata_raw.mat raft_7m raft_3m
