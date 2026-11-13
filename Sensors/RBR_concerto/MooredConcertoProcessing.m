@@ -12,7 +12,7 @@ clear all, close all
 
 SNs = {'066057', '209886'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
 moorings = {'LoveJoyNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'SepOct2026'; % edit this based on the data you are downloading
+months = 'AugSep2026'; % edit this based on the data you are downloading
 
 concerto_data = struct(); % create an empty struct that I will read data into
 
@@ -51,6 +51,65 @@ for i = 1:length(SNs)
 
 end
 
+%% ALTERNATE READ-IN: use .nc or .xlsx when a .rsk did not fully load
+% Comment out this whole section when every .rsk loads properly.
+% Builds an RSK-like struct (channels, data.tstamp, data.values) so the
+% trimming, RSKdespike, and plotting sections below work unchanged.
+
+altMoorings = {'InnerSouth'};  % moorings to replace with the exported files
+altFormat   = 'nc';            % 'nc' or 'xlsx'
+
+% channel order in the Ruskin exports (matches the channel numbers used below)
+altVars  = {'conductivity','temperature','pressure','temperature1', ...
+            'dissolved_o2_concentration','sea_pressure','depth','salinity', ...
+            'speed_of_sound','specific_conductivity','dissolved_o2_saturation'};
+altNames = {'Conductivity','Temperature','Pressure','Temperature1', ...
+            'Dissolved O2 concentration','Sea Pressure','Depth','Salinity', ...
+            'Speed of Sound','Specific conductivity','Dissolved O2 saturation'};
+
+for i = 1:length(altMoorings)
+    m  = find(strcmp(moorings, altMoorings{i}));
+    folderPath = fullfile(sprintf('%s_%s', moorings{m}, months), 'RBR_concerto');
+    filePattern = sprintf('%s_%s_*_sn%s.%s', moorings{m}, months, SNs{m}, altFormat);
+    fileInfo = dir(fullfile(folderPath, filePattern));
+    if isempty(fileInfo)
+        warning('No .%s file found for %s (SN %s).', altFormat, moorings{m}, SNs{m});
+        continue
+    end
+    fullFileName = fullfile(fileInfo(1).folder, fileInfo(1).name);
+    fprintf('Opening (alternate): %s\n', fullFileName);
+
+    switch altFormat
+        case 'nc'
+            t_ms   = ncread(fullFileName, 'time');            % ms since 1970-01-01 UTC
+            tstamp = datenum(1970,1,1) + double(t_ms)/86400000;
+            values = NaN(length(tstamp), length(altVars));
+            units  = cell(1, length(altVars));
+            for k = 1:length(altVars)
+                values(:,k) = ncread(fullFileName, altVars{k});
+                units{k}    = ncreadatt(fullFileName, altVars{k}, 'units');
+            end
+
+        case 'xlsx'
+            % 'Data' sheet: row 1 = title, row 2 = headers, data starts row 3
+            opts = detectImportOptions(fullFileName, 'Sheet', 'Data', ...
+                'VariableNamesRange', 'A2', 'DataRange', 'A3', ...
+                'VariableNamingRule', 'preserve');
+            T = readtable(fullFileName, opts);
+            tstamp = datenum(T{:,1});
+            values = T{:, 2:length(altVars)+1};               % drops Density anomaly (empty)
+            units  = repmat({''}, 1, length(altVars));
+    end
+
+    rsk = struct();
+    rsk.channels = struct('longName', altNames, 'shortName', altVars, 'units', units);
+    rsk.data.tstamp = tstamp;
+    rsk.data.values = values;
+    rsk.instruments.serialID = str2double(SNs{m});
+
+    concerto_data.(moorings{m}) = rsk;
+end
+
 
 
 %% cut the timestamps to the section we are interested in for each month
@@ -74,11 +133,18 @@ end
     %    startTime_dn = datenum(startTime);
     %    endTime_dn   = datenum(endTime);
 
-    % for September to October
-startTime = datetime(2026, 9, 24, 19, 30, 0);
-        endTime = datetime(2026, 10, 20, 19, 15, 0);
+    % for Aug to Sep
+
+        startTime = datetime(2026, 8, 27, 20, 0, 0);
+        endTime = datetime(2026, 9, 22, 20, 0, 0);
         startTime_dn = datenum(startTime);
         endTime_dn   = datenum(endTime);
+
+    % for September to October
+% startTime = datetime(2026, 9, 24, 19, 30, 0);
+%         endTime = datetime(2026, 10, 20, 19, 15, 0);
+        % startTime_dn = datenum(startTime);
+        % endTime_dn   = datenum(endTime);
 
 for i = 1:length(moorings)
     moorName  = moorings{i};
@@ -192,14 +258,14 @@ ax3 = subplot(3,1,3); hold(ax3, 'on');
 
  %% --- save the figure to github ---
 
- outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
+ outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/AugSep2026/RawData_plots';
 
  % make sure the directory exists; create it if not
  if ~exist(outDir, 'dir')
      mkdir(outDir);
  end
 
-figName = sprintf('BottomConcerto_timeseries_SepOct2026.png'); 
+figName = sprintf('BottomConcerto_timeseries_AugSep2026.png'); 
 outFile = fullfile(outDir, figName);
 
 exportgraphics(figure(1), outFile, 'Resolution', 300);
@@ -211,7 +277,7 @@ exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 raw_values = concerto_data;
 
-save mooredConcertoData_SepOct_2026_raw.mat concerto_data
+save mooredConcertoData_AugSep_2026_raw.mat concerto_data
 
 %% clean the data 
 
@@ -349,4 +415,4 @@ end
 fprintf('\nDone. Re-plot to check results.\n');
  %% save out the cleaned data
 
- save("CleanedData/mooredConcertoData_SepOct2026_L2.mat", "concerto_data")
+ save("CleanedData/mooredConcertoData_AugSep2026_L2.mat", "concerto_data")
