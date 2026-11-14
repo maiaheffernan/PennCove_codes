@@ -121,6 +121,79 @@ for iInst = 1:numel(instrumentNames)
 end
 
 
+%% 2b. Cut each month to the times the sensors were in the water
+
+% Concerto and miniDOT raw files were already cut in their read-in
+% scripts, so only these sensor types are cut here.
+sensorsToCut = {'seacat', 'ysi', 'todo', 'duo', 'solo'};
+
+if ~ismember(lower(sensorType), sensorsToCut)
+    fprintf('\n%s raw files were cut in the read-in script. Skipping the deployment-time cutoff.\n', ...
+        sensorType);
+else
+    % Uses one startTime and endTime per month for all of these sensors
+    % (see deployment_times below). Rows outside those times are listed by
+    % file, and nothing is removed without asking first. NaT rows are left
+    % alone here; section 3 handles them.
+    isOutside = cell(numel(segments), 1);
+    unknownFiles = {};
+    fprintf('\nRows outside the deployment times:\n');
+
+    for iSeg = 1:numel(segments)
+        thisFile = segments(iSeg).sourceFile;
+        [startTime, endTime] = deployment_times(thisFile);
+        t = get_time(segments(iSeg));
+        isOutside{iSeg} = false(size(t));
+
+        if isnat(startTime)
+            unknownFiles{end+1} = thisFile; %#ok<AGROW>
+            continue
+        end
+
+        % match the time zone of the data, if it has one
+        startTime.TimeZone = t.TimeZone;
+        endTime.TimeZone = t.TimeZone;
+
+        isBefore = t < startTime;
+        isAfter = t > endTime;
+        isOutside{iSeg} = isBefore | isAfter;
+
+        if any(isBefore)
+            fprintf('  %s in %s: %d row(s) before %s, from %s to %s\n', ...
+                segments(iSeg).instrument, thisFile, sum(isBefore), string(startTime), ...
+                string(min(t(isBefore))), string(max(t(isBefore))));
+        end
+        if any(isAfter)
+            fprintf('  %s in %s: %d row(s) after %s, from %s to %s\n', ...
+                segments(iSeg).instrument, thisFile, sum(isAfter), string(endTime), ...
+                string(min(t(isAfter))), string(max(t(isAfter))));
+        end
+    end
+
+    unknownFiles = unique(unknownFiles);
+    for iFile = 1:numel(unknownFiles)
+        fprintf('  %s: no startTime/endTime for these months, so it was not cut.\n', ...
+            unknownFiles{iFile});
+    end
+
+    nOutside = sum(cellfun(@sum, isOutside));
+    if nOutside == 0
+        fprintf('  None.\n');
+    elseif ask_yes_no(sprintf('Remove these %d rows outside the deployment times? (y/n): ', nOutside))
+        for iSeg = 1:numel(segments)
+            keep = ~isOutside{iSeg};
+            if istable(segments(iSeg).data)
+                segments(iSeg).data = segments(iSeg).data(keep, :);
+            else
+                segments(iSeg).data.data.tstamp = segments(iSeg).data.data.tstamp(keep);
+                segments(iSeg).data.data.values = segments(iSeg).data.data.values(keep, :);
+            end
+        end
+        fprintf('Removed %d rows outside the deployment times.\n', nOutside);
+    end
+end
+
+
 %% 3. Join each instrument's months together in time
 
 % Nothing is removed in this section without asking first.
@@ -353,6 +426,35 @@ function cleanName = clean_instrument_name(name)
 
 cleanName = regexprep(name, '^((concerto_data|TODO_data|DuoTD_data|soloT_data)_)+', '');
 cleanName = regexprep(cleanName, '_[A-Za-z]+\d{4}_(\d+)$', '_sn$1');
+
+
+function [startTime, endTime] = deployment_times(sourceFile)
+% Returns the startTime and endTime for one raw file. Each month uses the
+% strictest (latest start, earliest end) of the times in the SeaCat, YSI,
+% TODO, Duo and SoloT read-in scripts. The months come from the file name,
+% e.g. TODOdata_SepOct2026_raw.mat -> SepOct. Returns NaT for months not listed.
+
+months = regexp(sourceFile, 'MayJun|JunJul|JulAug|AugSep|SepOct', 'match', 'once');
+
+startTime = NaT;
+endTime = NaT;
+switch months
+    case 'MayJun'
+        startTime = datetime(2026, 5, 27, 0, 0, 0);
+        endTime = datetime(2026, 6, 23, 20, 40, 0);
+    case 'JunJul'
+        startTime = datetime(2026, 6, 26, 0, 0, 0);
+        endTime = datetime(2026, 7, 21, 16, 30, 0);
+    case 'JulAug'
+        startTime = datetime(2026, 7, 25, 12, 0, 0);
+        endTime = datetime(2026, 8, 25, 12, 0, 0);
+    case 'AugSep'
+        startTime = datetime(2026, 8, 27, 20, 0, 0);
+        endTime = datetime(2026, 9, 22, 19, 0, 0);    % TODO and SeaCat
+    case 'SepOct'
+        startTime = datetime(2026, 9, 24, 19, 30, 0);
+        endTime = datetime(2026, 10, 20, 14, 30, 0);  % SoloT, see its Nov 7 note
+end
 
 
 function t = get_time(segment)
