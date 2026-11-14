@@ -306,7 +306,7 @@ if ~isfolder(outDir)
 end
 
 % e.g. TODOdata_MayOct2026_concatenated.mat
-baseName = sprintf('%s_%s_concatenated', extractBefore(filePattern, '_*'), months);
+baseName = sprintf('%s_%s_concatenated_L1', extractBefore(filePattern, '_*'), months);
 matFile = fullfile(outDir, [baseName, '.mat']);
 csvFile = fullfile(outDir, [baseName, '.csv']);
 ncFile = fullfile(outDir, [baseName, '.nc']);
