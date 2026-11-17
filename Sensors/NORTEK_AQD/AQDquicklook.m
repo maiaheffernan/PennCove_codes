@@ -15,9 +15,9 @@
 
 clear
 
-fpath = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/InnerSouth_SepOct2026/AQD/';
+fpath = '/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/InnerNorth_SepOct2026/AQD/';
 %prefix = 'SurfzoneOptics_Aquadopp_011-15Sep2010';
-prefix = 'InnerSouth_AQD_SepOct2026';
+prefix = 'InnerNorth_AQD_SepOct2026_bottom';
 
 
 filebase = [ fpath prefix ];
@@ -239,10 +239,10 @@ hc.Label.String = 'Amp (dB)';
 
 linkaxes(s,'x')
 
-print('-dpng',[prefix '_60secmeans.png'])
+%print('-dpng',[prefix '_60secmeans.png'])
 
 %%
 
-README = 'Bottom-mount Aquadopp deployed by Jim Thomson (jthomson@apl.uw.edu) at [N 36.18425, W 075.75014] during the Surfzone Optics Experiment at the FRF (Duck).  Timestamps are UTC, and vertical (z) coordinates are relative to local sand level.  Velocities are u (positive onshore), v (postive alongshore/south), w (positive upwards).  Near surface velocities are to be used with caution.  Raw 1 Hz data have velocity uncertainty of 0.25 m/s.';
+%README = 'Bottom-mount Aquadopp deployed by Jim Thomson (jthomson@apl.uw.edu) at [N 36.18425, W 075.75014] during the Surfzone Optics Experiment at the FRF (Duck).  Timestamps are UTC, and vertical (z) coordinates are relative to local sand level.  Velocities are u (positive onshore), v (postive alongshore/south), w (positive upwards).  Near surface velocities are to be used with caution.  Raw 1 Hz data have velocity uncertainty of 0.25 m/s.';
  
  save(prefix)
