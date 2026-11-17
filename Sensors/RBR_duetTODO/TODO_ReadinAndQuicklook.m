@@ -30,9 +30,9 @@ clear all; close all;
 
 
 
-SNs = {'241787', '241789', '241791', '241792'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS)
-moorings = {'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'}; % these match the order of the serial numbers
-months = 'SepOct2026'; % edit this based on the data you are downloading
+SNs = {'241790', '241788'}; % Wire walker serial #s not included here: 241790 (WWN), 241788 (WWS) % '241787', '241789', '241791', '241792', 
+moorings = {'WWN', 'WWS'}; % these match the order of the serial numbers:'LoveJoyNorth', 'LoveJoySouth', 'InnerNorth', 'InnerSouth'
+months = 'MayOct2026'; % edit this based on the data you are downloading
 
 TODO_data = struct(); % create an empty struct that I will read data into
 
@@ -147,7 +147,7 @@ end
 
 % CHANGE THE MONTH DIRECTORY IN THE FILE PATH BELOW AS NEEDED
 
-outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/SepOct2026/RawData_plots';
+outDir = '/Users/heffem3/Documents/GitHub/PennCove_codes/Figures/MayOct2026/RawData_plots';
 
 % make sure the directory exists; create it if not
 if ~exist(outDir, 'dir')
@@ -164,7 +164,7 @@ exportgraphics(figure(1), outFile, 'Resolution', 300);
 
 raw_values = TODO_data; % in case I need to use it in this script
 
-save TODOdata_SepOct2026_raw.mat TODO_data
+save TODOdata_WireWalkers_MayOct2026_raw.mat TODO_data
 
 %% clean the data with a hampel filter and rate of change flagging
 
