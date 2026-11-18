@@ -123,9 +123,9 @@ end
 
 %% 2b. Cut each month to the times the sensors were in the water
 
-% Concerto and miniDOT raw files were already cut in their read-in
-% scripts, so only these sensor types are cut here.
-sensorsToCut = {'seacat', 'ysi', 'todo', 'duo', 'solo'};
+% miniDOT raw files were already cut in their read-in script, so only
+% these sensor types are cut here.
+sensorsToCut = {'seacat', 'ysi', 'todo', 'duo', 'solo', 'concerto'};
 
 if ~ismember(lower(sensorType), sensorsToCut)
     fprintf('\n%s raw files were cut in the read-in script. Skipping the deployment-time cutoff.\n', ...
@@ -450,7 +450,7 @@ switch months
         endTime = datetime(2026, 8, 25, 12, 0, 0);
     case 'AugSep'
         startTime = datetime(2026, 8, 27, 20, 0, 0);
-        endTime = datetime(2026, 9, 22, 19, 0, 0);    % TODO and SeaCat
+        endTime = datetime(2026, 9, 22, 19, 0, 0);    % TODO, SeaCat and Concerto
     case 'SepOct'
         startTime = datetime(2026, 9, 24, 19, 30, 0);
         endTime = datetime(2026, 10, 20, 14, 30, 0);  % SoloT, see its Nov 7 note
