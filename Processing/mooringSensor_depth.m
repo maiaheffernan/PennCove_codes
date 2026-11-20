@@ -34,7 +34,7 @@ fitSWIFTmooring_forL2prod(data_dir) % runs the function
 
 % pull the output .csv with the center information for each SWIFT
 
-mooring_centers_SepOct2026 = load('/Users/heffem3/Desktop/M2O2/SWIFTs/FullDatasets/SepOct2026/centers_table.csv');
+mooring_centers_SepOct2026 = readtable('/Users/heffem3/Desktop/M2O2/SWIFTs/FullDatasets/SepOct2026/mooring_watchcircle_centers.csv');
 
 %% load in the monthly SWIFT data
 
@@ -89,17 +89,19 @@ end
 % so when the SWIFT reads at time x, what is the pressure value from the YSIs and Duos at their recorded time that is closest to x?
 
 % LJN
-[ysi4m_idx, ysi4m_d] = knnsearch(ysiData.LJN_4m.Datetime, datetime([SWIFT28.time], 'ConvertFrom', 'datenum'))
-[ysi8m_idx, ysi8m_d] = knnsearch(ysiData.LJN_8m.Datetime, datetime([SWIFT28.time], 'ConvertFrom', 'datenum'))
+[ysi4m_idx, ysi4m_d] = knnsearch([ysiData.LJN_4m.DateTime], datetime([SWIFT28.SWIFT.time], 'ConvertFrom', 'datenum'));
+[ysi8m_idx, ysi8m_d] = knnsearch([ysiData.LJN_8m.DateTime], datetime([SWIFT28.SWIFT.time], 'ConvertFrom', 'datenum'));
 
 %LJS
+[ysi4m_idx, ysi4m_d] = knnsearch([ysiData.LJS_4m.DateTime], datetime([SWIFT27.SWIFT.time], 'ConvertFrom', 'datenum'));
+[ysi8m_idx, ysi11m_d] = knnsearch([ysiData.LJS_8m.DateTime], datetime([SWIFT27.SWIFT.time], 'ConvertFrom', 'datenum'));
 
 %InnerNorth
 
-%[duoInN_idx, duoInN_d] = knnsearch(ysiData.LJN_4m.Datetime, datetime([SWIFT28.time], 'ConvertFrom', 'datenum'))
+[duoInN_idx, duoInN_d] = knnsearch(datetime([duoData.DuoTD_data.InnerNorth_sn240149.data.tstamp], 'ConvertFrom', 'datenum'), datetime([SWIFT26.SWIFT.time], 'ConvertFrom', 'datenum'));
 
 %inner south
-%[duoInS_idx, duoInS_d] = knnsearch(ysiData.LJN_8m.Datetime, datetime([SWIFT28.time], 'ConvertFrom', 'datenum'))
+[duoInS_idx, duoInS_d] = knnsearch(datetime([duoData.DuoTD_data.InnerSouth_sn240151.data.tstamp], 'ConvertFrom', 'datenum'), datetime([SWIFT29.SWIFT.time], 'ConvertFrom', 'datenum'));
 
 
 
