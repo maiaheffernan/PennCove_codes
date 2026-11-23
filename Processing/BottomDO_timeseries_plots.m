@@ -27,24 +27,37 @@ JulAug = load('TODOdata_JulAug2026_L3.mat');
 
 AugSep = load('TODOdata_AugSep2026_L3.mat');
 
+% September to October
+
+SepOct = load('TODOdata_SepOct2026_L2.mat')
+
+% WWS TODO
+
+WWS = RSKreaddata(RSKopen('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/WWS_MayOct2026/RBR_TODO/WWS_MayOct2026_bottom_sn241788.rsk'))
+WWS.data.values(:,3) = WWS.data.values(:,2) * 31.998 / 1000; % DO: micromol/L -> mg/L (O2 molar mass 31.998 g/mol)
+
 %% concatenate the data in time
 
 % LJN
-LJN_alldata_time = [MayJun.TODO_data.LoveJoyNorth.data.tstamp; JunJul.TODO_data.LoveJoyNorth.data.tstamp; JulAug.TODO_data.LoveJoyNorth.data.tstamp; AugSep.TODO_data.LoveJoyNorth.data.tstamp]; 
-LJN_alldata_values = [MayJun.TODO_data.LoveJoyNorth.data.values; JunJul.TODO_data.LoveJoyNorth.data.values; JulAug.TODO_data.LoveJoyNorth.data.values; AugSep.TODO_data.LoveJoyNorth.data.values]; 
+LJN_alldata_time = [MayJun.TODO_data.LoveJoyNorth.data.tstamp; JunJul.TODO_data.LoveJoyNorth.data.tstamp; JulAug.TODO_data.LoveJoyNorth.data.tstamp; AugSep.TODO_data.LoveJoyNorth.data.tstamp; SepOct.TODO_data.LoveJoyNorth.data.tstamp]; 
+LJN_alldata_values = [MayJun.TODO_data.LoveJoyNorth.data.values; JunJul.TODO_data.LoveJoyNorth.data.values; JulAug.TODO_data.LoveJoyNorth.data.values; AugSep.TODO_data.LoveJoyNorth.data.values; SepOct.TODO_data.LoveJoyNorth.data.values]; 
 
 %LJS
-LJS_alldata_time = [MayJun.TODO_data.LoveJoySouth.data.tstamp; JunJul.TODO_data.LoveJoySouth.data.tstamp; JulAug.TODO_data.LoveJoySouth.data.tstamp; AugSep.TODO_data.LoveJoySouth.data.tstamp];
-LJS_alldata_values = [MayJun.TODO_data.LoveJoySouth.data.values; JunJul.TODO_data.LoveJoySouth.data.values; JulAug.TODO_data.LoveJoySouth.data.values; AugSep.TODO_data.LoveJoySouth.data.values]; 
+LJS_alldata_time = [MayJun.TODO_data.LoveJoySouth.data.tstamp; JunJul.TODO_data.LoveJoySouth.data.tstamp; JulAug.TODO_data.LoveJoySouth.data.tstamp; AugSep.TODO_data.LoveJoySouth.data.tstamp; SepOct.TODO_data.LoveJoySouth.data.tstamp];
+LJS_alldata_values = [MayJun.TODO_data.LoveJoySouth.data.values; JunJul.TODO_data.LoveJoySouth.data.values; JulAug.TODO_data.LoveJoySouth.data.values; AugSep.TODO_data.LoveJoySouth.data.values; SepOct.TODO_data.LoveJoySouth.data.values]; 
 
 % Inner N
-InnerN_alldata_time = [MayJun.TODO_data.InnerNorth.data.tstamp; JunJul.TODO_data.InnerNorth.data.tstamp; JulAug.TODO_data.InnerNorth.data.tstamp; AugSep.TODO_data.InnerNorth.data.tstamp];
-InnerN_alldata_values = [MayJun.TODO_data.InnerNorth.data.values; JunJul.TODO_data.InnerNorth.data.values; JulAug.TODO_data.InnerNorth.data.values; AugSep.TODO_data.InnerNorth.data.values]; 
+InnerN_alldata_time = [MayJun.TODO_data.InnerNorth.data.tstamp; JunJul.TODO_data.InnerNorth.data.tstamp; JulAug.TODO_data.InnerNorth.data.tstamp; AugSep.TODO_data.InnerNorth.data.tstamp; SepOct.TODO_data.InnerNorth.data.tstamp];
+InnerN_alldata_values = [MayJun.TODO_data.InnerNorth.data.values; JunJul.TODO_data.InnerNorth.data.values; JulAug.TODO_data.InnerNorth.data.values; AugSep.TODO_data.InnerNorth.data.values; SepOct.TODO_data.InnerNorth.data.values]; 
 
 % Inner S
-InnerS_alldata_time = [MayJun.TODO_data.InnerSouth.data.tstamp; JunJul.TODO_data.InnerSouth.data.tstamp; JulAug.TODO_data.InnerSouth.data.tstamp; AugSep.TODO_data.InnerSouth.data.tstamp];
-InnerS_alldata_values = [MayJun.TODO_data.InnerSouth.data.values; JunJul.TODO_data.InnerSouth.data.values; JulAug.TODO_data.InnerSouth.data.values; AugSep.TODO_data.InnerSouth.data.values]; 
+InnerS_alldata_time = [MayJun.TODO_data.InnerSouth.data.tstamp; JunJul.TODO_data.InnerSouth.data.tstamp; JulAug.TODO_data.InnerSouth.data.tstamp; AugSep.TODO_data.InnerSouth.data.tstamp; SepOct.TODO_data.InnerSouth.data.tstamp];
+InnerS_alldata_values = [MayJun.TODO_data.InnerSouth.data.values; JunJul.TODO_data.InnerSouth.data.values; JulAug.TODO_data.InnerSouth.data.values; AugSep.TODO_data.InnerSouth.data.values; SepOct.TODO_data.InnerSouth.data.values]; 
 
+% WWS lining up the same names
+
+WWS_time = [WWS.data.tstamp];
+WWS_values = [WWS.data.values];
 
 %% remove gaps larger than 12 hours
 
@@ -60,7 +73,7 @@ LJS_alldata_time = datetime(LJS_alldata_time, 'ConvertFrom', 'datenum');
 InnerN_alldata_time = datetime(InnerN_alldata_time, 'ConvertFrom', 'datenum');
 InnerS_alldata_time = datetime(InnerS_alldata_time, 'ConvertFrom', 'datenum');
 
-
+WWS_time = datetime(WWS_time, 'ConvertFrom', 'datenum');
 
 %% colorblind friendly colors
 
@@ -69,12 +82,14 @@ CT = S.colorblind;
 
 %% Plot DO in one plot
 
+
 figure(1); clf;
 hold on;
 plot(LJN_alldata_time, LJN_alldata_values(:,3), '-', 'LineWidth', 2, 'color',CT(6,:), 'DisplayName', 'Love Joy North');
 plot(LJS_alldata_time, LJS_alldata_values(:,3), '-', 'LineWidth', 2, 'color',CT(7,:), 'DisplayName', 'Love Joy South');
 plot(InnerN_alldata_time, InnerN_alldata_values(:,3), '-', 'LineWidth', 2, 'color',CT(8,:), 'DisplayName', 'Inner North');
 plot(InnerS_alldata_time, InnerS_alldata_values(:,3), '-', 'LineWidth', 2, 'color',CT(11,:), 'DisplayName', 'Inner South');
+plot(WWS_time(1:42571, :), WWS_values(1:42571,3), '-', 'LineWidth', 2, 'color',CT(1,:), 'DisplayName', 'Wire Walker South'); % limiting it at 20 Oct 2026 at 19:30 UTC
 % yline for hypoxic threshold
 yline(2, 'LineStyle', '--', 'HandleVisibility', 'off')
 hold off;
@@ -93,6 +108,7 @@ plot(LJN_alldata_time, LJN_alldata_values(:,1), 'b.', 'MarkerSize', 7, 'DisplayN
 plot(LJS_alldata_time, LJS_alldata_values(:,1), 'r.', 'MarkerSize', 7, 'DisplayName', 'Love Joy South');
 plot(InnerN_alldata_time, InnerN_alldata_values(:,1), 'g.', 'MarkerSize', 7, 'DisplayName', 'Inner North');
 plot(InnerS_alldata_time, InnerS_alldata_values(:,1), 'm.', 'MarkerSize', 7, 'DisplayName', 'Inner South');
+plot(WWS_time(1:42571, :), WWS_values(1:42571,1), 'k.', 'LineWidth', 2, 'color',CT(1,:), 'DisplayName', 'Wire Walker South')
 % yline for hypoxic threshold
 hold off;
 xlabel('Time');
@@ -110,10 +126,12 @@ figure(3); clf;
 
 s1 = subplot(2,1,1);
 hold on;
+plot(WWS_time(1:42571, :), WWS_values(1:42571,3), '-', 'LineWidth', 2, 'color','#efbc82', 'DisplayName', 'Wire Walker South');
 plot(LJN_alldata_time, LJN_alldata_values(:,3), '-', 'LineWidth', 2, 'color','#24492e', 'DisplayName', 'Love Joy North');
 plot(LJS_alldata_time, LJS_alldata_values(:,3), '-', 'LineWidth', 2, 'color','#2c6184', 'DisplayName', 'Love Joy South');
 plot(InnerN_alldata_time, InnerN_alldata_values(:,3), '-', 'LineWidth', 2, 'color','#89689d', 'DisplayName', 'Inner North');
 plot(InnerS_alldata_time, InnerS_alldata_values(:,3), '-', 'LineWidth', 2, 'color','#e69b99', 'DisplayName', 'Inner South');
+
 % yline for hypoxic threshold
 yline(2, 'LineStyle', '--', 'HandleVisibility', 'off')
 hold off;
@@ -125,10 +143,12 @@ hold off
 s2 = subplot(2,1,2);
 
 hold on;
+plot(WWS_time(1:42571, :), WWS_values(1:42571,1), '-', 'LineWidth', 2, 'color','#efbc82', 'DisplayName', 'Wire Walker South');
 plot(LJN_alldata_time, LJN_alldata_values(:,1), '-', 'LineWidth', 2, 'color','#24492e', 'DisplayName', 'Love Joy North');
 plot(LJS_alldata_time, LJS_alldata_values(:,1), '-', 'LineWidth', 2, 'color','#2c6184', 'DisplayName', 'Love Joy South');
 plot(InnerN_alldata_time, InnerN_alldata_values(:,1), '-', 'LineWidth', 2, 'color','#89689d', 'DisplayName', 'Inner North');
 plot(InnerS_alldata_time, InnerS_alldata_values(:,1), '-', 'LineWidth', 2, 'color','#e69b99','DisplayName', 'Inner South');
+
 % yline for hypoxic threshold
 hold off;
 xlabel('Time');
@@ -151,19 +171,22 @@ linkaxes([s1 s2], 'x')
 [LJS_dailyTime, LJS_dailyMean, LJS_dailyStd]       = daily_average(LJS_alldata_time, LJS_alldata_values);
 [InnerN_dailyTime, InnerN_dailyMean, InnerN_dailyStd] = daily_average(InnerN_alldata_time, InnerN_alldata_values);
 [InnerS_dailyTime, InnerS_dailyMean, InnerS_dailyStd] = daily_average(InnerS_alldata_time, InnerS_alldata_values);
+[WWS_dailyTime, WWS_dailyMean, WWS_dailyStd] = daily_average(WWS_time, WWS_values);
 
 %% plot the daily averages with error bars around the line
 
 
-% '#00496f', '#0f85a0', '#ed8b00', '#dd4124'
+% '#edd746', '#00496f', '#0f85a0', '#ed8b00', '#dd4124'
 
 figure(4); clf;
 hold on;
+plot_shaded(WWS_dailyTime, WWS_dailyMean(:,3), WWS_dailyStd(:,3), '#edd746', 'Wire Walker South');
 plot_shaded(LJN_dailyTime, LJN_dailyMean(:,3), LJN_dailyStd(:,3), '#00496f', 'Love Joy North');
 plot_shaded(LJS_dailyTime, LJS_dailyMean(:,3), LJS_dailyStd(:,3), '#0f85a0', 'Love Joy South');
 plot_shaded(InnerN_dailyTime, InnerN_dailyMean(:,3), InnerN_dailyStd(:,3), '#ed8b00', 'Inner North');
 plot_shaded(InnerS_dailyTime, InnerS_dailyMean(:,3), InnerS_dailyStd(:,3), '#dd4124', 'Inner South');
-yline(2, 'LineStyle', '--', 'HandleVisibility', 'off');
+yline(2, 'LineStyle', '--', 'Label', '2 mg/L hypoxic threshold', 'HandleVisibility', 'off');
+ylim([0 5])
 hold off;
 xlabel('Time');
 ylabel('Daily-averaged Bottom DO [mg/L]');
@@ -177,11 +200,13 @@ figure(5); clf;
 
 s3 = subplot(2,1,1);
 hold on;
+plot_shaded(WWS_dailyTime, WWS_dailyMean(:,3), WWS_dailyStd(:,3), '#edd746', 'Wire Walker South');
 plot_shaded(LJN_dailyTime, LJN_dailyMean(:,3), LJN_dailyStd(:,3), '#00496f', 'Love Joy North');
 plot_shaded(LJS_dailyTime, LJS_dailyMean(:,3), LJS_dailyStd(:,3), '#0f85a0', 'Love Joy South');
 plot_shaded(InnerN_dailyTime, InnerN_dailyMean(:,3), InnerN_dailyStd(:,3), '#ed8b00', 'Inner North');
 plot_shaded(InnerS_dailyTime, InnerS_dailyMean(:,3), InnerS_dailyStd(:,3), '#dd4124', 'Inner South');
-yline(2, 'LineStyle', '--', 'HandleVisibility', 'off');
+yline(2, 'LineStyle', '--', 'Label', '2 mg/L hypoxic threshold', 'HandleVisibility', 'off');
+ylim([0 5])
 hold off;
 ylabel('[mg/L]');
 title('Daily-averaged Bottom DO from all moorings (\pm 1 std)');
@@ -191,6 +216,7 @@ grid off;
 
 s4 = subplot(2,1,2);
 hold on;
+plot_shaded(WWS_dailyTime, WWS_dailyMean(:,1), WWS_dailyStd(:,1), '#edd746', 'Wire Walker South');
 plot_shaded(LJN_dailyTime, LJN_dailyMean(:,1), LJN_dailyStd(:,1), '#00496f', 'Love Joy North');
 plot_shaded(LJS_dailyTime, LJS_dailyMean(:,1), LJS_dailyStd(:,1), '#0f85a0', 'Love Joy South');
 plot_shaded(InnerN_dailyTime, InnerN_dailyMean(:,1), InnerN_dailyStd(:,1), '#ed8b00', 'Inner North');
