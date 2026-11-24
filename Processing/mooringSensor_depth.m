@@ -630,15 +630,159 @@ legend('Location', 'bestoutside')
 
 %% load in the other sensor data
 
+% test-- soloT data from Sep to Oct
+
+soloT = load('/Users/heffem3/Library/CloudStorage/GoogleDrive-heffem3@uw.edu/Shared drives/M2O2/Penn Cove 2026/Oct2026/Data/SoloTdata_SepOct2026_raw.mat');
 
 
-%% assign the depths on the line to each sensor serial number
+%% assign the depths on the line to each sensor serial number-- starting from the top of the line to the bottom
+
+%%% Solo T sensors %%%
+% LoveJoy North
+    % sn212861, 5.46
+    % sn212862, 10.43
+    % sn212863, 13.28
+    % sn212864, 15.33
+    % sn212865, 19.34
+    % sn212866, 22.42
+    % sn212867, 25.42
+
+% LoveJoy South
+    % sn212832, 6.0
+    % sn212833, 12.0
+    % sn212834, 15.0
+    % sn212857, 17.0
+    % sn212858, 21.0
+    % sn212859, 24.0
+    % sn212860, 27.0
+
+% Inner North
+    % sn212868, 4.00
+    % sn212869, 8.00
+    % sn212870, 12.00
+    % sn212871, 16.00
+    % sn212872, 24.00
+    % sn212873, 28.00
+    % sn212874, 32.00
+
+% Inner South
+    % sn212875, 2.00
+    % sn212876, 6.00
+    % sn212877, 10.00
+    % sn212878, 14.00
+    % sn212879, 22.00
+    % sn212880, 26.00
+    % sn212881, 30.00
 
 
 %% knowing the catenary function I fit, fit each sensor's length along the line to the new function that describes the catenary of the mooring
 
+% ----- how many catFit time steps converged -----
+% fitted:        time steps where the fit ran (not skipped for NaN position/depth or an impossible radius)
+% converged:     exitflag > 0
+% not converged: exitflag <= 0 (with the surface constraint, this can mean the line couldn't reach the surface within the X limits)
+fprintf('\n%-8s %8s %8s %10s %14s\n', 'SWIFT', 'total', 'fitted', 'converged', 'not converged');
+for i = 1:length(mooringSWIFTs)
+    sw     = mooringSWIFTs{i};
+    fitted = isfinite(catFit.(sw).exitflag);                    % time steps where lsqnonlin ran
+    conv   = fitted & catFit.(sw).exitflag > 0;                 % converged
+    fprintf('%-8s %8d %8d %10d %14d\n', sw, numel(fitted), sum(fitted), sum(conv), sum(fitted & ~conv));
+end
+
+% ----- SoloT positions on each line -----
+% SWIFT:       the SWIFT on that mooring (LJN = SWIFT28, LJS = SWIFT27, InnerNorth = SWIFT26, InnerSouth = SWIFT29)
+% sn:          SoloT serial number
+% distFromTop: distance down the line from the top (m), from the list above
+soloPos = table( ...
+    ["SWIFT28"; "SWIFT28"; "SWIFT28"; "SWIFT28"; "SWIFT28"; "SWIFT28"; "SWIFT28"; ...   % LoveJoy North
+     "SWIFT27"; "SWIFT27"; "SWIFT27"; "SWIFT27"; "SWIFT27"; "SWIFT27"; "SWIFT27"; ...   % LoveJoy South
+     "SWIFT26"; "SWIFT26"; "SWIFT26"; "SWIFT26"; "SWIFT26"; "SWIFT26"; "SWIFT26"; ...   % Inner North
+     "SWIFT29"; "SWIFT29"; "SWIFT29"; "SWIFT29"; "SWIFT29"; "SWIFT29"; "SWIFT29"], ...  % Inner South
+    ["sn212861"; "sn212862"; "sn212863"; "sn212864"; "sn212865"; "sn212866"; "sn212867"; ...
+     "sn212832"; "sn212833"; "sn212834"; "sn212857"; "sn212858"; "sn212859"; "sn212860"; ...
+     "sn212868"; "sn212869"; "sn212870"; "sn212871"; "sn212872"; "sn212873"; "sn212874"; ...
+     "sn212875"; "sn212876"; "sn212877"; "sn212878"; "sn212879"; "sn212880"; "sn212881"], ...
+    [5.46; 10.43; 13.28; 15.33; 19.34; 22.42; 25.42; ...
+     6.00; 12.00; 15.00; 17.00; 21.00; 24.00; 27.00; ...
+     4.00;  8.00; 12.00; 16.00; 24.00; 28.00; 32.00; ...
+     2.00;  6.00; 10.00; 14.00; 22.00; 26.00; 30.00], ...
+    'VariableNames', {'SWIFT', 'sn', 'distFromTop'});
+
+% ----- place each SoloT on the fitted line at every SWIFT time step -----
+soloOnLine = struct();   % results, one field per serial number
+
+for j = 1:height(soloPos)
+
+    sw  = char(soloPos.SWIFT(j));        % this SoloT's mooring
+    sn  = char(soloPos.sn(j));           % serial number, used as the field name
+    d   = soloPos.distFromTop(j);        % distance down the line from the top (m)
+    fit = catFit.(sw);                   % the fitted line for this mooring
+    nT  = numel(fit.time);               % number of SWIFT time steps
+
+    % the sensor must be on the line: 0 <= d <= L
+    if d > fit.L
+        fprintf('%s (%s): distFromTop = %.2f m is longer than the line (L = %.0f m), skipped\n', sn, sw, d, fit.L);
+        continue
+    end
+
+    s = fit.L - d;                        % distance along the line from the anchor (m)
+
+    mab = nan(nT, 1);                     % height above bottom at each SWIFT time step
+    for t = 1:nT
+        % use every time step where the fit ran, including ones that did not converge (exitflag <= 0);
+        % check fit.exitflag to see which time steps those are
+        if isfinite(fit.a(t))
+            [~, mab(t)] = catPoint(s, fit.a(t), fit.x0(t));   % height above bottom on the fitted line
+        end
+    end
+
+    % store the results
+    soloOnLine.(sn).SWIFT       = sw;             % mooring's SWIFT
+    soloOnLine.(sn).distFromTop = d;              % distance down the line from the top (m)
+    soloOnLine.(sn).time        = fit.time;       % SWIFT time steps (datenum)
+    soloOnLine.(sn).mab         = mab;            % fitted meters above bottom
+    soloOnLine.(sn).depth       = fit.H - mab;    % fitted depth below the surface (m)
+end
+
 
 %% visualize the mooring catenary and the sensors' locations a couple timesteps
+
+% ----- SoloT fitted depths over time, one panel per mooring -----
+mooringNames = {'LoveJoy North', 'LoveJoy South', 'Inner North', 'Inner South'};   % same order as mooringSWIFTs
+
+figure('Color', 'w');
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+for i = 1:length(mooringSWIFTs)
+    sw  = mooringSWIFTs{i};
+    fit = catFit.(sw);
+    tDT = datetime(fit.time, 'ConvertFrom', 'datenum');   % SWIFT times as datetime for the x axis
+
+    nexttile; hold on; box on
+
+    % water depth (the seabed, seen from the surface)
+    plot(tDT, fit.H, '-', 'Color', [0.5 0.35 0.2], 'LineWidth', 1.5, 'DisplayName', 'seabed (H)')
+
+    % each SoloT on this mooring
+    rows = find(soloPos.SWIFT == sw);
+    for j = rows'
+        sn = char(soloPos.sn(j));
+        if ~isfield(soloOnLine, sn), continue; end      % skipped (longer than the line)
+        plot(tDT, soloOnLine.(sn).depth, '-', 'LineWidth', 1, ...
+            'DisplayName', sprintf('%s (%.1f m)', sn, soloPos.distFromTop(j)))
+    end
+
+    % mark the time steps where the fit did not converge
+    notConv = isfinite(fit.exitflag) & fit.exitflag <= 0;
+    if any(notConv)
+        xline(tDT(notConv), '-', 'Color', [1 0.85 0.85], 'HandleVisibility', 'off')
+    end
+
+    set(gca, 'YDir', 'reverse')   % depth increases downward
+    ylabel('depth below surface (m)')
+    title(sprintf('%s (%s): SoloT fitted depths', mooringNames{i}, sw))
+    legend('Location', 'eastoutside')
+end
 
 
 
